@@ -3,4 +3,4 @@
 #include <d3dx11.h>
 #include <d3dcompiler.h>
 #include <xnamath.h>
-#include "resource.h"
+#include "Resource.h"
