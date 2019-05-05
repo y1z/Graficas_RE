@@ -1,9 +1,15 @@
 #pragma once
+
 #include "..//Usable_Windows.h"
+
+#ifndef ERROR_STUFF
+
+#define ERROR_STUFF
+
 
 #if defined USING_DIRECTX
 /*! tell's if there is an error */
-bool CheckForError(HRESULT hr)
+static bool CheckForError(HRESULT hr)
 {
 	if (FAILED(hr)) 
 	{
@@ -24,6 +30,6 @@ bool CheckForError(HRESULT hr)
 
 #elif //TODO_GL 
 
+#endif // !ERROR_STUFF
 
-
-#endif 
+#endif // USING_DIRECTX

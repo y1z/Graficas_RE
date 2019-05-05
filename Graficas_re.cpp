@@ -14,9 +14,10 @@
 
 // Classes
 #include "CDevice.h"
+#include "CSwapChian.h"
 
 CDevice Device;
-
+CSwapChian SwapChain;
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -215,11 +216,9 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 //--------------------------------------------------------------------------------------
 HRESULT InitDevice()
 {
-	/*----My Classes--*/
+	/* This is to make sure all the methods of the Device class work */
+	bool isSuccesful = false;
 
-
-
-	/*----------------*/
 	HRESULT hr = S_OK;
 
 	RECT rc;
@@ -266,7 +265,7 @@ HRESULT InitDevice()
 	{
 		g_driverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, &sd, &g_pSwapChain, Device.GetDeviceRef(), &g_featureLevel, &g_pImmediateContext);
+			D3D11_SDK_VERSION, &sd, SwapChain.GetSwapChianRef(), Device.GetDeviceRef(), &g_featureLevel, &g_pImmediateContext);
 		if (SUCCEEDED(hr))
 			break;
 	}
@@ -275,12 +274,17 @@ HRESULT InitDevice()
 
 	// Create a render target view
 	ID3D11Texture2D* pBackBuffer = NULL;
-	hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	if (FAILED(hr))
-		return hr;
+	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	/* This is to make sure all the methods of the Device class work */
-	bool isSuccesful = false;
+	isSuccesful = SwapChain.GetBuffer(0, static_cast<void*>(&pBackBuffer));
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
+		return hr;
+	}
+
+
 
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
@@ -752,5 +756,6 @@ void Render()
 	//
 	// Present our back buffer to our front buffer
 	//
-	g_pSwapChain->Present(0, 0);
+	//g_pSwapChain->Present(0, 0);
+	SwapChain.Present(0, 0);
 }

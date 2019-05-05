@@ -10,7 +10,7 @@
 
 CDevice::CDevice()
 {
-	mptr_Device = nullptr;
+
 }
 
 //Descriptor
