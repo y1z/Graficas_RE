@@ -49,9 +49,10 @@ public: // functions
 	bool CreatePixelShader(void *BlobPixel,void *PixelShader);
 	/*! Creates buffers 
 	\param DescriptorBuffer [in] dictates how what the buffer is and it's usage (D3D11_BUFFER_DESC)
+	\param Buffer [out] The Resulting buffer (ID3D11Buffer*)
 	\param Data [out] used to later manipulate the information (D3D11_SUBRESOURCE_DATA)
-	\param Buffer [out] The Resulting buffer (ID3D11Buffer*) */
-	bool CreateBuffer(void *DescriptorBuffer,void *Data, void *Buffer);
+	*/
+	bool CreateBuffer(void *DescriptorBuffer, void *Buffer,void *Data);
 	/*! Creates A Sampler
 	\param DescriptorSampler [in] Dictates what are sampler does 
 	\param Sampler [out] The Resulting sampler */

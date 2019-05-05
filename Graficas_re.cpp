@@ -15,6 +15,8 @@
 // Classes
 #include "CDevice.h"
 
+CDevice Device;
+
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -79,7 +81,7 @@ HRESULT InitDevice();
 void CleanupDevice();
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render();
-
+/*! This is for the functions that demand more than 1 pointer*/
 template<class T>
 T** GiveDoublePointer(T* Base)
 {
@@ -87,8 +89,14 @@ T** GiveDoublePointer(T* Base)
 	return Result;
 }
 
+/*! This is for functions that need a pointer */
+template<class T>
+T* GiveSinglePointer(T &Base)
+{
+	T* Result = &Base;
+	return Result;
+}
 
-//
 //--------------------------------------------------------------------------------------
 // Entry point to the program. Initializes everything and goes into a message processing 
 // loop. Idle time is used to render the scene.
@@ -208,7 +216,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 HRESULT InitDevice()
 {
 	/*----My Classes--*/
-	CDevice Device;
+
 
 
 	/*----------------*/
@@ -241,7 +249,7 @@ HRESULT InitDevice()
 	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
 	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory(&sd, sizeof(sd));
+	SecureZeroMemory(&sd, sizeof(sd));
 	sd.BufferCount = 1;
 	sd.BufferDesc.Width = width;
 	sd.BufferDesc.Height = height;
@@ -291,7 +299,7 @@ HRESULT InitDevice()
 
 	// Create depth stencil texture
 	D3D11_TEXTURE2D_DESC descDepth;
-	ZeroMemory(&descDepth, sizeof(descDepth));
+	SecureZeroMemory(&descDepth, sizeof(descDepth));
 	descDepth.Width = width;
 	descDepth.Height = height;
 	descDepth.MipLevels = 1;
@@ -308,7 +316,7 @@ HRESULT InitDevice()
 	//if (FAILED(hr))
 	//return hr;
 
-	isSuccesful = Device.CreateTexture2D(static_cast<void*>(g_pDepthStencil), static_cast<void*>(&descDepth));
+	isSuccesful = Device.CreateTexture2D(static_cast<void*>(&g_pDepthStencil), static_cast<void*>(&descDepth));
 
 	if (isSuccesful == false)
 	{
@@ -318,13 +326,15 @@ HRESULT InitDevice()
 
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-	ZeroMemory(&descDSV, sizeof(descDSV));
+	SecureZeroMemory(&descDSV, sizeof(descDSV));
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
 
-	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(&g_pDepthStencil),
-		static_cast<void*>(&descDSV), 
+	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = &descDSV;
+
+	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(g_pDepthStencil),
+		static_cast<void*>(ptr_DepthDescripter),
 		static_cast<void*>(&g_pDepthStencilView));
 
 	if (isSuccesful == false)
@@ -332,7 +342,7 @@ HRESULT InitDevice()
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-  // old code 
+	// old code 
 	//if (FAILED(hr))
 	//	return hr;
 
@@ -360,12 +370,21 @@ HRESULT InitDevice()
 	}
 
 	// Create the vertex shader
-	hr = g_pd3dDevice->CreateVertexShader(p_VertexShaderBlob->GetBufferPointer(), p_VertexShaderBlob->GetBufferSize(), NULL, &g_pVertexShader);
-	if (FAILED(hr))
+	//hr = g_pd3dDevice->CreateVertexShader(p_VertexShaderBlob->GetBufferPointer(), p_VertexShaderBlob->GetBufferSize(), NULL, &g_pVertexShader);
+
+	isSuccesful = Device.CreateVertexShader(static_cast<void*>(p_VertexShaderBlob), static_cast<void*> (&g_pVertexShader));
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
+		return hr;
+	}
+
+	/*if (FAILED(hr))
 	{
 		p_VertexShaderBlob->Release();
 		return hr;
-	}
+	}*/
 
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -375,12 +394,20 @@ HRESULT InitDevice()
 	};
 	UINT numElements = ARRAYSIZE(layout);
 
-	// Create the input layout
-	hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
-		p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
+	// old code
+	//hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
+	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
+
+	isSuccesful = Device.CreateInputLayout(static_cast<void*>(layout), static_cast<void*>(p_VertexShaderBlob),
+		numElements, static_cast<void*>(&g_pVertexLayout));
+
 	p_VertexShaderBlob->Release();
-	if (FAILED(hr))
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	// Set the input layout
 	g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
@@ -396,10 +423,17 @@ HRESULT InitDevice()
 	}
 
 	// Create the pixel shader
-	hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);
+	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
+	Device.CreatePixelShader(static_cast<void*>(p_PixelShaderBlob), static_cast<void*>(&g_pPixelShader));
+
 	p_PixelShaderBlob->Release();
-	if (FAILED(hr))
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
+
 
 	// Create vertex buffer
 	SimpleVertex vertices[] =
@@ -436,17 +470,26 @@ HRESULT InitDevice()
 	};
 
 	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
+	SecureZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(SimpleVertex) * 24;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
+	SecureZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
-	hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
-	if (FAILED(hr))
+	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
+
+	/*Creates the vertexBuffer*/
+	isSuccesful = Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+		static_cast<void*>(&g_pVertexBuffer),
+		static_cast<void*>(GiveSinglePointer(InitData)));
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	// Set vertex buffer
 	UINT stride = sizeof(SimpleVertex);
@@ -481,9 +524,19 @@ HRESULT InitDevice()
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	InitData.pSysMem = indices;
-	hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
-	if (FAILED(hr))
+	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
+
+	/*Creates the index buffer */
+	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+		static_cast<void*>(&g_pIndexBuffer),
+		static_cast<void*>(GiveSinglePointer(InitData))
+	);
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	// Set index buffer
 	g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
@@ -496,19 +549,41 @@ HRESULT InitDevice()
 	bd.ByteWidth = sizeof(CBNeverChanges);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
-	if (FAILED(hr))
+
+	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
+		/*Creates NeverChanges*/
+	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+		static_cast<void*>(&g_pCBNeverChanges), nullptr);
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	bd.ByteWidth = sizeof(CBChangeOnResize);
-	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangeOnResize);
-	if (FAILED(hr))
+
+	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+		static_cast<void*>(&g_pCBChangeOnResize), nullptr);
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	bd.ByteWidth = sizeof(CBChangesEveryFrame);
-	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
-	if (FAILED(hr))
+
+	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
+
+	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+		static_cast<void*>(&g_pCBChangesEveryFrame), nullptr);
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	// Load the Texture
 	hr = D3DX11CreateShaderResourceViewFromFile(Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
@@ -517,7 +592,7 @@ HRESULT InitDevice()
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	SecureZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -525,9 +600,17 @@ HRESULT InitDevice()
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
-	if (FAILED(hr))
+
+	//hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
+
+	isSuccesful = Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(sampDesc)),
+		static_cast<void*>(&g_pSamplerLinear));
+
+	if (isSuccesful == false)
+	{
+		HRESULT hr = S_FALSE;
 		return hr;
+	}
 
 	// Initialize the world matrices
 	g_World = XMMatrixIdentity();

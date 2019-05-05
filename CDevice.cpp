@@ -13,6 +13,7 @@ CDevice::CDevice()
 	mptr_Device = nullptr;
 }
 
+//Descriptor
 
 CDevice::~CDevice()
 {
@@ -51,9 +52,9 @@ bool CDevice::CreateTexture2D(void * Texture, void * Descriptor)
 
 	HRESULT hr = S_OK;
 
-	hr = mptr_Device->CreateTexture2D(reinterpret_cast<D3D11_TEXTURE2D_DESC*>(Descriptor),
+	hr = mptr_Device->CreateTexture2D(static_cast<D3D11_TEXTURE2D_DESC*>(Descriptor),
 		nullptr,
-		reinterpret_cast<ID3D11Texture2D**>(Texture));
+		static_cast<ID3D11Texture2D**>(Texture));
 	// For knowing if something went wrong 
 	if (!CheckForError(hr))
 	{
@@ -77,8 +78,8 @@ bool CDevice::CreateDepthStencilView(void * Texture, void * DiscriptorDepth, voi
 	HRESULT hr = S_OK;
 
 	hr = mptr_Device->CreateDepthStencilView(static_cast<ID3D11Texture2D*>(Texture),
-		static_cast<D3D11_DEPTH_STENCIL_VIEW_DESC*>(DiscriptorDepth),
-		static_cast<ID3D11DepthStencilView**>(DepthStencilView));
+		static_cast<D3D11_DEPTH_STENCIL_VIEW_DESC *>(DiscriptorDepth),
+		static_cast <ID3D11DepthStencilView * *>(DepthStencilView));
 
 	// For knowing if something went wrong 
 	if (!CheckForError(hr))
@@ -106,7 +107,7 @@ bool CDevice::CreateVertexShader(void * BlobVertex, void * VertexShader)
 	hr = mptr_Device->CreateVertexShader(ptr_temp->GetBufferPointer(),
 		ptr_temp->GetBufferSize(),
 		nullptr,
-		reinterpret_cast<ID3D11VertexShader**>(VertexShader));
+		static_cast<ID3D11VertexShader**>(VertexShader));
 
 	if (!CheckForError(hr)) {
 		return true;
@@ -166,15 +167,23 @@ bool CDevice::CreatePixelShader(void * BlobPixel, void * PixelShader)
 	return false;
 }
 
-bool CDevice::CreateBuffer(void * Descriptor, void * Data, void * Buffer)
+bool CDevice::CreateBuffer(void * Descriptor, void * Buffer, void * Data = nullptr)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr = S_OK;
+	if (Data != nullptr)
+	{
+		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
+			static_cast<D3D11_SUBRESOURCE_DATA*>(Data),
+			static_cast<ID3D11Buffer**>(Buffer));
+	}
+	else {
+		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
+			nullptr,
+			static_cast<ID3D11Buffer**>(Buffer));
+	}
 
-	hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
-		static_cast<D3D11_SUBRESOURCE_DATA*>(Data),
-		static_cast<ID3D11Buffer**>(Buffer));
 
 	if (!CheckForError(hr))
 	{
@@ -186,7 +195,7 @@ bool CDevice::CreateBuffer(void * Descriptor, void * Data, void * Buffer)
 #endif
 
 	return false;
-}
+	}
 
 bool CDevice::CreateSamplerState(void * DescriptorSampler, void * Sampler)
 {

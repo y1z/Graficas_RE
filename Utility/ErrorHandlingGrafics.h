@@ -9,6 +9,13 @@ bool CheckForError(HRESULT hr)
 	{
 		return true;
 	}
+	if (hr == S_FALSE)
+	{
+		return true;
+	}
+	if (hr == E_INVALIDARG) {
+		return true;
+	}
 
 	return false;
 }
