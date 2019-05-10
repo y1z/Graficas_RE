@@ -195,7 +195,7 @@ bool CDevice::CreateBuffer(void * Descriptor, void * Buffer, void * Data = nullp
 #endif
 
 	return false;
-	}
+}
 
 bool CDevice::CreateSamplerState(void * DescriptorSampler, void * Sampler)
 {

@@ -9,6 +9,7 @@ CDeviaceContext::CDeviaceContext()
 
 CDeviaceContext::~CDeviaceContext()
 {
+	if (mptr_DeviceContext != nullptr) { mptr_DeviceContext->Release(); }
 }
 
 
