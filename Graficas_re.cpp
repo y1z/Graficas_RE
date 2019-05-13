@@ -17,6 +17,8 @@
 #include "CDeviaceContext.h"
 #include "CSwapChian.h"
 #include "CBuffer.h"
+#include "CTexture.h"
+#include "CCamera.h"
 
 CDevice Device;// Replaced 
 CDeviaceContext DeviceContext;// Replaced 
@@ -26,8 +28,11 @@ CBuffer ConstantBufferChangeEveryFrame;// Replaced
 CBuffer ConstantBufferNeverChange;// Replaced
 //! Heres the VertexBuffer 
 CBuffer VertexBuffer;// Replaced 
+//! Heres the index-buffer
 CBuffer IndexBuffer;
-
+CTexture2D DepthStencil;
+// ! the camera and values associated with it
+CCamera Camera;
 //--------------------------------------------------------------------------------------
 // Structures
 //--------------------------------------------------------------------------------------
@@ -81,7 +86,6 @@ XMMATRIX                            g_World;
 XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
 XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
-
 
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -225,8 +229,6 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 //--------------------------------------------------------------------------------------
 HRESULT InitDevice()
 {
-
-
 	/* This is to make sure all the methods of the Device class work */
 	bool isSuccesful = false;
 
@@ -294,7 +296,6 @@ HRESULT InitDevice()
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
 
@@ -311,6 +312,7 @@ HRESULT InitDevice()
 		return hr;
 
 	// Create depth stencil texture
+	// old code 
 	D3D11_TEXTURE2D_DESC descDepth;
 	SecureZeroMemory(&descDepth, sizeof(descDepth));
 	descDepth.Width = width;
@@ -324,12 +326,16 @@ HRESULT InitDevice()
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	descDepth.CPUAccessFlags = 0;
 	descDepth.MiscFlags = 0;
+
 	// old code 	
 	//hr = g_pd3dDevice->CreateTexture2D(&descDepth, NULL, &g_pDepthStencil);
 	//if (FAILED(hr))
 	//return hr;
+	DepthStencil.InitTexture2D(width, height,
+		static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
 
-	isSuccesful = Device.CreateTexture2D(static_cast<void*>(&g_pDepthStencil), static_cast<void*>(&descDepth));
+	isSuccesful = Device.CreateTexture2D(static_cast<void*>(DepthStencil.GetTextureRef()),
+		static_cast<void*>(GiveSinglePointer(DepthStencil.GetDescriptor())));
 
 	if (isSuccesful == false)
 	{
@@ -340,13 +346,14 @@ HRESULT InitDevice()
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 	SecureZeroMemory(&descDSV, sizeof(descDSV));
-	descDSV.Format = descDepth.Format;
+	descDSV.Format = DepthStencil.GetDescriptor().Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = &descDSV;
+	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(descDSV);
+	//g_pDepthStencill
 
-	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(g_pDepthStencil),
+	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(DepthStencil.GetTexture()),
 		static_cast<void*>(ptr_DepthDescripter),
 		static_cast<void*>(&g_pDepthStencilView));
 
@@ -648,31 +655,39 @@ HRESULT InitDevice()
 	// Initialize the world matrices
 	g_World = XMMatrixIdentity();
 
-	// Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+	/*must be done before making the camara*/
+	Camera.SetFov(65.0f);
+
+	// Initialize the view matrix and Perceptive matrice
+	Camera.InitCamara(width, height);
+
+	// old code 
+	/*XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	g_View = XMMatrixLookAtLH(Eye, At, Up);
+	g_View = XMMatrixLookAtLH(Eye, At, Up);*/
+
+
 
 	CBNeverChanges cbNeverChanges;
-	cbNeverChanges.mView = XMMatrixTranspose(g_View);
-
+	cbNeverChanges.mView = XMMatrixTranspose(Camera.GetViewMatrice());
 
 	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
+	// old code 
 	//g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
 
-	// Initialize the projection matrix
-	g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
+	// old code 
+	//g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 
+		// Initialize the projection matrix
 	CBChangeOnResize cbChangesOnResize;
-	cbChangesOnResize.mProjection = XMMatrixTranspose(g_Projection);
+	cbChangesOnResize.mProjection = XMMatrixTranspose(Camera.GetProyectionMatrice());
 
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
 	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
 
 	return S_OK;
 }
-
 
 //--------------------------------------------------------------------------------------
 // Clean up the objects we've created
@@ -698,7 +713,6 @@ void CleanupDevice()
 	if (g_pImmediateContext) g_pImmediateContext->Release();
 	if (g_pd3dDevice) g_pd3dDevice->Release();
 }
-
 
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message

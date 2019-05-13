@@ -42,7 +42,7 @@ CBuffer::~CBuffer()
 	if (mptr_Buffer != nullptr) { mptr_Buffer->Release(); }
 }
 
-template<class T>/*! This function set up the buffer to letter be created*/
+template<class T>/*! This function set up the buffer to later become a Vertex buffer*/
 inline void CBuffer::IntiVertexBuffer(const T * DataStruct, uint64_t TotalElement, uint32_t OffSet)
 {
 #if defined(USING_DIRECTX)
@@ -60,7 +60,7 @@ inline void CBuffer::IntiVertexBuffer(const T * DataStruct, uint64_t TotalElemen
 #endif
 }
 
-template<class T>
+template<class T>/*! This function set up the buffer to later become a index buffer*/
 inline void CBuffer::InitIndexBuffer(const T * DataStruct, uint64_t TotalElements, uint32_t OffSet)
 {
 #if defined(USING_DIRECTX)
@@ -78,7 +78,7 @@ inline void CBuffer::InitIndexBuffer(const T * DataStruct, uint64_t TotalElement
 #endif
 }
 
-template<class T>
+template<class T>/*! This function set up the buffer to later become a constant buffer.*/
 inline void CBuffer::InitConstBuffer(const T &DataStruct, uint32_t Offset)
 {
 #if defined(USING_DIRECTX)
@@ -94,7 +94,6 @@ inline void CBuffer::InitConstBuffer(const T &DataStruct, uint32_t Offset)
 #	elif
 #endif
 }
-
 
 ID3D11Buffer * CBuffer::GetBuffer()
 {

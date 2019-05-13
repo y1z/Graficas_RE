@@ -2,10 +2,6 @@
 
 #include "..//Usable_Windows.h"
 
-#ifndef ERROR_STUFF
-
-#define ERROR_STUFF
-
 
 #if defined USING_DIRECTX
 /*! tell's if there is an error */
@@ -26,10 +22,6 @@ static bool CheckForError(HRESULT hr)
 	return false;
 }
 
-
-
 #elif //TODO_GL 
-
-#endif // !ERROR_STUFF
 
 #endif // USING_DIRECTX
