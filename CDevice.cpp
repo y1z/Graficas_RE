@@ -79,7 +79,7 @@ bool CDevice::CreateDepthStencilView(void * Texture, void * DiscriptorDepth, voi
 
 	hr = mptr_Device->CreateDepthStencilView(static_cast<ID3D11Texture2D*>(Texture),
 		static_cast<D3D11_DEPTH_STENCIL_VIEW_DESC *>(DiscriptorDepth),
-		static_cast <ID3D11DepthStencilView * *>(DepthStencilView));
+		static_cast <ID3D11DepthStencilView **>(DepthStencilView));
 
 	// For knowing if something went wrong 
 	if (!CheckForError(hr))

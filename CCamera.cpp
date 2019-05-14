@@ -21,6 +21,7 @@ void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
 
+
 	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, WindowWidth / (FLOAT)WindowHeight, m_Near, m_Far);
 	// will use this to determine right and front vector
 	m_UpVector = Up;
@@ -31,6 +32,7 @@ void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 	/*if put in the reverse order the front vector would be negative*/
 	m_FrontVector = XMVector3Cross(m_RightVector, m_UpVector);
 
+	m_Trasfrom = XMMatrixIdentity();
 #elif
 #endif
 }

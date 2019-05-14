@@ -36,7 +36,7 @@ private:
 	float m_Fov;
 #if defined(USING_DIRECTX)
 	// matrices
-	
+	XMMATRIX m_Trasfrom;
 	XMMATRIX m_View;
 	XMMATRIX m_Proyection;
 	// vectors

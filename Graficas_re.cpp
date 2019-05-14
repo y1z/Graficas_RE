@@ -19,6 +19,7 @@
 #include "CBuffer.h"
 #include "CTexture.h"
 #include "CCamera.h"
+#include "CRenderTragetView.h"
 
 CDevice Device;// Replaced 
 CDeviaceContext DeviceContext;// Replaced 
@@ -26,11 +27,11 @@ CSwapChian SwapChain;// Replaced
 CBuffer ConstantBufferResize;// Replaced
 CBuffer ConstantBufferChangeEveryFrame;// Replaced
 CBuffer ConstantBufferNeverChange;// Replaced
-//! Heres the VertexBuffer 
 CBuffer VertexBuffer;// Replaced 
 //! Heres the index-buffer
-CBuffer IndexBuffer;
-CTexture2D DepthStencil;
+CBuffer IndexBuffer;// Replaced
+CTexture2D DepthStencil;// Replaced
+CRenderTragetView RenderTragetView;
 // ! the camera and values associated with it
 CCamera Camera;
 //--------------------------------------------------------------------------------------
@@ -146,7 +147,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	CleanupDevice();
 
-	return (int)msg.wParam;
+	return (int) msg.wParam;
 }
 
 
@@ -163,12 +164,12 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL1);
+	wcex.hIcon = LoadIcon(hInstance, (LPCTSTR) IDI_TUTORIAL1);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = L"TutorialWindowClass";
-	wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
+	wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR) IDI_TUTORIAL1);
 	if (!RegisterClassEx(&wcex))
 		return E_FAIL;
 
@@ -214,7 +215,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 	if (FAILED(hr))
 	{
 		if (pErrorBlob != NULL)
-			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			OutputDebugStringA((char*) pErrorBlob->GetBufferPointer());
 		if (pErrorBlob) pErrorBlob->Release();
 		return hr;
 	}
@@ -286,10 +287,11 @@ HRESULT InitDevice()
 		return hr;
 
 	// Create a render target view
-	ID3D11Texture2D* pBackBuffer = NULL;
+
+	//ID3D11Texture2D* pBackBuffer = NULL;
 	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	isSuccesful = SwapChain.GetBuffer(0, static_cast<void*>(&pBackBuffer));
+	isSuccesful = SwapChain.GetBuffer(0, static_cast<void*>(RenderTragetView.GetBackBufferRef()));
 
 	if (isSuccesful == false)
 	{
@@ -299,7 +301,10 @@ HRESULT InitDevice()
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
 
-	isSuccesful = Device.CreateRenderTargetView(static_cast<void*>(pBackBuffer), static_cast<void*>(&g_pRenderTargetView));
+	isSuccesful = Device.CreateRenderTargetView(static_cast<void*>(RenderTragetView.GetBackBuffer()),
+		static_cast<void*>(RenderTragetView.GetRenderTragetRef()));// &g_pRenderTargetView 
+
+	RenderTragetView.ReleaseBackBuffer();
 
 	if (isSuccesful == false)
 	{
@@ -307,7 +312,7 @@ HRESULT InitDevice()
 		return hr;
 	}
 
-	pBackBuffer->Release();
+	//pBackBuffer->Release();
 	if (FAILED(hr))
 		return hr;
 
@@ -352,10 +357,10 @@ HRESULT InitDevice()
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(descDSV);
 	//g_pDepthStencill
-
+	// works
 	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(DepthStencil.GetTexture()),
 		static_cast<void*>(ptr_DepthDescripter),
-		static_cast<void*>(&g_pDepthStencilView));
+		static_cast<void*>(RenderTragetView.GetDepthStencilViewRef()));// &g_pDepthStencilView
 
 	if (isSuccesful == false)
 	{
@@ -367,12 +372,13 @@ HRESULT InitDevice()
 	//	return hr;
 
 	//g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
-	DeviceContext.OMSetRenderTargets(1, static_cast<void*>(&g_pRenderTargetView), static_cast<void*>(g_pDepthStencilView));
+	DeviceContext.OMSetRenderTargets(1, static_cast<void*>(RenderTragetView.GetRenderTragetRef()), 
+		static_cast<void*>(RenderTragetView.GetDepthStencilView()));
 
 	// Setup the viewport
 	D3D11_VIEWPORT vp;
-	vp.Width = (FLOAT)width;
-	vp.Height = (FLOAT)height;
+	vp.Width = (FLOAT) width;
+	vp.Height = (FLOAT) height;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -750,7 +756,7 @@ void Render()
 	static float t = 0.0f;
 	if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
 	{
-		t += (float)XM_PI * 0.0125f;
+		t += (float) XM_PI * 0.0125f;
 	}
 	else
 	{
@@ -776,13 +782,13 @@ void Render()
 
 	//g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
 
-	DeviceContext.ClearRenderTargetView(static_cast<void*>(g_pRenderTargetView), ClearColor);
+	DeviceContext.ClearRenderTargetView(static_cast<void*>(RenderTragetView.GetRenderTraget()), ClearColor);
 
 	//
 	// Clear the depth buffer to 1.0 (max depth)
 	//
 
-	DeviceContext.ClearDepthStencilView(static_cast<void*>(g_pDepthStencilView), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
+	DeviceContext.ClearDepthStencilView(static_cast<void*>(RenderTragetView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
 	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	//

@@ -8,7 +8,7 @@ CTexture2D::CTexture2D()
 
 CTexture2D::~CTexture2D()
 {
-	if (mptr_Texture != nullptr) { mptr_Texture->Release(); }
+	if (mptr_Texture) { mptr_Texture->Release(); }
 }
  
 void CTexture2D::InitTexture2D(uint32_t Width, uint32_t Hight, int32_t Format, int32_t BindFlag)
