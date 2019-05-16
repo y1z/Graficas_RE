@@ -13,6 +13,7 @@ public:// constructor
 public:// functions
 #if defined (USING_DIRECTX)
 	ID3D11RenderTargetView * GetRenderTraget();
+/*! For Arguments that require more that 1 pointer*/
 	ID3D11RenderTargetView ** GetRenderTragetRef();
 	ID3D11DepthStencilView * GetDepthStencilView();
 	ID3D11DepthStencilView ** GetDepthStencilViewRef();
