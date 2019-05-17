@@ -18,9 +18,16 @@ public:// functions
 	void SetNear(float newNearValue);
 	/*! Set FOV */
 	void SetFov(float FovDegrees);
+	/*! this methods lets my multiply the matrices by a vector */
+	void AlterProyectionMatric(void* Vector);
+
+	void AlterTrasfromMatrice(float x, float y ,float z);
+
+	void ResetTrasformMatrice();
 
 #if defined(USING_DIRECTX)
 	XMMATRIX GetViewMatrice();
+	XMMATRIX GetTrasformMatrice();
 	XMMATRIX GetProyectionMatrice();
 #elif
 #endif

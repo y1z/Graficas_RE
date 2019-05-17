@@ -5,12 +5,10 @@ CCamera::CCamera()
 	m_Near(0.01f),
 	// This is 45 degrees in radians
 	m_Fov(0.785398163f)
-{
-}
+{}
 
 CCamera::~CCamera()
-{
-}
+{}
 
 void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 {
@@ -20,22 +18,22 @@ void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	m_View = XMMatrixLookAtLH(Eye, At, Up);
-
-
-	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, WindowWidth / (FLOAT)WindowHeight, m_Near, m_Far);
+	// here is the front vector 
+	m_FrontVector = At - Eye;
 	// will use this to determine right and front vector
 	m_UpVector = Up;
-	// using this because the coordinate system is already using the 
-	// left hand rule http://www.f-lohmueller.de/pov_tut/a_geo/a_geo85e.htm
-	m_RightVector = XMVectorSet(1.0f, 0, 0, 0);
 
-	/*if put in the reverse order the front vector would be negative*/
-	m_FrontVector = XMVector3Cross(m_RightVector, m_UpVector);
+	m_RightVector = XMVector3Cross(m_UpVector, m_FrontVector);
+
+	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, WindowWidth / (FLOAT) WindowHeight, m_Near, m_Far);
 
 	m_Trasfrom = XMMatrixIdentity();
 #elif
 #endif
 }
+
+
+
 
 void CCamera::SetFar(float newFarValue)
 {
@@ -52,6 +50,18 @@ void CCamera::SetFov(float FovDegrees)
 	m_Fov = FovDegrees * (3.14159f / 180);
 }
 
+void CCamera::AlterProyectionMatric(void * Vector)
+{
+#if defined(USING_DIRECTX)
+	XMVECTOR *Result = static_cast<XMVECTOR*>(Vector);
+	XMVector3Transform((*Result), m_Proyection);
+
+
+	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov,  16/ (FLOAT) 9, m_Near, m_Far);
+#elif
+#endif
+}
+
 
 #if defined(USING_DIRECTX)
 
@@ -60,11 +70,36 @@ XMMATRIX CCamera::GetViewMatrice()
 	return m_View;
 }
 
+XMMATRIX CCamera::GetTrasformMatrice()
+{
+	return m_Trasfrom;
+}
+
 XMMATRIX CCamera::GetProyectionMatrice()
 {
 	return m_Proyection;
 }
+
 #elif
 #endif
+void CCamera::AlterTrasfromMatrice(float x, float y, float z)
+{
+#if defined(USING_DIRECTX)
+	FXMVECTOR Vector = XMVectorSet(x, y, z, 1);
+
+m_Trasfrom *=	XMMatrixTranslationFromVector(Vector);
+#elif
+#endif
+}
+
+void CCamera::ResetTrasformMatrice()
+{
+#if defined(USING_DIRECTX)
+
+	m_Trasfrom = XMMatrixIdentity();
+#elif
+#endif
+
+}
 
 

@@ -94,7 +94,7 @@ XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 HRESULT InitDevice();
 void CleanupDevice();
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WindProc(HWND, UINT, WPARAM, LPARAM);
 void Render();
 /*! This is for the functions that demand more than 1 pointer*/
 template<class T>
@@ -160,7 +160,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = WndProc;
+	wcex.lpfnWndProc = WindProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
@@ -188,11 +188,9 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 	return S_OK;
 }
 
-
 //--------------------------------------------------------------------------------------
 // Helper for compiling shaders with D3DX11
 //--------------------------------------------------------------------------------------
-
 
 /*!
 \todo Create own version of this function later down the line.*/
@@ -372,7 +370,7 @@ HRESULT InitDevice()
 	//	return hr;
 
 	//g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
-	DeviceContext.OMSetRenderTargets(1, static_cast<void*>(RenderTragetView.GetRenderTragetRef()), 
+	DeviceContext.OMSetRenderTargets(1, static_cast<void*>(RenderTragetView.GetRenderTragetRef()),
 		static_cast<void*>(RenderTragetView.GetDepthStencilView()));
 
 	// Setup the viewport
@@ -723,22 +721,66 @@ void CleanupDevice()
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
 //--------------------------------------------------------------------------------------
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+
+
+/*! USE THE "wPARAM" it contains the key that's pressed*/
+LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
+	// messages for mouse 
+	/*
+	MK_LBUTTON          0x0001
+	MK_RBUTTON          0x0002
+	MK_SHIFT            0x0004
+	MK_CONTROL          0x0008
+	MK_MBUTTON          0x0010
+	*/
+	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
+	// the value for the A key 
+	int KeyA = 0x41;
+	// the value for the S key 
+	int KeyS = 0x53;
+	// the value for the D key 
+	int KeyD = 0x44;
 	switch (message)
 	{
+	case WM_KEYDOWN:// checks if ANY key was pressed 
+		if (wParam == (WPARAM)'W')
+		{
+			Camera.AlterTrasfromMatrice(0, 0, 2);
+		}		
+		if (wParam == (WPARAM)'A')
+		{
+			Camera.AlterTrasfromMatrice(-2, 0,0);
+			
+		}		
+		if (wParam == (WPARAM)'S')
+		{
+			Camera.AlterTrasfromMatrice(0, 0, -2);
+
+		}		
+		if (wParam == (WPARAM)'D')
+		{
+			Camera.AlterTrasfromMatrice(2, 0,0);
+		}
+		if (wParam == (WPARAM)'R')
+		{
+			Camera.ResetTrasformMatrice();
+		}
+
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 		break;
-
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
 
+		//	PostQuitMessage(0);
+	case WM_LBUTTONDOWN:
+		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -795,10 +837,17 @@ void Render()
 	// Update variables that change once per frame
 	//
 	CBChangesEveryFrame cb;
-	cb.mWorld = XMMatrixTranspose(g_World);
+	cb.mWorld = XMMatrixTranspose(g_World* Camera.GetTrasformMatrice()) ;
 	cb.vMeshColor = g_vMeshColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
 	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+
+	// Initialize the projection matrix
+	CBChangeOnResize cbChangesOnResize;
+	cbChangesOnResize.mProjection = XMMatrixTranspose(Camera.GetProyectionMatrice());
+
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
+	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
 
 	//
 	// Render the cube
