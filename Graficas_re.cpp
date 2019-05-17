@@ -738,33 +738,29 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
-	// the value for the A key 
-	int KeyA = 0x41;
-	// the value for the S key 
-	int KeyS = 0x53;
-	// the value for the D key 
-	int KeyD = 0x44;
 	switch (message)
 	{
 	case WM_KEYDOWN:// checks if ANY key was pressed 
+		// All of these char's HAVE to be capital letters
+		// for this to work 
 		if (wParam == (WPARAM)'W')
 		{
 			Camera.AlterTrasfromMatrice(0, 0, 2);
-		}		
+		}
 		if (wParam == (WPARAM)'A')
 		{
-			Camera.AlterTrasfromMatrice(-2, 0,0);
-			
-		}		
+			Camera.AlterTrasfromMatrice(-2, 0, 0);
+
+		}
 		if (wParam == (WPARAM)'S')
 		{
 			Camera.AlterTrasfromMatrice(0, 0, -2);
-
-		}		
+		}
 		if (wParam == (WPARAM)'D')
 		{
-			Camera.AlterTrasfromMatrice(2, 0,0);
+			Camera.AlterTrasfromMatrice(2, 0, 0);
 		}
+		// reset to the default position
 		if (wParam == (WPARAM)'R')
 		{
 			Camera.ResetTrasformMatrice();
@@ -833,12 +829,13 @@ void Render()
 	DeviceContext.ClearDepthStencilView(static_cast<void*>(RenderTragetView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
 	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	float MyCubeColor[4] = { g_vMeshColor.x * -1, 	g_vMeshColor.y * -1, 	g_vMeshColor.z * -1, 1.0f };
 	//
 	// Update variables that change once per frame
 	//
 	CBChangesEveryFrame cb;
-	cb.mWorld = XMMatrixTranspose(g_World* Camera.GetTrasformMatrice()) ;
-	cb.vMeshColor = g_vMeshColor;
+	cb.mWorld = XMMatrixTranspose(g_World * Camera.GetTrasformMatrice());
+	cb.vMeshColor = MyCubeColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
 	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
 
@@ -869,8 +866,35 @@ void Render()
 	DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
 	DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
 	DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(&g_pSamplerLinear));
-
 	DeviceContext.DrawIndexed(36, 0, 0);
+/* Making cube rotates */
+	g_World *= XMMatrixTranslation(-3, 0, 0);
+	cb.mWorld = XMMatrixTranspose(g_World);
+	cb.vMeshColor = g_vMeshColor;
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	DeviceContext.DrawIndexed(36, 0, 0);
+	/*Make cube that rotate and Scales*/
+
+
+	FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(t)) * 1.25f, 1, 1);
+	g_World = XMMatrixScalingFromVector(ScalingVector);
+	g_World *= XMMatrixRotationY(t);
+	g_World *= XMMatrixTranslation(0, 2, -2);
+	cb.mWorld = XMMatrixTranspose(g_World);
+	cb.vMeshColor = g_vMeshColor;
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	DeviceContext.DrawIndexed(36, 0, 0);
+
+
+	g_World = XMMatrixRotationY(0);
+	g_World = XMMatrixScalingFromVector(ScalingVector);
+	g_World *= XMMatrixTranslation(3, 0, 0);
+	cb.mWorld = XMMatrixTranspose(g_World);
+	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	DeviceContext.DrawIndexed(36, 0, 0);
+
 	//
 	// Present our back buffer to our front buffer
 	//
