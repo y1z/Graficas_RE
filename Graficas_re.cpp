@@ -59,7 +59,7 @@ struct CBChangesEveryFrame
 	XMMATRIX mWorld;
 	XMFLOAT4 vMeshColor;
 };
-
+//
 
 //--------------------------------------------------------------------------------------
 // Global Variables
