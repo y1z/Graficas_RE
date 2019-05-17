@@ -6,8 +6,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
-/// --------------------------------MY INCLUDES---------------------------------------///
 
+/// --------------------------------MY INCLUDES---------------------------------------///
+static float g_Time = 0.0f;
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
@@ -88,6 +89,7 @@ XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
 XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
+RECT Window;
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
@@ -237,6 +239,8 @@ HRESULT InitDevice()
 	GetClientRect(g_hWnd, &rc);
 	UINT width = rc.right - rc.left;
 	UINT height = rc.bottom - rc.top;
+
+	Window = rc;
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -694,40 +698,17 @@ HRESULT InitDevice()
 }
 
 //--------------------------------------------------------------------------------------
-// Clean up the objects we've created
-//--------------------------------------------------------------------------------------
-void CleanupDevice()
-{
-	if (g_pImmediateContext) g_pImmediateContext->ClearState();
-
-	if (g_pSamplerLinear) g_pSamplerLinear->Release();
-	if (g_pTextureRV) g_pTextureRV->Release();
-	if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
-	if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
-	if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-	if (g_pVertexBuffer) g_pVertexBuffer->Release();
-	if (g_pIndexBuffer) g_pIndexBuffer->Release();
-	if (g_pVertexLayout) g_pVertexLayout->Release();
-	if (g_pVertexShader) g_pVertexShader->Release();
-	if (g_pPixelShader) g_pPixelShader->Release();
-	if (g_pDepthStencil) g_pDepthStencil->Release();
-	if (g_pDepthStencilView) g_pDepthStencilView->Release();
-	if (g_pRenderTargetView) g_pRenderTargetView->Release();
-	if (g_pSwapChain) g_pSwapChain->Release();
-	if (g_pImmediateContext) g_pImmediateContext->Release();
-	if (g_pd3dDevice) g_pd3dDevice->Release();
-}
-
-//--------------------------------------------------------------------------------------
 // Called every time the application receives a message
 //--------------------------------------------------------------------------------------
 
-
+/// ===================HERE IS WIND PROC ===================////
 /*! USE THE "wPARAM" it contains the key that's pressed*/
 LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
+
+	GetClientRect(hWnd, &Window);
 	// messages for mouse 
 	/*
 	MK_LBUTTON          0x0001
@@ -738,32 +719,67 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
+	POINT mousePointOrigin = { 800,600};
+	POINT mousePointEnd;
+	XMMATRIX Rotation;
+	XMVECTOR AngelVector;
+
+	bool MoveCamara = true;
+
 	switch (message)
 	{
 	case WM_KEYDOWN:// checks if ANY key was pressed 
 		// All of these char's HAVE to be capital letters
 		// for this to work 
+		MoveCamara = true;
 		if (wParam == (WPARAM)'W')
 		{
-			Camera.AlterTrasfromMatrice(0, 0, 2);
+			Camera.MoveTrasfromMatrice(0, 0, 2);
+			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'A')
 		{
-			Camera.AlterTrasfromMatrice(-2, 0, 0);
+			Camera.MoveTrasfromMatrice(-2, 0, 0);
+			MoveCamara = false;
 
 		}
 		if (wParam == (WPARAM)'S')
 		{
-			Camera.AlterTrasfromMatrice(0, 0, -2);
+			Camera.MoveTrasfromMatrice(0, 0, -2);
+			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'D')
 		{
-			Camera.AlterTrasfromMatrice(2, 0, 0);
+			Camera.MoveTrasfromMatrice(2, 0, 0);
+			MoveCamara = false;
 		}
 		// reset to the default position
 		if (wParam == (WPARAM)'R')
 		{
 			Camera.ResetTrasformMatrice();
+			MoveCamara = false;
+		}
+		if(MoveCamara)
+		{
+			float Xpos;
+			float Ypos;
+
+			GetCursorPos(&mousePointEnd);
+
+			Xpos = mousePointEnd.x - mousePointOrigin.x;
+			//	Xpos -= mousePointOrigin.x;
+
+			Ypos = mousePointEnd.y - mousePointOrigin.y;
+			//Ypos -= mousePointOrigin.y;
+
+			AngelVector = XMVectorSet(Xpos, -Ypos, 0, 0);
+
+			AngelVector *= 0.00021f;
+
+			Camera.m_At += AngelVector;
+			Camera.CoordinateUpdate();
+
+
 		}
 
 	case WM_PAINT:
@@ -774,8 +790,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 
-		//	PostQuitMessage(0);
-	case WM_LBUTTONDOWN:
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -788,13 +802,15 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 //--------------------------------------------------------------------------------------
 // Render a frame
 //--------------------------------------------------------------------------------------
+
+
 void Render()
 {
 	// Update our time
-	static float t = 0.0f;
+
 	if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
 	{
-		t += (float) XM_PI * 0.0125f;
+		g_Time += (float) XM_PI * 0.0125f;
 	}
 	else
 	{
@@ -802,21 +818,26 @@ void Render()
 		DWORD dwTimeCur = GetTickCount();
 		if (dwTimeStart == 0)
 			dwTimeStart = dwTimeCur;
-		t = (dwTimeCur - dwTimeStart) / 1000.0f;
+		g_Time = (dwTimeCur - dwTimeStart) / 1000.0f;
 	}
 
 	// Rotate cube around the origin
-	g_World = XMMatrixRotationY(t);
+	g_World = XMMatrixRotationY(g_Time);
 
 	// Modify the color
-	g_vMeshColor.x = (sinf(t * 1.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.y = (cosf(t * 3.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.z = (sinf(t * 5.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.x = (sinf(g_Time * 1.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.y = (cosf(g_Time * 3.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.z = (sinf(g_Time * 5.0f) + 1.0f) * 0.5f;
 
 	//
 	// Clear the back buffer
 	//
 	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
+
+	CBNeverChanges cbNeverChanges;
+	cbNeverChanges.mView = XMMatrixTranspose(Camera.GetViewMatrice());
+
+	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
 
 	//g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
 
@@ -867,7 +888,7 @@ void Render()
 	DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
 	DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(&g_pSamplerLinear));
 	DeviceContext.DrawIndexed(36, 0, 0);
-/* Making cube rotates */
+	/* Making cube rotates */
 	g_World *= XMMatrixTranslation(-3, 0, 0);
 	cb.mWorld = XMMatrixTranspose(g_World);
 	cb.vMeshColor = g_vMeshColor;
@@ -877,9 +898,9 @@ void Render()
 	/*Make cube that rotate and Scales*/
 
 
-	FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(t)) * 1.25f, 1, 1);
+	FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(g_Time)) * 1.25f, 1, 1);
 	g_World = XMMatrixScalingFromVector(ScalingVector);
-	g_World *= XMMatrixRotationY(t);
+	g_World *= XMMatrixRotationY(g_Time);
 	g_World *= XMMatrixTranslation(0, 2, -2);
 	cb.mWorld = XMMatrixTranspose(g_World);
 	cb.vMeshColor = g_vMeshColor;
@@ -902,3 +923,27 @@ void Render()
 	SwapChain.Present(0, 0);
 }
 
+//--------------------------------------------------------------------------------------
+// Clean up the objects we've created
+//--------------------------------------------------------------------------------------
+void CleanupDevice()
+{
+	if (g_pImmediateContext) g_pImmediateContext->ClearState();
+
+	if (g_pSamplerLinear) g_pSamplerLinear->Release();
+	if (g_pTextureRV) g_pTextureRV->Release();
+	if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
+	if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
+	if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
+	if (g_pVertexBuffer) g_pVertexBuffer->Release();
+	if (g_pIndexBuffer) g_pIndexBuffer->Release();
+	if (g_pVertexLayout) g_pVertexLayout->Release();
+	if (g_pVertexShader) g_pVertexShader->Release();
+	if (g_pPixelShader) g_pPixelShader->Release();
+	if (g_pDepthStencil) g_pDepthStencil->Release();
+	if (g_pDepthStencilView) g_pDepthStencilView->Release();
+	if (g_pRenderTargetView) g_pRenderTargetView->Release();
+	if (g_pSwapChain) g_pSwapChain->Release();
+	if (g_pImmediateContext) g_pImmediateContext->Release();
+	if (g_pd3dDevice) g_pd3dDevice->Release();
+}
