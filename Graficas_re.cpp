@@ -734,23 +734,30 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		MoveCamara = true;
 		if (wParam == (WPARAM)'W')
 		{
-			Camera.MoveTrasfromMatrice(0, 0, 2);
+		//	Camera.MoveTrasfromMatrice(0, 0, 2);
+			Camera.MoveCamera(Camera.m_FrontVector);
 			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'A')
 		{
-			Camera.MoveTrasfromMatrice(-2, 0, 0);
+			XMVECTOR Move = Camera.m_FrontVector;
+			//Camera.MoveTrasfromMatrice(-2, 0, 0);
+			Camera.MoveCamera(Camera.m_RightVector * -1);
+
 			MoveCamara = false;
 
 		}
 		if (wParam == (WPARAM)'S')
 		{
-			Camera.MoveTrasfromMatrice(0, 0, -2);
+			//Camera.MoveTrasfromMatrice(0, 0, -2);
+			Camera.MoveCamera(Camera.m_FrontVector * -1);
 			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'D')
 		{
-			Camera.MoveTrasfromMatrice(2, 0, 0);
+			XMVECTOR d;
+			//Camera.MoveTrasfromMatrice(Camera.m_RightV);
+			Camera.MoveCamera(Camera.m_RightVector);
 			MoveCamara = false;
 		}
 		// reset to the default position
@@ -778,8 +785,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			Camera.m_At += AngelVector;
 			Camera.CoordinateUpdate();
-
-
 		}
 
 	case WM_PAINT:

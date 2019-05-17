@@ -92,6 +92,12 @@ XMMATRIX CCamera::GetProyectionMatrice()
 	return m_Proyection;
 }
 
+void CCamera::MoveCamera(XMVECTOR Vec)
+{
+
+	m_Trasfrom *= XMMatrixTranslationFromVector(Vec);
+}
+
 #elif
 #endif
 void CCamera::MoveTrasfromMatrice(float x, float y, float z)
@@ -117,6 +123,7 @@ void CCamera::ResetTrasformMatrice()
 {
 #if defined(USING_DIRECTX)
 	m_Trasfrom = XMMatrixIdentity();
+
 #elif
 #endif
 }

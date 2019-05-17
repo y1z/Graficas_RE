@@ -29,10 +29,13 @@ public:// functions
 
 	void CoordinateUpdate();
 
+
+
 #if defined(USING_DIRECTX)
 	XMMATRIX GetViewMatrice();
 	XMMATRIX GetTrasformMatrice();
 	XMMATRIX GetProyectionMatrice();
+	void MoveCamera(XMVECTOR Vec);
 #elif
 #endif
 
