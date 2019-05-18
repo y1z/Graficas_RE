@@ -29,8 +29,6 @@ public:// functions
 
 	void CoordinateUpdate();
 
-
-
 #if defined(USING_DIRECTX)
 	XMMATRIX GetViewMatrice();
 	XMMATRIX GetTrasformMatrice();
@@ -61,6 +59,7 @@ public:// REMOVE public
 	XMVECTOR m_FrontVector;
 
 	XMVECTOR m_Up;
+
 	XMVECTOR m_Eye;
 	XMVECTOR m_At;
 

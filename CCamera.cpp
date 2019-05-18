@@ -13,19 +13,11 @@ CCamera::~CCamera()
 void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 {
 #if defined(USING_DIRECTX)
-	XMVECTOR  Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	 m_Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
-	  m_At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	m_UpVector = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	m_Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
+	m_At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	m_View = XMMatrixLookAtLH(m_Eye, m_At, Up);
-	// here is the front vector 
-	m_FrontVector = m_At - m_Eye;
-	
-	// will use this to determine right and front vector
-	m_UpVector = Up;
-
-	m_RightVector = XMVector3Cross(m_UpVector, m_FrontVector);
-
+	CoordinateUpdate();
 	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, WindowWidth / (FLOAT) WindowHeight, m_Near, m_Far);
 
 	m_Trasfrom = XMMatrixIdentity();
@@ -94,8 +86,9 @@ XMMATRIX CCamera::GetProyectionMatrice()
 
 void CCamera::MoveCamera(XMVECTOR Vec)
 {
-
-	m_Trasfrom *= XMMatrixTranslationFromVector(Vec);
+	m_Eye += Vec;
+	m_At += Vec;
+	CoordinateUpdate();
 }
 
 #elif
@@ -133,8 +126,13 @@ void CCamera::CoordinateUpdate()
 #if defined(USING_DIRECTX)
 	m_View = XMMatrixLookAtLH(m_Eye, m_At, m_UpVector	);
 	// here is the front vector 
-	m_FrontVector = m_At - m_Eye;
-	m_RightVector = XMVector3Cross(m_UpVector, m_FrontVector);
+	m_FrontVector = XMVector4Normalize(m_At - m_Eye);
+	
+	m_RightVector = XMVector4Normalize(XMVector3Cross(m_UpVector, m_FrontVector));
+
+	m_UpVector = (XMVector3Cross(m_FrontVector, m_RightVector));
+
+	m_At = m_Eye + m_FrontVector;
 #elif
 #endif
 }

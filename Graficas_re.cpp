@@ -709,6 +709,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 
 	GetClientRect(hWnd, &Window);
+	
 	// messages for mouse 
 	/*
 	MK_LBUTTON          0x0001
@@ -719,7 +720,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
-	POINT mousePointOrigin = { 800,600};
+	POINT mousePointOrigin = { Window.right / 2,Window.bottom / 2};
 	POINT mousePointEnd;
 	XMMATRIX Rotation;
 	XMVECTOR AngelVector;
@@ -734,28 +735,23 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		MoveCamara = true;
 		if (wParam == (WPARAM)'W')
 		{
-		//	Camera.MoveTrasfromMatrice(0, 0, 2);
 			Camera.MoveCamera(Camera.m_FrontVector);
 			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'A')
 		{
-			XMVECTOR Move = Camera.m_FrontVector;
-			//Camera.MoveTrasfromMatrice(-2, 0, 0);
-			Camera.MoveCamera(Camera.m_RightVector * -1);
+			Camera.MoveCamera(Camera.m_RightVector * -1.0f);
 
 			MoveCamara = false;
-
 		}
 		if (wParam == (WPARAM)'S')
 		{
 			//Camera.MoveTrasfromMatrice(0, 0, -2);
-			Camera.MoveCamera(Camera.m_FrontVector * -1);
+			Camera.MoveCamera(Camera.m_FrontVector * -1.0f);
 			MoveCamara = false;
 		}
 		if (wParam == (WPARAM)'D')
 		{
-			XMVECTOR d;
 			//Camera.MoveTrasfromMatrice(Camera.m_RightV);
 			Camera.MoveCamera(Camera.m_RightVector);
 			MoveCamara = false;

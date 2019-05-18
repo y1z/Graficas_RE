@@ -399,6 +399,7 @@
     <CLInclude Include="resource.h" />
     <ClInclude Include="Usable_Windows.h" />
     <ClInclude Include="Utility\ErrorHandlingGrafics.h" />
+    <ClInclude Include="ViewPort.h" />
     <ResourceCompile Include="Graficas_re.rc" />
   </ItemGroup>
   <ItemGroup>
