@@ -21,7 +21,9 @@ static float g_Time = 0.0f;
 #include "CTexture.h"
 #include "CCamera.h"
 #include "CRenderTragetView.h"
-
+#include "ViewPort.h"
+#include <numeric>
+#include <algorithm>
 CDevice Device;// Replaced 
 CDeviaceContext DeviceContext;// Replaced 
 CSwapChian SwapChain;// Replaced
@@ -35,6 +37,8 @@ CTexture2D DepthStencil;// Replaced
 CRenderTragetView RenderTragetView;
 // ! the camera and values associated with it
 CCamera Camera;
+CViewPort MY_ViewPort;
+
 //--------------------------------------------------------------------------------------
 // Structures
 //--------------------------------------------------------------------------------------
@@ -385,8 +389,11 @@ HRESULT InitDevice()
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
+
+	MY_ViewPort.SetupViewPort(640, 700, 0, 0);
+
 	//g_pImmediateContext->RSSetViewports(1, &vp);
-	DeviceContext.RSSetViewports(1, static_cast<void*>(&vp));
+	DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
 	// Compile the vertex shader
 	ID3DBlob* p_VertexShaderBlob = NULL;
@@ -709,7 +716,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 
 	GetClientRect(hWnd, &Window);
-	
+
 	// messages for mouse 
 	/*
 	MK_LBUTTON          0x0001
@@ -720,7 +727,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
-	POINT mousePointOrigin = { Window.right / 2,Window.bottom / 2};
+	POINT mousePointOrigin = { Window.right / 2,Window.bottom / 2 };
 	POINT mousePointEnd;
 	XMMATRIX Rotation;
 	XMVECTOR AngelVector;
@@ -762,7 +769,19 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Camera.ResetTrasformMatrice();
 			MoveCamara = false;
 		}
-		if(MoveCamara)
+		// checks if the value is negative 
+		if (wParam == VK_OEM_PLUS)
+		{
+			MY_ViewPort.IncreamentWidth();
+			MoveCamara = false;
+		}
+		else if ( VK_OEM_MINUS)
+		{
+			MY_ViewPort.DecreamentWidth();
+			MoveCamara = false;
+		}
+
+		if (MoveCamara)
 		{
 			float Xpos;
 			float Ypos;
@@ -790,6 +809,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_MOUSEWHEEL:
 
 		break;
 	default:
@@ -880,6 +900,9 @@ void Render()
 	//g_pImmediateContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
 	//g_pImmediateContext->DrawIndexed(36, 0, 0);
 	//
+	DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
+
+	
 	DeviceContext.VSSetShader(static_cast<void*>(g_pVertexShader));
 	DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
 	DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
