@@ -14,7 +14,7 @@ std::vector<SInputDesc> CInputLayout::GetDescirtionVec()
 	return m_InputLayouts;
 }
 
-void CInputLayout::ConvertDxToInputLayout(D3D11_INPUT_ELEMENT_DESC * Layout, int amount)
+void CInputLayout::ConvertDxToInputLayout(D3D11_INPUT_ELEMENT_DESC *Layout, int amount)
 {
 
 	for (int i = 0; i < amount; ++i)
@@ -40,11 +40,11 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> CInputLayout::ConvertInputLayoutToDx()
 {
 	std::vector<D3D11_INPUT_ELEMENT_DESC> Result;
 
-	for (SInputDesc Intermediate : m_InputLayouts)
+	/*MUST BE A REFERECE because if not the string data does not stay on 'ConvertedTo'*/
+	for (SInputDesc &Intermediate : m_InputLayouts)
 	{
 		D3D11_INPUT_ELEMENT_DESC ConvertedTo;
-		std::string s_SematiceName(Intermediate.Name);
-		ConvertedTo.SemanticName = s_SematiceName.c_str();
+		ConvertedTo.SemanticName = Intermediate.Name.c_str();
 		ConvertedTo.SemanticIndex = Intermediate.Index;
 		ConvertedTo.Format = static_cast<DXGI_FORMAT>(Intermediate.Format);
 		ConvertedTo.InputSlot = Intermediate.Slots;

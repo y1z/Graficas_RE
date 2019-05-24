@@ -18,7 +18,7 @@
 		 this will be used to communicate with directX and OpenGl.*/
 struct SInputDesc
 {
-	std::string_view Name;
+	std::string Name;
 	uint32_t Index;
 	char Slots;
 	int Format;

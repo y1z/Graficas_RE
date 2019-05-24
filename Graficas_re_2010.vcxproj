@@ -146,6 +146,7 @@
       <PreprocessorDefinitions>WIN32;USING_DIRECTX;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -380,10 +381,12 @@
     <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CDeviaceContext.cpp" />
     <ClCompile Include="CDevice.cpp" />
+    <ClCompile Include="CInputLayout.cpp" />
     <ClCompile Include="CSwapChian.cpp" />
     <ClCompile Include="CTexture.cpp" />
     <ClCompile Include="Graficas_re.cpp" />
     <ClCompile Include="CRenderTragetView.cpp" />
+    <ClCompile Include="ViewPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Graficas_re.fx" />
@@ -393,6 +396,7 @@
     <ClInclude Include="CBuffer.h" />
     <ClInclude Include="CDeviaceContext.h" />
     <ClInclude Include="CDevice.h" />
+    <ClInclude Include="CInputLayout.h" />
     <ClInclude Include="CSwapChian.h" />
     <ClInclude Include="CTexture.h" />
     <ClInclude Include="CRenderTragetView.h" />

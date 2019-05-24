@@ -22,6 +22,7 @@ static float g_Time = 0.0f;
 #include "CCamera.h"
 #include "CRenderTragetView.h"
 #include "ViewPort.h"
+#include "CInputLayout.h"
 #include <numeric>
 #include <algorithm>
 
@@ -433,6 +434,9 @@ HRESULT InitDevice()
 		return hr;
 	}*/
 
+	///*  ////
+	CInputLayout MY_InputLayout;
+
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -441,11 +445,19 @@ HRESULT InitDevice()
 	};
 	UINT numElements = ARRAYSIZE(layout);
 
+	MY_InputLayout.ConvertDxToInputLayout(layout, 2);
+
+
+
+	auto LayoutConvertion = MY_InputLayout.ConvertInputLayoutToDx();
+
 	// old code
 	//hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
 	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
 
-	isSuccesful = Device.CreateInputLayout(static_cast<void*>(layout), static_cast<void*>(p_VertexShaderBlob),
+	D3D11_INPUT_ELEMENT_DESC *temp = &LayoutConvertion.front();
+
+	isSuccesful = Device.CreateInputLayout(static_cast<void*>(temp), static_cast<void*>(p_VertexShaderBlob),
 		numElements, static_cast<void*>(&g_pVertexLayout));
 
 	p_VertexShaderBlob->Release();
