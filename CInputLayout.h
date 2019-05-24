@@ -26,6 +26,10 @@ struct SInputDesc
 	int DataArrangement;
 	int InputDataType;
 };
+/*\file 
+\class CInputLayout "CInputLayout.h"
+\brief this class acts as a in-between the native DirectX input-layout and mi own input layout 
+*/
 
 class CInputLayout
 {
@@ -33,6 +37,7 @@ public:
 	CInputLayout();
 	~CInputLayout();
 public:
+	//! returns my input layout 
 	std::vector<SInputDesc> GetDescirtionVec();
 #ifdef USING_DIRECTX
 	void ConvertDxToInputLayout(D3D11_INPUT_ELEMENT_DESC *Layout, int amout);
@@ -40,8 +45,6 @@ public:
 #endif // USING_DIRECTX
 	std::vector<SInputDesc> m_InputLayouts;
 private:
-
-	SInputDesc m_IntermediateDesc;
 
 #ifdef USING_DIRECTX
 	ID3D11InputLayout* mdx_InputLayout = nullptr;
