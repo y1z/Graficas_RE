@@ -792,17 +792,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Camera.ResetTrasformMatrice();
 			MoveCamara = false;
 		}
-		// checks if the value is negative 
-		if (wParam == VK_OEM_PLUS)
-		{
-			MY_ViewPort.IncreamentWidth();
-			MoveCamara = false;
-		}
-		else if ( VK_OEM_MINUS)
-		{
-			MY_ViewPort.DecreamentWidth();
-			MoveCamara = false;
-		}
 
 		if (MoveCamara)
 		{
