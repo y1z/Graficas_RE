@@ -24,6 +24,9 @@ static float g_Time = 0.0f;
 #include "ViewPort.h"
 #include <numeric>
 #include <algorithm>
+
+
+
 CDevice Device;// Replaced 
 CDeviaceContext DeviceContext;// Replaced 
 CSwapChian SwapChain;// Replaced
@@ -156,7 +159,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	return (int) msg.wParam;
 }
 
-
 //--------------------------------------------------------------------------------------
 // Register class and create window
 //--------------------------------------------------------------------------------------
@@ -203,6 +205,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;
+	/// this is here just for testing 
 
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -212,10 +215,17 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 	// the release configuration of this program.
 	dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
+	/// fin out what the fuck this
+	/*HRESULT D3D11Reflect(
+  in  LPCVOID pSrcData,
+  in  SIZE_T SrcDataSize,
+  out ID3D11ShaderReflection ppReflector
+);*/
 
 	ID3DBlob* pErrorBlob;
 	hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
 		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
+
 	if (FAILED(hr))
 	{
 		if (pErrorBlob != NULL)
@@ -396,7 +406,7 @@ HRESULT InitDevice()
 	DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
 	// Compile the vertex shader
-	ID3DBlob* p_VertexShaderBlob = NULL;
+	ID3DBlob* p_VertexShaderBlob = nullptr;
 	hr = CompileShaderFromFile(L"Graficas_re.fx", "VS", "vs_4_0", &p_VertexShaderBlob);
 
 	if (FAILED(hr))
@@ -463,6 +473,16 @@ HRESULT InitDevice()
 	// Create the pixel shader
 	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
 	Device.CreatePixelShader(static_cast<void*>(p_PixelShaderBlob), static_cast<void*>(&g_pPixelShader));
+	///------------------------------ Testting area remove when done 
+	ID3D11ShaderReflection *pReflector = nullptr;
+	
+	D3DReflect(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), 
+		IID_ID3D11ShaderReflection,reinterpret_cast<void**>(&pReflector));
+	///---------------------------------
+	D3D11_SHADER_DESC lShaderDesc;
+
+ pReflector->GetDesc(&lShaderDesc);
+
 
 	p_PixelShaderBlob->Release();
 
@@ -645,10 +665,12 @@ HRESULT InitDevice()
 	if (FAILED(hr))
 		return hr;
 
+
+
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc;
 	SecureZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;//D3D11_FILTER_MIN_MAG_MIP_POINT
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -700,6 +722,7 @@ HRESULT InitDevice()
 
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
 	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
+
 
 	return S_OK;
 }
