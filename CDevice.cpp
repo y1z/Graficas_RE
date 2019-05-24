@@ -6,7 +6,7 @@
 #elif
 #endif
 */
-
+#include <assimp/Exporter.hpp>
 
 CDevice::CDevice()
 {
