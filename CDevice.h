@@ -1,12 +1,9 @@
 #pragma once
 
 #include"Usable_Windows.h"
-
 //TODO_Gl add include guard
 #include "DirectXHeader.h"
 #include <cinttypes>
-
-
 
 class CDevice
 {

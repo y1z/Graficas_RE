@@ -3,6 +3,8 @@
 #include "DirectXHeader.h"
 #include <vector>
 #include <string_view>
+
+class CDevice;
 /*struct D3D11_INPUT_ELEMENT_DESC
 		{
 		LPCSTR SemanticName;
@@ -20,15 +22,15 @@ struct SInputDesc
 {
 	std::string Name;
 	uint32_t Index;
-	char Slots;
+	int Slots;
 	int Format;
 	int32_t Alignment;
 	int DataArrangement;
 	int InputDataType;
 };
-/*\file 
+/*\file
 \class CInputLayout "CInputLayout.h"
-\brief this class acts as a in-between the native DirectX input-layout and mi own input layout 
+\brief this class acts as a in-between the native DirectX input-layout and mi own input layout
 */
 
 class CInputLayout
@@ -38,16 +40,24 @@ public:
 	~CInputLayout();
 public:
 	//! returns my input layout 
-	std::vector<SInputDesc> GetDescirtionVec();
+	std::vector<SInputDesc> GetDescriptionVec();
 #ifdef USING_DIRECTX
+	//! take the directX input layout and convert that to MY input-layout struct
 	void ConvertDxToInputLayout(D3D11_INPUT_ELEMENT_DESC *Layout, int amout);
+	/*! used to create a dynamic input-layout 
+	\param [in] ShaderData is used to get the necessary from the shader 
+	\param [in] ShaderInputData used to know what type of data I'm receiving from the buffer(D3D11_INPUT_CLASSIFICATION) */
+	bool ReadShaderDataDX(ID3DBlob* ShaderData,int ShaderInputData);
+	//! convert MY input layout to directX native input layout plus returns a vector
 	std::vector<D3D11_INPUT_ELEMENT_DESC> ConvertInputLayoutToDx();
+	std::vector<D3D11_INPUT_ELEMENT_DESC>& ConvertInputLayoutToDxRef();
+
 #endif // USING_DIRECTX
-	std::vector<SInputDesc> m_InputLayouts;
 private:
+	std::vector<SInputDesc> m_InputLayouts;
 
 #ifdef USING_DIRECTX
-	ID3D11InputLayout* mdx_InputLayout = nullptr;
+	ID3D11InputLayout* mptr_InputLayoutDX = nullptr;
 #elif
 #endif // USING_DIRECTX
 

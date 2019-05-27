@@ -25,12 +25,12 @@ static float g_Time = 0.0f;
 #include "CInputLayout.h"
 #include <numeric>
 #include <algorithm>
+#include <assimp/Exporter.hpp>
 
 
-
-CDevice Device;// Replaced 
-CDeviaceContext DeviceContext;// Replaced 
-CSwapChian SwapChain;// Replaced
+CDevice MY_Device;// Replaced 
+CDeviaceContext MY_DeviceContext;// Replaced 
+CSwapChian MY_SwapChain;// Replaced
 CBuffer ConstantBufferResize;// Replaced
 CBuffer ConstantBufferChangeEveryFrame;// Replaced
 CBuffer ConstantBufferNeverChange;// Replaced
@@ -42,6 +42,8 @@ CRenderTragetView RenderTragetView;
 // ! the camera and values associated with it
 CCamera Camera;
 CViewPort MY_ViewPort;
+//! used to determine
+CInputLayout MY_InputLayout;
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -206,7 +208,6 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;
-	/// this is here just for testing 
 
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -216,12 +217,6 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 	// the release configuration of this program.
 	dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
-	/// fin out what the fuck this
-	/*HRESULT D3D11Reflect(
-  in  LPCVOID pSrcData,
-  in  SIZE_T SrcDataSize,
-  out ID3D11ShaderReflection ppReflector
-);*/
 
 	ID3DBlob* pErrorBlob;
 	hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
@@ -296,7 +291,7 @@ HRESULT InitDevice()
 	{
 		g_driverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, &sd, SwapChain.GetSwapChianRef(), Device.GetDeviceRef(), &g_featureLevel, DeviceContext.GetDeviceContextRef());
+			D3D11_SDK_VERSION, &sd, MY_SwapChain.GetSwapChianRef(), MY_Device.GetDeviceRef(), &g_featureLevel, MY_DeviceContext.GetDeviceContextRef());
 		if (SUCCEEDED(hr))
 			break;
 	}
@@ -308,7 +303,7 @@ HRESULT InitDevice()
 	//ID3D11Texture2D* pBackBuffer = NULL;
 	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	isSuccesful = SwapChain.GetBuffer(0, static_cast<void*>(RenderTragetView.GetBackBufferRef()));
+	isSuccesful = MY_SwapChain.GetBuffer(0, static_cast<void*>(RenderTragetView.GetBackBufferRef()));
 
 	if (isSuccesful == false)
 	{
@@ -318,7 +313,7 @@ HRESULT InitDevice()
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
 
-	isSuccesful = Device.CreateRenderTargetView(static_cast<void*>(RenderTragetView.GetBackBuffer()),
+	isSuccesful = MY_Device.CreateRenderTargetView(static_cast<void*>(RenderTragetView.GetBackBuffer()),
 		static_cast<void*>(RenderTragetView.GetRenderTragetRef()));// &g_pRenderTargetView 
 
 	RenderTragetView.ReleaseBackBuffer();
@@ -356,7 +351,7 @@ HRESULT InitDevice()
 	DepthStencil.InitTexture2D(width, height,
 		static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
 
-	isSuccesful = Device.CreateTexture2D(static_cast<void*>(DepthStencil.GetTextureRef()),
+	isSuccesful = MY_Device.CreateTexture2D(static_cast<void*>(DepthStencil.GetTextureRef()),
 		static_cast<void*>(GiveSinglePointer(DepthStencil.GetDescriptor())));
 
 	if (isSuccesful == false)
@@ -375,7 +370,7 @@ HRESULT InitDevice()
 	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(descDSV);
 	//g_pDepthStencill
 	// works
-	isSuccesful = Device.CreateDepthStencilView(static_cast<void*>(DepthStencil.GetTexture()),
+	isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(DepthStencil.GetTexture()),
 		static_cast<void*>(ptr_DepthDescripter),
 		static_cast<void*>(RenderTragetView.GetDepthStencilViewRef()));// &g_pDepthStencilView
 
@@ -389,7 +384,7 @@ HRESULT InitDevice()
 	//	return hr;
 
 	//g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
-	DeviceContext.OMSetRenderTargets(1, static_cast<void*>(RenderTragetView.GetRenderTragetRef()),
+	MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(RenderTragetView.GetRenderTragetRef()),
 		static_cast<void*>(RenderTragetView.GetDepthStencilView()));
 
 	// Setup the viewport
@@ -404,7 +399,7 @@ HRESULT InitDevice()
 	MY_ViewPort.SetupViewPort(640, 700, 0, 0);
 
 	//g_pImmediateContext->RSSetViewports(1, &vp);
-	DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
+	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
 	// Compile the vertex shader
 	ID3DBlob* p_VertexShaderBlob = nullptr;
@@ -416,11 +411,12 @@ HRESULT InitDevice()
 			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return hr;
 	}
+	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(p_VertexShaderBlob), static_cast<void*> (&g_pVertexShader));
 
+	MY_InputLayout.ReadShaderDataDX(p_VertexShaderBlob, static_cast<int>( D3D11_INPUT_PER_VERTEX_DATA));
 	// Create the vertex shader
 	//hr = g_pd3dDevice->CreateVertexShader(p_VertexShaderBlob->GetBufferPointer(), p_VertexShaderBlob->GetBufferSize(), NULL, &g_pVertexShader);
 
-	isSuccesful = Device.CreateVertexShader(static_cast<void*>(p_VertexShaderBlob), static_cast<void*> (&g_pVertexShader));
 
 	if (isSuccesful == false)
 	{
@@ -434,20 +430,16 @@ HRESULT InitDevice()
 		return hr;
 	}*/
 
-	///*  ////
-	CInputLayout MY_InputLayout;
-
+	///old code 
 	// Define the input layout
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	UINT numElements = ARRAYSIZE(layout);
-
-	MY_InputLayout.ConvertDxToInputLayout(layout, 2);
-
-
+	//D3D11_INPUT_ELEMENT_DESC layout[] =
+	//{
+	//		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	//};
+	//UINT numElements = ARRAYSIZE(layout);
+	//
+	//MY_InputLayout.ConvertDxToInputLayout(layout, 2);
 
 	auto LayoutConvertion = MY_InputLayout.ConvertInputLayoutToDx();
 
@@ -455,10 +447,8 @@ HRESULT InitDevice()
 	//hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
 	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
 
-	D3D11_INPUT_ELEMENT_DESC *temp = &LayoutConvertion.front();
-
-	isSuccesful = Device.CreateInputLayout(static_cast<void*>(temp), static_cast<void*>(p_VertexShaderBlob),
-		numElements, static_cast<void*>(&g_pVertexLayout));
+	isSuccesful = MY_Device.CreateInputLayout(static_cast<void*>(&LayoutConvertion[0]), static_cast<void*>(p_VertexShaderBlob),
+		LayoutConvertion.size(), static_cast<void*>(&g_pVertexLayout));
 
 	p_VertexShaderBlob->Release();
 
@@ -470,7 +460,7 @@ HRESULT InitDevice()
 
 	// Set the input layout
 	//g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
-	DeviceContext.IASetInputLayout(static_cast<void *>(g_pVertexLayout));
+	MY_DeviceContext.IASetInputLayout(static_cast<void *>(g_pVertexLayout));
 
 	// Compile the pixel shader
 	ID3DBlob* p_PixelShaderBlob = NULL;
@@ -481,20 +471,9 @@ HRESULT InitDevice()
 			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return hr;
 	}
-
 	// Create the pixel shader
 	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
-	Device.CreatePixelShader(static_cast<void*>(p_PixelShaderBlob), static_cast<void*>(&g_pPixelShader));
-	///------------------------------ Testting area remove when done 
-	ID3D11ShaderReflection *pReflector = nullptr;
-	
-	D3DReflect(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), 
-		IID_ID3D11ShaderReflection,reinterpret_cast<void**>(&pReflector));
-	///---------------------------------
-	D3D11_SHADER_DESC lShaderDesc;
-
- pReflector->GetDesc(&lShaderDesc);
-
+	MY_Device.CreatePixelShader(static_cast<void*>(p_PixelShaderBlob), static_cast<void*>(&g_pPixelShader));
 
 	p_PixelShaderBlob->Release();
 
@@ -551,12 +530,12 @@ HRESULT InitDevice()
 	SecureZeroMemory(&InitData, sizeof(InitData));
 
 	InitData.pSysMem = vertices;
-	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
+	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer)
 
 	VertexBuffer.IntiVertexBuffer(vertices, 24, 0);
 
 	/*Creates the vertexBuffer*/
-	isSuccesful = Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(VertexBuffer.GetBufferRef()),
 		static_cast<void*>(GiveSinglePointer(InitData)));
 
@@ -571,7 +550,7 @@ HRESULT InitDevice()
 	UINT offset = 0;
 	//g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
 
-	DeviceContext.IASetVertexBuffers(0, 1,
+	MY_DeviceContext.IASetVertexBuffers(0, 1,
 		static_cast<void*>(VertexBuffer.GetBufferRef()), static_cast<void*>(&stride), static_cast<void*>(&offset));
 
 	// Create index buffer
@@ -607,7 +586,7 @@ HRESULT InitDevice()
 	IndexBuffer.InitIndexBuffer(indices, 36, 0);
 
 	/*!Creates the index buffer */
-	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(IndexBuffer.GetBufferRef()),
 		static_cast<void*>(GiveSinglePointer(InitData))
 	);
@@ -620,11 +599,11 @@ HRESULT InitDevice()
 
 	// Set index buffer
 	//g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-	DeviceContext.IASetIndexBuffer(static_cast<void*>(IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
+	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
 
 	// Set primitive topology
 	//g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	DeviceContext.IASetPrimitiveTopology(static_cast<int>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+	MY_DeviceContext.IASetPrimitiveTopology(static_cast<int>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 	// Create the constant buffers
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -637,7 +616,7 @@ HRESULT InitDevice()
 	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
 
 		/*Creates NeverChanges buffer */
-	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
@@ -650,7 +629,7 @@ HRESULT InitDevice()
 
 	ConstantBufferResize.InitConstBuffer(*g_pCBChangeOnResize, 0);
 
-	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(ConstantBufferResize.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
@@ -663,7 +642,7 @@ HRESULT InitDevice()
 
 	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
 
-	Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
@@ -673,7 +652,7 @@ HRESULT InitDevice()
 	}
 
 	// Load the Texture
-	hr = D3DX11CreateShaderResourceViewFromFile(Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(MY_Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
 	if (FAILED(hr))
 		return hr;
 
@@ -692,7 +671,7 @@ HRESULT InitDevice()
 
 	//hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
 
-	isSuccesful = Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(sampDesc)),
+	isSuccesful = MY_Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(sampDesc)),
 		static_cast<void*>(&g_pSamplerLinear));
 
 	if (isSuccesful == false)
@@ -721,7 +700,7 @@ HRESULT InitDevice()
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(Camera.GetViewMatrice());
 
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
 	// old code 
 	//g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
 
@@ -733,7 +712,7 @@ HRESULT InitDevice()
 	cbChangesOnResize.mProjection = XMMatrixTranspose(Camera.GetProyectionMatrice());
 
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
 
 
 	return S_OK;
@@ -882,17 +861,17 @@ void Render()
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(Camera.GetViewMatrice());
 
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferNeverChange.GetBuffer()), static_cast<void*>(&cbNeverChanges), 0);
 
 	//g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
 
-	DeviceContext.ClearRenderTargetView(static_cast<void*>(RenderTragetView.GetRenderTraget()), ClearColor);
+	MY_DeviceContext.ClearRenderTargetView(static_cast<void*>(RenderTragetView.GetRenderTraget()), ClearColor);
 
 	//
 	// Clear the depth buffer to 1.0 (max depth)
 	//
 
-	DeviceContext.ClearDepthStencilView(static_cast<void*>(RenderTragetView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
+	MY_DeviceContext.ClearDepthStencilView(static_cast<void*>(RenderTragetView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
 	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	float MyCubeColor[4] = { g_vMeshColor.x * -1, 	g_vMeshColor.y * -1, 	g_vMeshColor.z * -1, 1.0f };
@@ -903,14 +882,14 @@ void Render()
 	cb.mWorld = XMMatrixTranspose(g_World * Camera.GetTrasformMatrice());
 	cb.vMeshColor = MyCubeColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
 
 	// Initialize the projection matrix
 	CBChangeOnResize cbChangesOnResize;
 	cbChangesOnResize.mProjection = XMMatrixTranspose(Camera.GetProyectionMatrice());
 
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
 
 	//
 	// Render the cube
@@ -924,25 +903,25 @@ void Render()
 	//g_pImmediateContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
 	//g_pImmediateContext->DrawIndexed(36, 0, 0);
 	//
-	DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
+	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
-	
-	DeviceContext.VSSetShader(static_cast<void*>(g_pVertexShader));
-	DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
-	DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
-	DeviceContext.VSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
-	DeviceContext.PSSetShader(static_cast<void*>(g_pPixelShader));
-	DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
-	DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
-	DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(&g_pSamplerLinear));
-	DeviceContext.DrawIndexed(36, 0, 0);
+
+	MY_DeviceContext.VSSetShader(static_cast<void*>(g_pVertexShader));
+	MY_DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
+	MY_DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
+	MY_DeviceContext.VSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
+	MY_DeviceContext.PSSetShader(static_cast<void*>(g_pPixelShader));
+	MY_DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
+	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
+	MY_DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(&g_pSamplerLinear));
+	MY_DeviceContext.DrawIndexed(36, 0, 0);
 	/* Making cube rotates */
 	g_World *= XMMatrixTranslation(-3, 0, 0);
 	cb.mWorld = XMMatrixTranspose(g_World);
 	cb.vMeshColor = g_vMeshColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	MY_DeviceContext.DrawIndexed(36, 0, 0);
 	/*Make cube that rotate and Scales*/
 
 
@@ -953,22 +932,22 @@ void Render()
 	cb.mWorld = XMMatrixTranspose(g_World);
 	cb.vMeshColor = g_vMeshColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	MY_DeviceContext.DrawIndexed(36, 0, 0);
 
 
 	g_World = XMMatrixRotationY(0);
 	g_World = XMMatrixScalingFromVector(ScalingVector);
 	g_World *= XMMatrixTranslation(3, 0, 0);
 	cb.mWorld = XMMatrixTranspose(g_World);
-	DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	MY_DeviceContext.DrawIndexed(36, 0, 0);
 
 	//
 	// Present our back buffer to our front buffer
 	//
 	//g_pSwapChain->Present(0, 0);
-	SwapChain.Present(0, 0);
+	MY_SwapChain.Present(0, 0);
 }
 
 //--------------------------------------------------------------------------------------
