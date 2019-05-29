@@ -381,6 +381,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CCamera.cpp" />
+    <ClCompile Include="CDepthStencilView.cpp" />
     <ClCompile Include="CDeviaceContext.cpp" />
     <ClCompile Include="CDevice.cpp" />
     <ClCompile Include="CInputLayout.cpp" />
@@ -388,6 +389,7 @@
     <ClCompile Include="CTexture.cpp" />
     <ClCompile Include="Graficas_re.cpp" />
     <ClCompile Include="CRenderTragetView.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="ViewPort.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -396,6 +398,7 @@
   <ItemGroup>
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CBuffer.h" />
+    <ClInclude Include="CDepthStencilView.h" />
     <ClInclude Include="CDeviaceContext.h" />
     <ClInclude Include="CDevice.h" />
     <ClInclude Include="CInputLayout.h" />
@@ -405,6 +408,7 @@
     <CLInclude Include="resource.h" />
     <ClInclude Include="Usable_Windows.h" />
     <ClInclude Include="Utility\ErrorHandlingGrafics.h" />
+    <ClInclude Include="VertexShader.h" />
     <ClInclude Include="ViewPort.h" />
     <ResourceCompile Include="Graficas_re.rc" />
   </ItemGroup>

@@ -74,6 +74,7 @@ bool CInputLayout::ReadShaderDataDX(ID3DBlob * ShaderData, int ShaderInputData)
 		InputLayout.Index = paramDesc.SemanticIndex;
 		InputLayout.DataArrangement = 0;
 		InputLayout.Slots = 0;
+
 		if (i != 0)
 		{
 			InputLayout.Alignment = ShaderDesc.FloatInstructionCount;
@@ -132,7 +133,6 @@ bool CInputLayout::ReadShaderDataDX(ID3DBlob * ShaderData, int ShaderInputData)
 
 		m_InputLayouts.emplace_back(InputLayout);
 	}
-
 	// no longer needed 
 	ReflectorShader->Release();
 	return true;
@@ -143,7 +143,7 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> CInputLayout::ConvertInputLayoutToDx()
 {
 	std::vector<D3D11_INPUT_ELEMENT_DESC> Result;
 
-	/*MUST BE A REFERECE because if not the string data does not stay on 'ConvertedTo'*/
+	/*MUST BE A REFERECE because if not the string data does not stay on 'ConvertedTo' type*/
 	for (SInputDesc &Intermediate : m_InputLayouts)
 	{
 		D3D11_INPUT_ELEMENT_DESC ConvertedTo;
@@ -157,30 +157,6 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> CInputLayout::ConvertInputLayoutToDx()
 
 		Result.emplace_back(ConvertedTo);
 	}
-
-
-	return Result;
-}
-
-std::vector<D3D11_INPUT_ELEMENT_DESC>& CInputLayout::ConvertInputLayoutToDxRef()
-{
-	std::vector<D3D11_INPUT_ELEMENT_DESC> Result;
-
-	/*MUST BE A REFERECE because if not the string data does not stay on 'ConvertedTo'*/
-	for (SInputDesc &Intermediate : m_InputLayouts)
-	{
-		D3D11_INPUT_ELEMENT_DESC ConvertedTo;
-		ConvertedTo.SemanticName = Intermediate.Name.c_str();
-		ConvertedTo.SemanticIndex = Intermediate.Index;
-		ConvertedTo.Format = static_cast<DXGI_FORMAT>(Intermediate.Format);
-		ConvertedTo.InputSlot = Intermediate.Slots;
-		ConvertedTo.AlignedByteOffset = Intermediate.Alignment;
-		ConvertedTo.InputSlotClass = static_cast<D3D11_INPUT_CLASSIFICATION>(Intermediate.InputDataType);
-		ConvertedTo.InstanceDataStepRate = Intermediate.DataArrangement;
-
-		Result.emplace_back(ConvertedTo);
-	}
-
 
 	return Result;
 }

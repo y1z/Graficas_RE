@@ -23,9 +23,10 @@ static float g_Time = 0.0f;
 #include "CRenderTragetView.h"
 #include "ViewPort.h"
 #include "CInputLayout.h"
+#include "CDepthStencilView.h"
+// standard library
 #include <numeric>
 #include <algorithm>
-#include <assimp/Exporter.hpp>
 
 
 CDevice MY_Device;// Replaced 
@@ -43,7 +44,9 @@ CRenderTragetView RenderTragetView;
 CCamera Camera;
 CViewPort MY_ViewPort;
 //! used to determine
-CInputLayout MY_InputLayout;
+CInputLayout MY_InputLayout;// Replaced 
+CDepthStencilView MY_DepthStancilView;
+
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -99,7 +102,7 @@ XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
 XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
-RECT Window;
+RECT WindowDimentions;
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
@@ -250,7 +253,7 @@ HRESULT InitDevice()
 	UINT width = rc.right - rc.left;
 	UINT height = rc.bottom - rc.top;
 
-	Window = rc;
+	WindowDimentions = rc;
 
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -312,7 +315,7 @@ HRESULT InitDevice()
 	}
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
-
+	/// Render traget creation 
 	isSuccesful = MY_Device.CreateRenderTargetView(static_cast<void*>(RenderTragetView.GetBackBuffer()),
 		static_cast<void*>(RenderTragetView.GetRenderTragetRef()));// &g_pRenderTargetView 
 
@@ -348,11 +351,13 @@ HRESULT InitDevice()
 	//hr = g_pd3dDevice->CreateTexture2D(&descDepth, NULL, &g_pDepthStencil);
 	//if (FAILED(hr))
 	//return hr;
-	DepthStencil.InitTexture2D(width, height,
-		static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
+	MY_DepthStancilView.InitDepthStencil2D(height, width, static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
 
-	isSuccesful = MY_Device.CreateTexture2D(static_cast<void*>(DepthStencil.GetTextureRef()),
-		static_cast<void*>(GiveSinglePointer(DepthStencil.GetDescriptor())));
+	///DepthStencil.InitTexture2D(width, height,
+	///	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
+
+	isSuccesful = MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStancilView.GetTexture2DRef()),
+		static_cast<void*>(GiveSinglePointer(MY_DepthStancilView.GetTextureDescriptor())));
 
 	if (isSuccesful == false)
 	{
@@ -361,16 +366,17 @@ HRESULT InitDevice()
 	}
 
 	// Create the depth stencil view
-	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-	SecureZeroMemory(&descDSV, sizeof(descDSV));
-	descDSV.Format = DepthStencil.GetDescriptor().Format;
-	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	descDSV.Texture2D.MipSlice = 0;
+	/// just here for reference
+	//D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	//SecureZeroMemory(&descDSV, sizeof(descDSV));
+	//descDSV.Format = DepthStencil.GetDescriptor().Format;
+	//descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	//descDSV.Texture2D.MipSlice = 0;
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(descDSV);
+	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(MY_DepthStancilView.ConvertDepthStecilToDx2D());
 	//g_pDepthStencill
 	// works
-	isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(DepthStencil.GetTexture()),
+	isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStancilView.GetTexture2D()),
 		static_cast<void*>(ptr_DepthDescripter),
 		static_cast<void*>(RenderTragetView.GetDepthStencilViewRef()));// &g_pDepthStencilView
 
@@ -398,7 +404,7 @@ HRESULT InitDevice()
 
 	MY_ViewPort.SetupViewPort(640, 700, 0, 0);
 
-	//g_pImmediateContext->RSSetViewports(1, &vp);
+	// /**/g_pImmediateContext->RSSetViewports(1, &vp);
 	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
 	// Compile the vertex shader
@@ -411,6 +417,7 @@ HRESULT InitDevice()
 			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return hr;
 	}
+
 	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(p_VertexShaderBlob), static_cast<void*> (&g_pVertexShader));
 
 	MY_InputLayout.ReadShaderDataDX(p_VertexShaderBlob, static_cast<int>( D3D11_INPUT_PER_VERTEX_DATA));
@@ -729,7 +736,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
-	GetClientRect(hWnd, &Window);
+	GetClientRect(hWnd, &WindowDimentions);
 
 	// messages for mouse 
 	/*
@@ -741,7 +748,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	*/
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
-	POINT mousePointOrigin = { Window.right / 2,Window.bottom / 2 };
+	POINT mousePointOrigin = { WindowDimentions.right / 2,WindowDimentions.bottom / 2 };
 	POINT mousePointEnd;
 	XMMATRIX Rotation;
 	XMVECTOR AngelVector;

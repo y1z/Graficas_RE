@@ -4,7 +4,6 @@
 #include <vector>
 #include <string_view>
 
-class CDevice;
 /*struct D3D11_INPUT_ELEMENT_DESC
 		{
 		LPCSTR SemanticName;
@@ -50,7 +49,6 @@ public:
 	bool ReadShaderDataDX(ID3DBlob* ShaderData,int ShaderInputData);
 	//! convert MY input layout to directX native input layout plus returns a vector
 	std::vector<D3D11_INPUT_ELEMENT_DESC> ConvertInputLayoutToDx();
-	std::vector<D3D11_INPUT_ELEMENT_DESC>& ConvertInputLayoutToDxRef();
 
 #endif // USING_DIRECTX
 private:
