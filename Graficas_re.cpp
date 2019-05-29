@@ -24,6 +24,8 @@ static float g_Time = 0.0f;
 #include "ViewPort.h"
 #include "CInputLayout.h"
 #include "CDepthStencilView.h"
+#include "CVertexShader.h"
+
 // standard library
 #include <numeric>
 #include <algorithm>
@@ -38,14 +40,16 @@ CBuffer ConstantBufferNeverChange;// Replaced
 CBuffer VertexBuffer;// Replaced 
 //! Heres the index-buffer
 CBuffer IndexBuffer;// Replaced
-CTexture2D DepthStencil;// Replaced
 CRenderTragetView RenderTragetView;
 // ! the camera and values associated with it
 CCamera Camera;
 CViewPort MY_ViewPort;
-//! used to determine
+//! used to determine the input layout 
 CInputLayout MY_InputLayout;// Replaced 
-CDepthStencilView MY_DepthStancilView;
+CDepthStencilView MY_DepthStancilView;// Replaced 
+//! VertexShader
+CVertexShader MY_VertexShader;
+
 
 
 //--------------------------------------------------------------------------------------
@@ -407,9 +411,13 @@ HRESULT InitDevice()
 	// /**/g_pImmediateContext->RSSetViewports(1, &vp);
 	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
+	// Internaly does the CompileShaderFromFile function
+	MY_VertexShader.InitVertexShader(L"Graficas_re.fx", "VS", "vs_4_0");
 	// Compile the vertex shader
-	ID3DBlob* p_VertexShaderBlob = nullptr;
-	hr = CompileShaderFromFile(L"Graficas_re.fx", "VS", "vs_4_0", &p_VertexShaderBlob);
+	//ID3DBlob* p_VertexShaderBlob = nullptr;
+	//hr = CompileShaderFromFile(L"Graficas_re.fx", "VS", "vs_4_0", &p_VertexShaderBlob);
+
+
 
 	if (FAILED(hr))
 	{
@@ -418,9 +426,9 @@ HRESULT InitDevice()
 		return hr;
 	}
 
-	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(p_VertexShaderBlob), static_cast<void*> (&g_pVertexShader));
+	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(MY_VertexShader.GetVertexShaderData()), static_cast<void*> (&g_pVertexShader));
 
-	MY_InputLayout.ReadShaderDataDX(p_VertexShaderBlob, static_cast<int>( D3D11_INPUT_PER_VERTEX_DATA));
+	MY_InputLayout.ReadShaderDataDX(MY_VertexShader.GetVertexShaderData(), static_cast<int>( D3D11_INPUT_PER_VERTEX_DATA));
 	// Create the vertex shader
 	//hr = g_pd3dDevice->CreateVertexShader(p_VertexShaderBlob->GetBufferPointer(), p_VertexShaderBlob->GetBufferSize(), NULL, &g_pVertexShader);
 
