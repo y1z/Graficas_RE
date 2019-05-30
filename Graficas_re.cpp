@@ -6,7 +6,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
-
 /// --------------------------------MY INCLUDES---------------------------------------///
 static float g_Time = 0.0f;
 //  Utility
@@ -720,7 +719,6 @@ HRESULT InitDevice()
 	g_View = XMMatrixLookAtLH(Eye, At, Up);*/
 
 
-
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(Camera.GetViewMatrice());
 
@@ -762,7 +760,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	MK_SHIFT            0x0004
 	MK_CONTROL          0x0008
 	MK_MBUTTON          0x0010
-	*/
+	
 	/*https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes*/
 
 	POINT mousePointOrigin = { WindowDimentions.right / 2,WindowDimentions.bottom / 2 };

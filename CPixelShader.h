@@ -4,7 +4,7 @@
 
 class CPixelShader
 {
-public:///
+public:
 	CPixelShader();
 	~CPixelShader();
 
