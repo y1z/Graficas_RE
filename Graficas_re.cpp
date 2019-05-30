@@ -24,8 +24,9 @@ static float g_Time = 0.0f;
 #include "ViewPort.h"
 #include "CInputLayout.h"
 #include "CDepthStencilView.h"
+// shaders 
 #include "CVertexShader.h"
-
+#include "CPixelShader.h"
 // standard library
 #include <numeric>
 #include <algorithm>
@@ -49,8 +50,8 @@ CInputLayout MY_InputLayout;// Replaced
 CDepthStencilView MY_DepthStancilView;// Replaced 
 //! VertexShader
 CVertexShader MY_VertexShader;
-
-
+// ! Pixel Shader 
+CPixelShader MY_PixelShader;
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -462,10 +463,10 @@ HRESULT InitDevice()
 	//hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
 	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
 
-	isSuccesful = MY_Device.CreateInputLayout(static_cast<void*>(&LayoutConvertion[0]), static_cast<void*>(p_VertexShaderBlob),
+	isSuccesful = MY_Device.CreateInputLayout(static_cast<void*>(&LayoutConvertion[0]), static_cast<void*>(MY_VertexShader.GetVertexShaderData()),
 		LayoutConvertion.size(), static_cast<void*>(&g_pVertexLayout));
 
-	p_VertexShaderBlob->Release();
+	//p_VertexShaderBlob->Release();
 
 	if (isSuccesful == false)
 	{
@@ -477,9 +478,17 @@ HRESULT InitDevice()
 	//g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
 	MY_DeviceContext.IASetInputLayout(static_cast<void *>(g_pVertexLayout));
 
+	// reads information about the pixel shader 
+	 isSuccesful =  MY_PixelShader.InitPixelShader(L"Graficas_re.fx", "PS", "ps_4_0");
+
+	 if (isSuccesful == false)
+	 {
+		 HRESULT hr = S_FALSE;
+		 return hr;
+	 }
 	// Compile the pixel shader
-	ID3DBlob* p_PixelShaderBlob = NULL;
-	hr = CompileShaderFromFile(L"Graficas_re.fx", "PS", "ps_4_0", &p_PixelShaderBlob);
+	//ID3DBlob* p_PixelShaderBlob = NULL;
+	//hr = CompileShaderFromFile(L"Graficas_re.fx", "PS", "ps_4_0", &p_PixelShaderBlob);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL,
@@ -488,9 +497,9 @@ HRESULT InitDevice()
 	}
 	// Create the pixel shader
 	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
-	MY_Device.CreatePixelShader(static_cast<void*>(p_PixelShaderBlob), static_cast<void*>(&g_pPixelShader));
+	MY_Device.CreatePixelShader(static_cast<void*>(MY_PixelShader.GetPixelShaderData()), static_cast<void*>(MY_PixelShader.GetPixelShaderRef()));
 
-	p_PixelShaderBlob->Release();
+//	p_PixelShaderBlob->Release();
 
 	if (isSuccesful == false)
 	{
@@ -925,7 +934,7 @@ void Render()
 	MY_DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
 	MY_DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
 	MY_DeviceContext.VSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
-	MY_DeviceContext.PSSetShader(static_cast<void*>(g_pPixelShader));
+	MY_DeviceContext.PSSetShader(static_cast<void*>(MY_PixelShader.GetPixelShader()));
 	MY_DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
 	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
 	MY_DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(&g_pSamplerLinear));
