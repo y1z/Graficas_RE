@@ -1,7 +1,5 @@
 #include "CShaderResourceView.h"
 
-
-
 CShaderResourceView::CShaderResourceView()
 {}
 

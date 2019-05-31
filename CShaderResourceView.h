@@ -11,7 +11,6 @@ public:// functions
 #ifdef USING_DIRECTX
 	ID3D11ShaderResourceView* GetResourceView();
 	ID3D11ShaderResourceView** GetResourceViewRef();
-	void GetDiscription();
 #endif // USING_DIRECTX
 
 

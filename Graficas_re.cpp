@@ -1029,7 +1029,6 @@ void Render()
 	//
 	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
-
 	MY_DeviceContext.VSSetShader(static_cast<void*>(g_pVertexShader));
 	MY_DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
 	MY_DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
