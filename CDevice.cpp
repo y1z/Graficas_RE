@@ -29,6 +29,7 @@ bool CDevice::CreateRenderTargetView(void * BackBuffer, void * RenderTraget)
 	hr = mptr_Device->CreateRenderTargetView(reinterpret_cast<ID3D11Texture2D*>(BackBuffer),
 		nullptr,
 		reinterpret_cast<ID3D11RenderTargetView**> (RenderTraget));
+
 	if (!CheckForError(hr))
 	{
 		return true;

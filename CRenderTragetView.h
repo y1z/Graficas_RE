@@ -20,7 +20,8 @@ public:// functions
 	ID3D11Texture2D *GetBackBuffer();
 	ID3D11Texture2D ** GetBackBufferRef();
 
-	void ReleaseBackBuffer();
+	void DestroyBuffers();
+
 #elif
 #endif
 

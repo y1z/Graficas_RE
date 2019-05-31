@@ -11,6 +11,8 @@ public:// functions
 	/*! this function prepares the texture for creation*/
 	void InitTexture2D(uint32_t Width, uint32_t Hight,int32_t Format,int32_t BindFlag);
 
+	void MakeNull();
+
 #if(USING_DIRECTX)
 	ID3D11Texture2D *GetTexture();
 	ID3D11Texture2D **GetTextureRef();

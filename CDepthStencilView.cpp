@@ -9,7 +9,7 @@ CDepthStencilView::CDepthStencilView()
 CDepthStencilView::~CDepthStencilView()
 {
 	if (mptr_DepthStencil != nullptr) { delete mptr_DepthStencil; }
-	if (mptr_DepthStencilView != nullptr) { mptr_DepthStencilView->Release(); }
+//	if (mptr_DepthStencilView != nullptr) { mptr_DepthStencilView->Release(); }
 }
 
 void CDepthStencilView::InitDepthStencil2D(uint32_t Height, uint32_t Width, int Format)
@@ -61,4 +61,16 @@ D3D11_DEPTH_STENCIL_VIEW_DESC CDepthStencilView::ConvertDepthStecilToDx2D()
 	return Result;
 }
 
+
 #endif // USING_DIRECTX
+
+
+void CDepthStencilView::DestoryBuffer()
+{
+	if (mptr_DepthStencil) { 
+		mptr_DepthStencil->GetTexture()->Release(); 
+		mptr_DepthStencil->MakeNull();
+	
+	}
+
+}

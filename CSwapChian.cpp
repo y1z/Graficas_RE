@@ -1,5 +1,5 @@
 #include "CSwapChian.h"
-
+#include "CDevice.h"
 
 
 CSwapChian::CSwapChian()
@@ -12,6 +12,8 @@ CSwapChian::~CSwapChian()
 	if (mptr_SwapChian != nullptr) { mptr_SwapChian->Release(); }
 }
 
+
+
 bool CSwapChian::GetBuffer(int32_t BufferIndex, void * Buffer)
 {
 #if defined(USING_DIRECTX)
@@ -19,7 +21,6 @@ bool CSwapChian::GetBuffer(int32_t BufferIndex, void * Buffer)
 	HRESULT hr = S_OK;
 
 	hr = mptr_SwapChian->GetBuffer(BufferIndex, __uuidof(ID3D11Texture2D), static_cast<void**>(Buffer));
-
 	if (!CheckForError(hr)) {
 		return true;
 	}
@@ -47,6 +48,30 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 #endif
 
 	return false;
+}
+
+void CSwapChian::ResizeBuffer(int width, int height, HWND g_hWnd)
+{
+	//sd.Windowed = TRUE;
+
+	mptr_SwapChian->ResizeBuffers(1, width,height, DXGI_FORMAT_R8G8B8A8_UNORM,0);
+}
+
+void CSwapChian::ResizeTarget(int width, int height)
+{
+	DXGI_MODE_DESC Description;
+	Description.Format = DXGI_FORMAT_UNKNOWN;
+	Description.Height = height;
+	Description.Width = width;
+	Description.RefreshRate.Numerator = 60;
+	Description.RefreshRate.Denominator = 1;
+	Description.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+	Description.Scaling = DXGI_MODE_SCALING_STRETCHED;
+
+	DXGI_SWAP_CHAIN_DESC temp;
+
+	mptr_SwapChian->GetDesc(&temp);
+
 }
 
 IDXGISwapChain ** CSwapChian::GetSwapChianRef()

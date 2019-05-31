@@ -40,6 +40,7 @@ bool CVertexShader::InitVertexShader(wchar_t * ShaderFile, char * ShaderEntry, c
 	return true;
 }
 
+#ifdef USING_DIRECTX
 ID3D11VertexShader * CVertexShader::GetVertexShader()
 {
 	return mptr_vertexShader;
@@ -59,3 +60,5 @@ ID3DBlob ** CVertexShader::GetVertexShaderDataRef()
 {
 	return &mptr_ShaderData;
 }
+
+#endif // USING_DIRECTX

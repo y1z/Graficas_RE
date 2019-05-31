@@ -47,6 +47,7 @@ void CCamera::AlterProyectionMatric(int NewWidth, int NewHeight, float Fov , flo
 	if (Fov < 1)
 	{
 		Fov = 45.0f;
+		SetFov(Fov);
 	}
 	if (Near < 0.01f)
 	{
@@ -56,7 +57,6 @@ void CCamera::AlterProyectionMatric(int NewWidth, int NewHeight, float Fov , flo
 	{
 		Far = 100.0f;
 	}
-	m_Fov = Fov;
 	m_Near = Near;
 	m_Far = Far;
 

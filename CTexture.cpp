@@ -36,6 +36,11 @@ void CTexture2D::InitTexture2D(uint32_t Width, uint32_t Hight, int32_t Format, i
 
 }
 
+void CTexture2D::MakeNull()
+{
+	mptr_Texture = nullptr;
+}
+
 ID3D11Texture2D * CTexture2D::GetTexture()
 {
 	return mptr_Texture;

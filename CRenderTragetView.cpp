@@ -43,9 +43,24 @@ ID3D11Texture2D ** CRenderTragetView::GetBackBufferRef()
 	return &mptr_buffer;
 }
 
-void CRenderTragetView::ReleaseBackBuffer()
+void CRenderTragetView::DestroyBuffers()
 {
-	mptr_buffer->Release();
-	// just in case
-	isBackBufferReleased = true;
+
+	if (mptr_DepthStencilView)
+	{
+		mptr_DepthStencilView->Release();
+		mptr_DepthStencilView = nullptr;
+	}
+	if (mptr_buffer)
+	{
+		mptr_buffer->Release();
+		mptr_buffer = nullptr;
+	}
+	if (mptr_RenderTraget)
+	{
+		mptr_RenderTraget->Release();
+		mptr_RenderTraget = nullptr;
+	}
+
+
 }

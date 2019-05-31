@@ -43,6 +43,7 @@ public:// functions
 	D3D11_DEPTH_STENCIL_VIEW_DESC ConvertDepthStecilToDx2D();
 #endif // USING_DIRECTX
 
+	void DestoryBuffer();
 
 private://variables
 	/*! for interfacing with directX */
