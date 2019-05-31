@@ -84,7 +84,7 @@ public:// functions
 	/*!
 \param StratSlot [in] dictates where you are
 \param TotalViews [in] How many view are there
-\param ShaderResourceView
+\param ShaderResourceView [in] allows you to see data from the shader.
 */
 	void PSSetShaderResources(int32_t StratSlot, int32_t TotalViews, void *ShaderResourceView);
 	/*!
@@ -93,9 +93,9 @@ public:// functions
 */
 	void PSSetSamplers(int32_t StartSlot, int32_t TotalSamplers, void* Sampler);
 	/*!
-\param TotalIndexs[in] how many triangles there are
-\param StartIndex[in]
-\param IndexDiff[in]*/
+\param TotalIndexs [in] how many triangles there are
+\param StartIndex [in] where to start drawing 
+\param IndexDiff [in]  */
 	void DrawIndexed(int32_t TotalIndexs, int32_t StartIndex, int32_t IndexDiff = 0);
 
 #if defined(USING_DIRECTX)
@@ -103,7 +103,7 @@ public:// functions
 	ID3D11DeviceContext * GetDeviceContext();
 #elif
 #endif
-public:
+private:
 #ifdef USING_DIRECTX
 	ID3D11DeviceContext* mptr_DeviceContext = nullptr;
 

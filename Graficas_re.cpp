@@ -25,6 +25,7 @@ static float g_Time = 0.0f;
 #include "CInputLayout.h"
 #include "CDepthStencilView.h"
 #include "CSampler.h"
+#include "CShaderResourceView.h"
 
 // shaders 
 #include "CVertexShader.h"
@@ -58,6 +59,8 @@ CDepthStencilView MY_DepthStencilView;// Replaced
 CVertexShader MY_VertexShader;
 // ! Pixel Shader 
 CPixelShader MY_PixelShader;
+//! shader resource View 
+CShaderResourceView MY_ShaderResourceView;
 //! My Sampler class 
 CSampler MY_Sampler;
 /// ImGui Manager 
@@ -681,7 +684,7 @@ HRESULT InitDevice()
 	}
 
 	// Load the Texture
-	hr = D3DX11CreateShaderResourceViewFromFile(MY_Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(MY_Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, MY_ShaderResourceView.GetResourceViewRef(), NULL);
 	if (FAILED(hr))
 		return hr;
 
@@ -1033,7 +1036,7 @@ void Render()
 	MY_DeviceContext.VSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
 	MY_DeviceContext.PSSetShader(static_cast<void*>(MY_PixelShader.GetPixelShader()));
 	MY_DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
-	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(&g_pTextureRV));
+	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(MY_ShaderResourceView.GetResourceViewRef()));
 	MY_DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(MY_Sampler.GetSamplerRef()));
 	MY_DeviceContext.DrawIndexed(36, 0, 0);
 	/* Making cube rotates */

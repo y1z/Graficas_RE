@@ -387,6 +387,7 @@
     <ClCompile Include="CInputLayout.cpp" />
     <ClCompile Include="CPixelShader.cpp" />
     <ClCompile Include="CSampler.cpp" />
+    <ClCompile Include="CShaderResourceView.cpp" />
     <ClCompile Include="CSwapChian.cpp" />
     <ClCompile Include="CTexture.cpp" />
     <ClCompile Include="Graficas_re.cpp" />
@@ -414,6 +415,7 @@
     <ClInclude Include="CInputLayout.h" />
     <ClInclude Include="CPixelShader.h" />
     <ClInclude Include="CSampler.h" />
+    <ClInclude Include="CShaderResourceView.h" />
     <ClInclude Include="CSwapChian.h" />
     <ClInclude Include="CTexture.h" />
     <ClInclude Include="CRenderTragetView.h" />
