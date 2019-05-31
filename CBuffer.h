@@ -21,6 +21,8 @@ public:// functions
 	ID3D11Buffer* GetBuffer();
 	ID3D11Buffer** GetBufferRef();
 
+	uint64_t GetElementCount();
+
 private://variables
 	ID3D11Buffer *mptr_Buffer = nullptr;
 	D3D11_BUFFER_DESC m_Discriptor;
@@ -28,6 +30,7 @@ private://variables
 
 	uint64_t m_Stride = 0;
 	uint64_t m_Offset = 0;
+	uint64_t m_CountElemets = 0;
 };
 
 CBuffer::CBuffer()
@@ -43,14 +46,16 @@ CBuffer::~CBuffer()
 }
 
 template<class T>/*! This function set up the buffer to later become a Vertex buffer*/
-inline void CBuffer::IntiVertexBuffer(const T * DataStruct, uint64_t TotalElement, uint32_t OffSet)
+inline void CBuffer::IntiVertexBuffer(const T * DataStruct, uint64_t TotalElements, uint32_t OffSet)
 {
 #if defined(USING_DIRECTX)
 	m_Discriptor.Usage = D3D11_USAGE_DEFAULT;
 	m_Discriptor.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-	m_Discriptor.ByteWidth = sizeof(*DataStruct) * TotalElement;
+	m_Discriptor.ByteWidth = sizeof(*DataStruct) * TotalElements;
 	m_Discriptor.CPUAccessFlags = 0;
+
+	m_CountElemets = TotalElements;
 
 	m_Stride = sizeof(*DataStruct);
 	m_Offset = OffSet;
@@ -69,6 +74,8 @@ inline void CBuffer::InitIndexBuffer(const T * DataStruct, uint64_t TotalElement
 
 	m_Discriptor.ByteWidth = sizeof(*DataStruct) * TotalElements;
 	m_Discriptor.CPUAccessFlags = 0;
+
+	m_CountElemets = TotalElements;
 
 	m_Stride = sizeof(*DataStruct);
 	m_Offset = OffSet;
@@ -103,4 +110,9 @@ ID3D11Buffer * CBuffer::GetBuffer()
 ID3D11Buffer ** CBuffer::GetBufferRef()
 {
 	return &mptr_Buffer;
+}
+
+inline uint64_t CBuffer::GetElementCount()
+{
+	return m_CountElemets;
 }

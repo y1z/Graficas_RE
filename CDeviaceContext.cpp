@@ -185,6 +185,11 @@ ID3D11DeviceContext **CDeviaceContext::GetDeviceContextRef()
 {
 	return &mptr_DeviceContext;
 }
+ID3D11DeviceContext * CDeviaceContext::GetDeviceContext()
+{
+	return 	mptr_DeviceContext;
+	;
+}
 #elif
 #endif
 

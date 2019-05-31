@@ -100,9 +100,14 @@ public:// functions
 
 #if defined(USING_DIRECTX)
 	ID3D11DeviceContext ** GetDeviceContextRef();
+	ID3D11DeviceContext * GetDeviceContext();
 #elif
 #endif
 public:
+#ifdef USING_DIRECTX
 	ID3D11DeviceContext* mptr_DeviceContext = nullptr;
+
+#endif // USING_DIRECTX
+
 };
 

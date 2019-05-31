@@ -5,12 +5,13 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
-bool g_bool = false;
+bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
 static float g_Time = 0.0f;
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
+#include "Utility/Timer.h"
 
 // Classes
 #include "CDevice.h"
@@ -23,13 +24,18 @@ static float g_Time = 0.0f;
 #include "ViewPort.h"
 #include "CInputLayout.h"
 #include "CDepthStencilView.h"
+
 // shaders 
 #include "CVertexShader.h"
 #include "CPixelShader.h"
 // standard library
 #include <numeric>
 #include <algorithm>
-
+// imgui Files 
+#include"imgui/imgui.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imGuiManager.h"
 
 CDevice MY_Device;// Replaced 
 CDeviaceContext MY_DeviceContext;// Replaced 
@@ -51,6 +57,10 @@ CDepthStencilView MY_DepthStencilView;// Replaced
 CVertexShader MY_VertexShader;
 // ! Pixel Shader 
 CPixelShader MY_PixelShader;
+/// ImGui Manager 
+imGuiManager MY_Gui;
+/// This is used to find delta time 
+ Timer MY_Timer;
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -85,7 +95,7 @@ HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-ID3D11Device*                       g_pd3dDevice = NULL;
+//ID3D11Device*                       g_pd3dDevice = NULL;
 ID3D11DeviceContext*                g_pImmediateContext = NULL;
 IDXGISwapChain*                     g_pSwapChain = NULL;
 ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
@@ -306,6 +316,8 @@ HRESULT InitDevice()
 	//ID3D11Texture2D* pBackBuffer = NULL;
 	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
+	MY_Gui.Init(MY_Device, MY_DeviceContext, g_hWnd);
+
 	isSuccesful = MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
 
 	if (isSuccesful == false)
@@ -375,7 +387,6 @@ HRESULT InitDevice()
 
 	/*D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter =*/
 	//g_pDepthStencill
-	// works
 	isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
 		static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
 		static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));// &g_pDepthStencilView
@@ -424,9 +435,6 @@ HRESULT InitDevice()
 	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(MY_VertexShader.GetVertexShaderData()), static_cast<void*> (&g_pVertexShader));
 
 	MY_InputLayout.ReadShaderDataDX(MY_VertexShader.GetVertexShaderData(), static_cast<int>(D3D11_INPUT_PER_VERTEX_DATA));
-	// Create the vertex shader
-	//hr = g_pd3dDevice->CreateVertexShader(p_VertexShaderBlob->GetBufferPointer(), p_VertexShaderBlob->GetBufferSize(), NULL, &g_pVertexShader);
-
 
 	if (isSuccesful == false)
 	{
@@ -674,8 +682,6 @@ HRESULT InitDevice()
 	if (FAILED(hr))
 		return hr;
 
-
-
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc;
 	SecureZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -701,7 +707,6 @@ HRESULT InitDevice()
 	// Initialize the world matrices
 	g_World = XMMatrixIdentity();
 
-	/*must be done before making the camara*/
 	MY_Camera.SetFov(65.0f);
 
 	// Initialize the view matrix and Perceptive matrice
@@ -731,7 +736,7 @@ HRESULT InitDevice()
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
 	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferResize.GetBuffer()), static_cast<void*>(&cbChangesOnResize), 0);
 
-	g_bool = true;
+	g_FinishInit = true;
 	return S_OK;
 }
 
@@ -741,13 +746,18 @@ HRESULT InitDevice()
 
 /// ===================HERE IS WIND PROC ===================////
 /*! USE THE "wPARAM" it contains the key that's pressed*/
-LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+// Win32 message handler
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
 	RECT WindowDimentions;
 
 	GetClientRect(g_hWnd, &WindowDimentions);
+
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
 
 	// messages for mouse 
 	/*
@@ -768,7 +778,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D());
 
-	switch (message)
+	switch (msg)
 	{
 	case WM_KEYDOWN:// checks if ANY key was pressed 
 		// All of these char's HAVE to be capital letters
@@ -834,7 +844,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_SIZING:
 
-		if (g_bool)
+		if (g_FinishInit)
 		{
 			// destroy all buffer related with the swap-chain , and make all of them nullptr 
 			MY_DepthStencilView.DestoryBuffer();
@@ -916,7 +926,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		break;
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 	return 0;
@@ -930,8 +940,11 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Render()
 {
-	// Update our time
 
+	// Start Timing to get fps count 
+	MY_Timer.StartTiming();
+
+	// Update our time
 	if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
 	{
 		g_Time += (float) XM_PI * 0.0125f;
@@ -1043,6 +1056,13 @@ void Render()
 	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
 	MY_DeviceContext.DrawIndexed(36, 0, 0);
 
+	/// imGui events ----------------------
+	//MY_Gui.MakeBasicWindow("Ventana Bien Pinche meca");
+
+
+	MY_Timer.EndTiming();
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window",MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
+
 	//
 	// Present our back buffer to our front buffer
 	//
@@ -1072,5 +1092,5 @@ void CleanupDevice()
 	if (g_pRenderTargetView) g_pRenderTargetView->Release();
 	if (g_pSwapChain) g_pSwapChain->Release();
 	if (g_pImmediateContext) g_pImmediateContext->Release();
-	if (g_pd3dDevice) g_pd3dDevice->Release();
+	//if (g_pd3dDevice) g_pd3dDevice->Release();
 }

@@ -10,11 +10,17 @@
 
 class imGuiManager
 {
+
 public:
 	imGuiManager();
 	~imGuiManager();
 public:
 	bool Init(CDevice &Device, CDeviaceContext &DeviceContext, HWND& Handle);
+	//! has nothing just the simplest window you can make 
+	void MakeBasicWindow(const char* WindowName);
+	void MakeWindowFpsAndVertexCount(const char* WindowName, float DeltaTime, int VertexCount);
+
+	
 
 };
 
