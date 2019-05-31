@@ -6,7 +6,10 @@ CVertexShader::CVertexShader()
 
 
 CVertexShader::~CVertexShader()
-{}
+{
+	if (mptr_ShaderData) { mptr_ShaderData->Release(); }
+	if (mptr_vertexShader) { mptr_vertexShader->Release(); }
+}
 
 bool CVertexShader::InitVertexShader(wchar_t * ShaderFile, char * ShaderEntry, char * ShaderVersion)
 {

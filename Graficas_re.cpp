@@ -60,7 +60,7 @@ CPixelShader MY_PixelShader;
 /// ImGui Manager 
 imGuiManager MY_Gui;
 /// This is used to find delta time 
- Timer MY_Timer;
+Timer MY_Timer;
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -95,7 +95,7 @@ HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-//ID3D11Device*                       g_pd3dDevice = NULL;
+ID3D11Device*                       g_pd3dDevice = NULL;
 ID3D11DeviceContext*                g_pImmediateContext = NULL;
 IDXGISwapChain*                     g_pSwapChain = NULL;
 ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
@@ -842,89 +842,89 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	case WM_SIZING:
+	//case WM_SIZING:
 
-		if (g_FinishInit)
-		{
-			// destroy all buffer related with the swap-chain , and make all of them nullptr 
-			MY_DepthStencilView.DestoryBuffer();
+	////	if (g_FinishInit)
+	//	//{
+	////		// destroy all buffer related with the swap-chain , and make all of them nullptr 
+	////		//MY_DepthStencilView.DestoryBuffer();
 
-			MY_RenderTragetView.DestroyBuffers();
+	////		//MY_RenderTragetView.DestroyBuffers();
 
-			// tell the swap chine the size of the new window (affecting the buffer )
-			MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, g_hWnd);
-			// get a buffer(the one you just made nullptr) and reuse-it as a back buffer again and again and again and AGAIN FOR ALL OF EXISTENCES
-			MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
-
-
-			// remake your render-target-view 
-			MY_Device.CreateRenderTargetView(static_cast<void*>(MY_RenderTragetView.GetBackBuffer()),
-				static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()));
-			// prepare you depth-stencil-view to be remade 
-			MY_DepthStencilView.InitDepthStencil2D(WindowDimentions.bottom, WindowDimentions.right,
-				static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
-
-			// create a Depth stencil (depth-stencil-views) back buffer 
-			MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStencilView.GetTexture2DRef()),
-				static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.GetTextureDescriptor())));
-
-			// join them 
-			MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
-				static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
-				static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));
-
-			// now set the render-target again .
-			MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
-				static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
+	////		//// tell the swap chine the size of the new window (affecting the buffer )
+	////		//MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, g_hWnd);
+	////		//// get a buffer(the one you just made nullptr) and reuse-it as a back buffer again and again and again and AGAIN FOR ALL OF EXISTENCES
+	////		//MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
 
 
-	//		MY_SwapChain.ResizeTarget(WindowDimentions.right, WindowDimentions.bottom);
-		//	MY_ViewPort.SetupViewPort(WindowDimentions.bottom, WindowDimentions.right, 0, 0);
+	////		//// remake your render-target-view 
+	////		//MY_Device.CreateRenderTargetView(static_cast<void*>(MY_RenderTragetView.GetBackBuffer()),
+	////		//	static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()));
+	////		//// prepare you depth-stencil-view to be remade 
+	////		//MY_DepthStencilView.InitDepthStencil2D(WindowDimentions.bottom, WindowDimentions.right,
+	////		//	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
 
-			MY_Camera.AlterProyectionMatric(WindowDimentions.right, WindowDimentions.bottom);
+	////		//// create a Depth stencil (depth-stencil-views) back buffer 
+	////		//MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStencilView.GetTexture2DRef()),
+	////		//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.GetTextureDescriptor())));
 
-			MY_Camera.CoordinateUpdate();
+	////		//// join them 
+	////		//MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
+	////		//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
+	////		//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));
 
-		//	MY_DeviceContext.RSSetViewports(1, GiveSinglePointer(MY_ViewPort.GetViewPortRef()));
+	////		//// now set the render-target again .
+	////		//MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
+	////		//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
 
-			/*            g_pd3dDeviceContext->OMSetRenderTargets(0, 0, 0);
 
-						// Release all outstanding references to the swap chain's buffers.
-						g_pRenderTargetView->Release();
+	//////		MY_SwapChain.ResizeTarget(WindowDimentions.right, WindowDimentions.bottom);
+	////	//	MY_ViewPort.SetupViewPort(WindowDimentions.bottom, WindowDimentions.right, 0, 0);
 
-						HRESULT hr;
-						// Preserve the existing buffer count and format.
-						// Automatically choose the width and height to match the client rect for HWNDs.
-						hr = g_pSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	////		MY_Camera.AlterProyectionMatric(WindowDimentions.right, WindowDimentions.bottom);
 
-						// Perform error handling here!
+	////		MY_Camera.CoordinateUpdate();
 
-						// Get buffer and create a render-target-view.
-						ID3D11Texture2D* pBuffer;
-						hr = g_pSwapChain->GetBuffer(0, __uuidof( ID3D11Texture2D),
-																				 (void**) &pBuffer );
-						// Perform error handling here!
+	////		//	MY_DeviceContext.RSSetViewports(1, GiveSinglePointer(MY_ViewPort.GetViewPortRef()));
 
-						hr = g_pd3dDevice->CreateRenderTargetView(pBuffer, NULL,
-																										 &g_pRenderTargetView);
-						// Perform error handling here!
-						pBuffer->Release();
+	//			/*            g_pd3dDeviceContext->OMSetRenderTargets(0, 0, 0);
 
-						g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, NULL );
+	//						// Release all outstanding references to the swap chain's buffers.
+	//						g_pRenderTargetView->Release();
 
-						// Set up the viewport.
-						D3D11_VIEWPORT vp;
-						vp.Width = width;
-						vp.Height = height;
-						vp.MinDepth = 0.0f;
-						vp.MaxDepth = 1.0f;
-						vp.TopLeftX = 0;
-						vp.TopLeftY = 0;
-						g_pd3dDeviceContext->RSSetViewports( 1, &vp );*/
+	//						HRESULT hr;
+	//						// Preserve the existing buffer count and format.
+	//						// Automatically choose the width and height to match the client rect for HWNDs.
+	//						hr = g_pSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
-		}
+	//						// Perform error handling here!
 
-		break;
+	//						// Get buffer and create a render-target-view.
+	//						ID3D11Texture2D* pBuffer;
+	//						hr = g_pSwapChain->GetBuffer(0, __uuidof( ID3D11Texture2D),
+	//																				 (void**) &pBuffer );
+	//						// Perform error handling here!
+
+	//						hr = g_pd3dDevice->CreateRenderTargetView(pBuffer, NULL,
+	//																										 &g_pRenderTargetView);
+	//						// Perform error handling here!
+	//						pBuffer->Release();
+
+	//						g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, NULL );
+
+	//						// Set up the viewport.
+	//						D3D11_VIEWPORT vp;
+	//						vp.Width = width;
+	//						vp.Height = height;
+	//						vp.MinDepth = 0.0f;
+	//						vp.MaxDepth = 1.0f;
+	//						vp.TopLeftX = 0;
+	//						vp.TopLeftY = 0;
+	//						g_pd3dDeviceContext->RSSetViewports( 1, &vp );*/
+
+	////	}
+
+	//	break;
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
@@ -1061,7 +1061,7 @@ void Render()
 
 
 	MY_Timer.EndTiming();
-	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window",MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
 
 	//
 	// Present our back buffer to our front buffer
@@ -1092,5 +1092,5 @@ void CleanupDevice()
 	if (g_pRenderTargetView) g_pRenderTargetView->Release();
 	if (g_pSwapChain) g_pSwapChain->Release();
 	if (g_pImmediateContext) g_pImmediateContext->Release();
-	//if (g_pd3dDevice) g_pd3dDevice->Release();
+	if (g_pd3dDevice) g_pd3dDevice->Release();
 }

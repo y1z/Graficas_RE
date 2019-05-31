@@ -7,9 +7,18 @@ namespace ig = ImGui;
 imGuiManager::imGuiManager()
 {}
 
-
+/*!  Highly  Important to free the memory*/
 imGuiManager::~imGuiManager()
-{}
+{
+
+#ifdef USING_DIRECTX
+	ImGui_ImplDX11_Shutdown();
+#endif // USING_DIRECTX
+
+
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}
 
 bool imGuiManager::Init(CDevice & Device, CDeviaceContext & DeviceContext, HWND& Handle)
 {
@@ -54,10 +63,11 @@ void imGuiManager::MakeWindowFpsAndVertexCount(const char * WindowName, float De
 #ifdef USING_DIRECTX
 	ImGui_ImplDX11_NewFrame();
 #endif // USING_DIRECTX
+	// Formating for the FPS counter 
 	std::string fpsMessage("FPS ");
-	fpsMessage += std::to_string(1/DeltaTime);
+	fpsMessage += std::to_string(1 / DeltaTime);
 
-	std::string VertexMessage("Vertex Count ");
+	std::string VertexMessage("Vertex Count # ");
 	VertexMessage += std::to_string(VertexCount);
 
 	ImGui_ImplWin32_NewFrame();
