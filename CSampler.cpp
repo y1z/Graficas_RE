@@ -6,7 +6,9 @@ CSampler::CSampler()
 
 
 CSampler::~CSampler()
-{}
+{
+	if (mptr_Sampler != nullptr) { mptr_Sampler->Release(); }
+}
 
 void CSampler::ConvertDxToSampler(D3D11_SAMPLER_DESC & DxDescriptor)
 {
