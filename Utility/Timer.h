@@ -10,7 +10,6 @@ class Timer
 {
 	/*! used for measuring durations in terms of picoseconds*/
 	using TimeMeasurementPico = std::chrono::duration<uint64_t, std::pico>;
-
 	/*! this duration has seconds that can have a decimal point
 	(just because I get confused with other Representation)*/
 	using TimeMeasurementSeconds = std::chrono::duration<double, std::ratio<1, 1>>;

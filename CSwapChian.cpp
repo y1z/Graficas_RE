@@ -3,8 +3,7 @@
 
 
 CSwapChian::CSwapChian()
-{
-}
+{}
 
 
 CSwapChian::~CSwapChian()
@@ -17,16 +16,16 @@ CSwapChian::~CSwapChian()
 bool CSwapChian::GetBuffer(int32_t BufferIndex, void * Buffer)
 {
 #if defined(USING_DIRECTX)
-	
+
 	HRESULT hr = S_OK;
 
 	hr = mptr_SwapChian->GetBuffer(BufferIndex, __uuidof(ID3D11Texture2D), static_cast<void**>(Buffer));
-	if (!CheckForError(hr)) {
+	if (!CheckForError(hr))
+	{
 		return true;
 	}
 
 	return false;
-
 #elif
 #endif
 
@@ -39,7 +38,8 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 	HRESULT hr = S_OK;
 	hr = mptr_SwapChian->Present(Syc, PresentOpction);
 
-	if (!CheckForError(hr)) {
+	if (!CheckForError(hr))
+	{
 		return true;
 	}
 	return false;
@@ -52,9 +52,7 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 
 void CSwapChian::ResizeBuffer(int width, int height, HWND g_hWnd)
 {
-	//sd.Windowed = TRUE;
-
-	mptr_SwapChian->ResizeBuffers(1, width,height, DXGI_FORMAT_R8G8B8A8_UNORM,0);
+	mptr_SwapChian->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 }
 
 void CSwapChian::ResizeTarget(int width, int height)

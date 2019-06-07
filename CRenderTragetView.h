@@ -17,8 +17,8 @@ public:// functions
 	ID3D11RenderTargetView ** GetRenderTragetRef();
 	ID3D11DepthStencilView * GetDepthStencilView();
 	ID3D11DepthStencilView ** GetDepthStencilViewRef();
-	ID3D11Texture2D *GetBackBuffer();
-	ID3D11Texture2D ** GetBackBufferRef();
+	ID3D11Texture2D*GetBackBuffer();
+	ID3D11Texture2D** GetBackBufferRef();
 
 	void DestroyBuffers();
 

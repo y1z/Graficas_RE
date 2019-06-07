@@ -220,7 +220,7 @@ bool CDevice::CreateSamplerState(void * DescriptorSampler, void * Sampler)
 }
 
 #if defined(USING_DIRECTX)
-ID3D11Device * CDevice::GetDeviceTemp()
+ID3D11Device * CDevice::GetDevice()
 {
 	return mptr_Device;
 }

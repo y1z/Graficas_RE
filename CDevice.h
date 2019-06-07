@@ -58,7 +58,7 @@ public: // functions
 	/*! This is just for testing 
 	\todo when the classes "CSwapChain" and "CDeviceContext" Remove this method*/
 #if defined(USING_DIRECTX)
-	ID3D11Device* GetDeviceTemp();
+	ID3D11Device* GetDevice();
 	ID3D11Device** GetDeviceRef();
 #elif
 #endif

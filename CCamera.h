@@ -22,7 +22,7 @@ public:// functions
 	void AlterProyectionMatric(int NewWidth, int NewHeight, float Fov = -1, float Near = -1, float Far = -1);
 
 	void MoveTrasfromMatrice(float x, float y, float z);
-
+	
 	void RotateTrasformMatrice(void * Rotation);
 
 	void ResetTrasformMatrice();

@@ -381,7 +381,6 @@ HRESULT InitDevice()
 	{
 		HRESULT hr = S_FALSE;
 		return hr;
-
 	}
 	// Create the depth stencil view
 	/// just here for reference
@@ -404,20 +403,20 @@ HRESULT InitDevice()
 	}
 	// old code 
 	//if (FAILED(hr))
-	//	return hr;
+	//	return hr;+
 
 	//g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
 	MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
 		static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
 
 	// Setup the viewport
-	D3D11_VIEWPORT vp;
-	vp.Width = (FLOAT) width;
-	vp.Height = (FLOAT) height;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
+	//D3D11_VIEWPORT vp;
+	//vp.Width = (FLOAT) width;
+	//vp.Height = (FLOAT) height;
+	//vp.MinDepth = 0.0f;
+	//vp.MaxDepth = 1.0f;
+	//vp.TopLeftX = 0;
+	//vp.TopLeftY = 0;
 
 	MY_ViewPort.SetupViewPort(height, width, 0, 0);
 
@@ -684,7 +683,7 @@ HRESULT InitDevice()
 	}
 
 	// Load the Texture
-	hr = D3DX11CreateShaderResourceViewFromFile(MY_Device.GetDeviceTemp(), L"seafloor.dds", NULL, NULL, MY_ShaderResourceView.GetResourceViewRef(), NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(MY_Device.GetDevice(), L"seafloor.dds", NULL, NULL, MY_ShaderResourceView.GetResourceViewRef(), NULL);
 	if (FAILED(hr))
 		return hr;
 
@@ -705,9 +704,9 @@ HRESULT InitDevice()
 		(int) D3D11_TEXTURE_ADDRESS_WRAP, (int) D3D11_TEXTURE_ADDRESS_WRAP,
 		(int) D3D11_COMPARISON_NEVER, 0);
 
-		// creates a sampler 
-		isSuccesful = MY_Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(MY_Sampler.ConvertSamplerToDx())),
-			static_cast<void*>(MY_Sampler.GetSamplerRef()));
+	// creates a sampler 
+	isSuccesful = MY_Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(MY_Sampler.ConvertSamplerToDx())),
+		static_cast<void*>(MY_Sampler.GetSamplerRef()));
 
 	if (isSuccesful == false)
 	{
@@ -718,8 +717,6 @@ HRESULT InitDevice()
 	// Initialize the world matrices
 	g_World = XMMatrixIdentity();
 
-	MY_Camera.SetFov(65.0f);
-
 	// Initialize the view matrix and Perceptive matrice
 	MY_Camera.InitCamara(width, height);
 
@@ -728,7 +725,6 @@ HRESULT InitDevice()
 	XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	g_View = XMMatrixLookAtLH(Eye, At, Up);*/
-
 
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
@@ -853,89 +849,88 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-		//case WM_SIZING:
+	case WM_SIZING:
 
-		////	if (g_FinishInit)
-		//	//{
-		////		// destroy all buffer related with the swap-chain , and make all of them nullptr 
-		////		//MY_DepthStencilView.DestoryBuffer();
+		if (g_FinishInit)
+		{
+			//// destroy all buffer related with the swap-chain , and make all of them nullptr 
+			//MY_DepthStencilView.DestoryBuffer();
 
-		////		//MY_RenderTragetView.DestroyBuffers();
+			//MY_RenderTragetView.DestroyBuffers();
 
-		////		//// tell the swap chine the size of the new window (affecting the buffer )
-		////		//MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, g_hWnd);
-		////		//// get a buffer(the one you just made nullptr) and reuse-it as a back buffer again and again and again and AGAIN FOR ALL OF EXISTENCES
-		////		//MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
+			// tell the swap chine the size of the new window (affecting the buffer )
+			MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, g_hWnd);
+			// get a buffer(the one you just made nullptr) and reuse-it as a back buffer again and again and again and AGAIN FOR ALL OF EXISTENCES
+		//	MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
+
+			// remake your render-target-view 
+			//MY_Device.CreateRenderTargetView(static_cast<void*>(MY_RenderTragetView.GetBackBuffer()),
+			//	static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()));
+			//// prepare you depth-stencil-view to be remade 
+			//MY_DepthStencilView.InitDepthStencil2D(WindowDimentions.bottom, WindowDimentions.right,
+			//	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
+
+			//// create a Depth stencil (depth-stencil-views) back buffer 
+			//MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStencilView.GetTexture2DRef()),
+			//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.GetTextureDescriptor())));
+
+			//// join them 
+			//MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
+			//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
+			//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));
+
+			//// now set the render-target again .
+			//MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
+			//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
 
 
-		////		//// remake your render-target-view 
-		////		//MY_Device.CreateRenderTargetView(static_cast<void*>(MY_RenderTragetView.GetBackBuffer()),
-		////		//	static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()));
-		////		//// prepare you depth-stencil-view to be remade 
-		////		//MY_DepthStencilView.InitDepthStencil2D(WindowDimentions.bottom, WindowDimentions.right,
-		////		//	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
+			//MY_SwapChain.ResizeTarget(WindowDimentions.right, WindowDimentions.bottom);
+			//MY_ViewPort.SetupViewPort(WindowDimentions.bottom, WindowDimentions.right, 0, 0);
 
-		////		//// create a Depth stencil (depth-stencil-views) back buffer 
-		////		//MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStencilView.GetTexture2DRef()),
-		////		//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.GetTextureDescriptor())));
+			//MY_Camera.AlterProyectionMatric(WindowDimentions.right, WindowDimentions.bottom);
 
-		////		//// join them 
-		////		//MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
-		////		//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
-		////		//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));
+			//MY_Camera.CoordinateUpdate();s
+		}/// end case 
+			//	MY_DeviceContext.RSSetViewports(1, GiveSinglePointer(MY_ViewPort.GetViewPortRef()));
 
-		////		//// now set the render-target again .
-		////		//MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
-		////		//	static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
+	//			/*            g_pd3dDeviceContext->OMSetRenderTargets(0, 0, 0);
 
+	//						// Release all outstanding references to the swap chain's buffers.
+	//						g_pRenderTargetView->Release();
 
-		//////		MY_SwapChain.ResizeTarget(WindowDimentions.right, WindowDimentions.bottom);
-		////	//	MY_ViewPort.SetupViewPort(WindowDimentions.bottom, WindowDimentions.right, 0, 0);
+	//						HRESULT hr;
+	//						// Preserve the existing buffer count and format.
+	//						// Automatically choose the width and height to match the client rect for HWNDs.
+	//						hr = g_pSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 
-		////		MY_Camera.AlterProyectionMatric(WindowDimentions.right, WindowDimentions.bottom);
+	//						// Perform error handling here!
 
-		////		MY_Camera.CoordinateUpdate();
+	//						// Get buffer and create a render-target-view.
+	//						ID3D11Texture2D* pBuffer;
+	//						hr = g_pSwapChain->GetBuffer(0, __uuidof( ID3D11Texture2D),
+	//																				 (void**) &pBuffer );
+	//						// Perform error handling here!
 
-		////		//	MY_DeviceContext.RSSetViewports(1, GiveSinglePointer(MY_ViewPort.GetViewPortRef()));
+	//						hr = g_pd3dDevice->CreateRenderTargetView(pBuffer, NULL,
+	//																										 &g_pRenderTargetView);
+	//						// Perform error handling here!
+	//						pBuffer->Release();
 
-		//			/*            g_pd3dDeviceContext->OMSetRenderTargets(0, 0, 0);
+	//						g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, NULL );
 
-		//						// Release all outstanding references to the swap chain's buffers.
-		//						g_pRenderTargetView->Release();
+	//						// Set up the viewport.
+	//						D3D11_VIEWPORT vp;
+	//						vp.Width = width;
+	//						vp.Height = height;
+	//						vp.MinDepth = 0.0f;
+	//						vp.MaxDepth = 1.0f;
+	//						vp.TopLeftX = 0;
+	//						vp.TopLeftY = 0;
+	//						g_pd3dDeviceContext->RSSetViewports( 1, &vp );*/
 
-		//						HRESULT hr;
-		//						// Preserve the existing buffer count and format.
-		//						// Automatically choose the width and height to match the client rect for HWNDs.
-		//						hr = g_pSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	////	}
 
-		//						// Perform error handling here!
-
-		//						// Get buffer and create a render-target-view.
-		//						ID3D11Texture2D* pBuffer;
-		//						hr = g_pSwapChain->GetBuffer(0, __uuidof( ID3D11Texture2D),
-		//																				 (void**) &pBuffer );
-		//						// Perform error handling here!
-
-		//						hr = g_pd3dDevice->CreateRenderTargetView(pBuffer, NULL,
-		//																										 &g_pRenderTargetView);
-		//						// Perform error handling here!
-		//						pBuffer->Release();
-
-		//						g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, NULL );
-
-		//						// Set up the viewport.
-		//						D3D11_VIEWPORT vp;
-		//						vp.Width = width;
-		//						vp.Height = height;
-		//						vp.MinDepth = 0.0f;
-		//						vp.MaxDepth = 1.0f;
-		//						vp.TopLeftX = 0;
-		//						vp.TopLeftY = 0;
-		//						g_pd3dDeviceContext->RSSetViewports( 1, &vp );*/
-
-		////	}
-
-		//	break;
+	//	break;
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
@@ -951,7 +946,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void Render()
 {
-
 	// Start Timing to get fps count 
 	MY_Timer.StartTiming();
 
@@ -1019,6 +1013,7 @@ void Render()
 	// Render the cube
 	//g_pImmediateContext->VSSetShader(g_pVertexShader, NULL, 0);
 	//g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
+	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
 	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
 	//g_pImmediateContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
 	//7g_pImmediateContext->PSSetShader(g_pPixelShader, NULL, 0);

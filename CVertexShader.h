@@ -11,8 +11,8 @@ public:// functions
 	bool InitVertexShader(wchar_t *ShaderFile, char * ShaderEntry,char* ShaderVersion);
 
 #ifdef USING_DIRECTX
-	ID3D11VertexShader * GetVertexShader();
-	ID3D11VertexShader ** GetVertexShaderRef();
+	ID3D11VertexShader* GetVertexShader();
+	ID3D11VertexShader** GetVertexShaderRef();
 
 	ID3DBlob* GetVertexShaderData();
 	ID3DBlob** GetVertexShaderDataRef();
