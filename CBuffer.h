@@ -2,6 +2,7 @@
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
 #include <cinttypes>
+
 class CBuffer
 {
 public:
@@ -18,8 +19,11 @@ public:// functions
 	template<class T>
 	void InitConstBuffer(const T &DataStruct, uint32_t Offset);
 
+#ifdef USING_DIRECTX
 	ID3D11Buffer* GetBuffer();
 	ID3D11Buffer** GetBufferRef();
+#endif // USING_DIRECTX
+
 
 	uint64_t GetElementCount();
 
