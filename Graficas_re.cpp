@@ -39,7 +39,6 @@ static float g_Time = 0.0f;
 #include "imgui/imgui_impl_dx11.h"
 #include "imGuiManager.h"
 // assimp
-//#include "assimp/"
 #include <assimp/Importer.hpp>
 
 CDevice MY_Device;// Replaced 
