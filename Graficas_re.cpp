@@ -90,7 +90,7 @@ CModel MY_Model;
 //--------------------------------------------------------------------------------------
 HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
-D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
+/*D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 ID3D11Device*                       g_pd3dDevice = NULL;
 ID3D11DeviceContext*                g_pImmediateContext = NULL;
@@ -107,7 +107,7 @@ ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
 ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
 ID3D11ShaderResourceView*           g_pTextureRV = NULL;
-ID3D11SamplerState*                 g_pSamplerLinear = NULL;
+ID3D11SamplerState*                 g_pSamplerLinear = NULL;*/
 XMMATRIX                            g_World;
 XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
@@ -563,9 +563,9 @@ HRESULT InitDevice()
 	
 
 	/*Creates the vertexBuffer*/
-	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_VertexBuffer.m_Discriptor)),
-		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_VertexBuffer),
-		static_cast<void*>(GiveSinglePointer(InitData)));
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_VertexBuffer.m_Discriptor)),
+		static_cast<void*>(MY_Model.m_Meshs[1].mptr_VertexBuffer.GetBufferRef()),
+		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_VertexBuffer.m_Data)));
 
 	if (isSuccesful == false)
 	{
@@ -579,7 +579,7 @@ HRESULT InitDevice()
 	//g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
 
 	MY_DeviceContext.IASetVertexBuffers(0, 1,
-		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_VertexBuffer.m_Discriptor), static_cast<void*>(&stride), static_cast<void*>(&offset));
+		static_cast<void*>(MY_Model.m_Meshs[1].mptr_VertexBuffer.GetBufferRef()), static_cast<void*>(&stride), static_cast<void*>(&offset));
 
 	// Create index buffer
 	// Create vertex buffer
@@ -614,9 +614,9 @@ HRESULT InitDevice()
 	IndexBuffer.InitIndexBuffer(indices, 36, 0);
 
 	/*!Creates the index buffer */
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_IndexBuffer.m_Discriptor)),
-		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_IndexBuffer),
-		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_IndexBuffer.m_Data))
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_IndexBuffer.m_Discriptor)),
+		static_cast<void*>(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetBufferRef()),
+		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_IndexBuffer.m_Data))
 	);
 
 	if (isSuccesful == false)
@@ -627,7 +627,7 @@ HRESULT InitDevice()
 
 	// Set index buffer
 	//g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
+	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
 
 	// Set primitive topology
 	//g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1029,41 +1029,41 @@ void Render()
 	MY_DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
 	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(MY_ShaderResourceView.GetResourceViewRef()));
 	MY_DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(MY_Sampler.GetSamplerRef()));
-	MY_DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetElementCount(), 0, 0);
 	/* Making cube rotates */
-	g_World *= XMMatrixTranslation(-3, 0, 0);
-	cb.mWorld = XMMatrixTranspose(g_World);
-	cb.vMeshColor = g_vMeshColor;
-	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
-	/*Make cube that rotate and Scales*/
+	//g_World *= XMMatrixTranslation(-3, 0, 0);
+	//cb.mWorld = XMMatrixTranspose(g_World);
+	//cb.vMeshColor = g_vMeshColor;
+	////g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
+	///*Make cube that rotate and Scales*/
 
 
-	FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(g_Time)) * 1.25f, 1, 1);
-	g_World = XMMatrixScalingFromVector(ScalingVector);
-	g_World *= XMMatrixRotationY(g_Time);
-	g_World *= XMMatrixTranslation(0, 2, -2);
-	cb.mWorld = XMMatrixTranspose(g_World);
-	cb.vMeshColor = g_vMeshColor;
-	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
+	//FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(g_Time)) * 1.25f, 1, 1);
+	//g_World = XMMatrixScalingFromVector(ScalingVector);
+	//g_World *= XMMatrixRotationY(g_Time);
+	//g_World *= XMMatrixTranslation(0, 2, -2);
+	//cb.mWorld = XMMatrixTranspose(g_World);
+	//cb.vMeshColor = g_vMeshColor;
+	////g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
 
 
-	g_World = XMMatrixRotationY(0);
-	g_World = XMMatrixScalingFromVector(ScalingVector);
-	g_World *= XMMatrixTranslation(3, 0, 0);
-	cb.mWorld = XMMatrixTranspose(g_World);
-	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
+	//g_World = XMMatrixRotationY(0);
+	//g_World = XMMatrixScalingFromVector(ScalingVector);
+	//g_World *= XMMatrixTranslation(3, 0, 0);
+	//cb.mWorld = XMMatrixTranspose(g_World);
+	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
 
 	/// imGui events ----------------------
 	//MY_Gui.MakeBasicWindow("Ventana Bien Pinche meca");
 
 
 	MY_Timer.EndTiming();
-	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount());
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_Model.m_Meshs[1].mptr_VertexBuffer.GetElementCount());
 
 	//
 	// Present our back buffer to our front buffer
