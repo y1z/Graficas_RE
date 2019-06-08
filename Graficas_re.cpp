@@ -5,6 +5,7 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
+
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
 static float g_Time = 0.0f;
@@ -18,6 +19,9 @@ static float g_Time = 0.0f;
 #include "CDeviaceContext.h"
 #include "CSwapChian.h"
 #include "CBuffer.h"
+
+
+//! Give me the ability to use this include in other places 
 #include "CTexture.h"
 #include "CCamera.h"
 #include "CRenderTragetView.h"
@@ -26,6 +30,7 @@ static float g_Time = 0.0f;
 #include "CDepthStencilView.h"
 #include "CSampler.h"
 #include "CShaderResourceView.h"
+#include "CModel.h"
 
 // shaders 
 #include "CVertexShader.h"
@@ -40,16 +45,21 @@ static float g_Time = 0.0f;
 #include "imGuiManager.h"
 // assimp
 #include <assimp/Importer.hpp>
+#include "Structs.h"
+
+
+//class CBuffer;
+
 
 CDevice MY_Device;// Replaced 
 CDeviaceContext MY_DeviceContext;// Replaced 
 CSwapChian MY_SwapChain;// Replaced
-CBuffer ConstantBufferResize;// Replaced
-CBuffer ConstantBufferChangeEveryFrame;// Replaced
-CBuffer ConstantBufferNeverChange;// Replaced
-CBuffer MY_VertexBuffer;// Replaced 
+Templates::CBuffer ConstantBufferResize;// Replaced
+Templates::CBuffer ConstantBufferChangeEveryFrame;// Replaced
+Templates::CBuffer ConstantBufferNeverChange;// Replaced
+Templates::CBuffer MY_VertexBuffer;// Replaced 
 //! Heres the index-buffer
-CBuffer IndexBuffer;// Replaced
+Templates::CBuffer IndexBuffer;// Replaced
 CRenderTragetView MY_RenderTragetView;
 // ! the camera and values associated with it
 CCamera MY_Camera;
@@ -69,32 +79,11 @@ CSampler MY_Sampler;
 imGuiManager MY_Gui;
 /// This is used to find delta time 
 Timer MY_Timer;
-
-//--------------------------------------------------------------------------------------
-// Structures
-//--------------------------------------------------------------------------------------
-struct SimpleVertex
-{
-	XMFLOAT3 Pos;
-	XMFLOAT2 Tex;
-};
-
-struct CBNeverChanges
-{
-	XMMATRIX mView;
-};
-
-struct CBChangeOnResize
-{
-	XMMATRIX mProjection;
-};
-
-struct CBChangesEveryFrame
-{
-	XMMATRIX mWorld;
-	XMFLOAT4 vMeshColor;
-};
 //
+CModel MY_Model;
+
+
+
 
 //--------------------------------------------------------------------------------------
 // Global Variables
@@ -309,6 +298,8 @@ HRESULT InitDevice()
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
 
+	MY_Model.LoadModelFromFile("Models/Dwarf/dwarf.x");
+
 	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
 	{
 		g_driverType = driverTypes[driverTypeIndex];
@@ -516,7 +507,9 @@ HRESULT InitDevice()
 		return hr;
 	}
 
+	using namespace Templates;
 
+	
 	// Create vertex buffer
 	SimpleVertex vertices[] =
 	{
@@ -567,9 +560,11 @@ HRESULT InitDevice()
 
 	MY_VertexBuffer.IntiVertexBuffer(vertices, 24, 0);
 
+	
+
 	/*Creates the vertexBuffer*/
-	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
-		static_cast<void*>(MY_VertexBuffer.GetBufferRef()),
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_VertexBuffer.m_Discriptor)),
+		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_VertexBuffer),
 		static_cast<void*>(GiveSinglePointer(InitData)));
 
 	if (isSuccesful == false)
@@ -584,7 +579,7 @@ HRESULT InitDevice()
 	//g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
 
 	MY_DeviceContext.IASetVertexBuffers(0, 1,
-		static_cast<void*>(MY_VertexBuffer.GetBufferRef()), static_cast<void*>(&stride), static_cast<void*>(&offset));
+		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_VertexBuffer.m_Discriptor), static_cast<void*>(&stride), static_cast<void*>(&offset));
 
 	// Create index buffer
 	// Create vertex buffer
@@ -619,9 +614,9 @@ HRESULT InitDevice()
 	IndexBuffer.InitIndexBuffer(indices, 36, 0);
 
 	/*!Creates the index buffer */
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
-		static_cast<void*>(IndexBuffer.GetBufferRef()),
-		static_cast<void*>(GiveSinglePointer(InitData))
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_IndexBuffer.m_Discriptor)),
+		static_cast<void*>(&MY_Model.m_Meshs[0].mptr_IndexBuffer),
+		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[0].mptr_IndexBuffer.m_Data))
 	);
 
 	if (isSuccesful == false)
@@ -632,7 +627,7 @@ HRESULT InitDevice()
 
 	// Set index buffer
 	//g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
+	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
 
 	// Set primitive topology
 	//g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1041,7 +1036,7 @@ void Render()
 	cb.vMeshColor = g_vMeshColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
 	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
 	/*Make cube that rotate and Scales*/
 
 
@@ -1053,7 +1048,7 @@ void Render()
 	cb.vMeshColor = g_vMeshColor;
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
 	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
 
 
 	g_World = XMMatrixRotationY(0);
@@ -1061,14 +1056,14 @@ void Render()
 	g_World *= XMMatrixTranslation(3, 0, 0);
 	cb.mWorld = XMMatrixTranspose(g_World);
 	MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	MY_DeviceContext.DrawIndexed(36, 0, 0);
+	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount(), 0, 0);
 
 	/// imGui events ----------------------
 	//MY_Gui.MakeBasicWindow("Ventana Bien Pinche meca");
 
 
 	MY_Timer.EndTiming();
-	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_Model.m_Meshs[0].mptr_VertexBuffer.GetElementCount());
 
 	//
 	// Present our back buffer to our front buffer
