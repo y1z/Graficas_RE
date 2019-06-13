@@ -1,7 +1,7 @@
 # Using this Repo
 Using visual studio 2017 this proyect should work if you use the same IDE  
 - Im using an environment veriable called "DEVLIBS" when using some external liberaries   
-	- GLM .
+	- GLM 0.9.9.5  
 # Downloding
 just get the zip and use the 2010 .sln file .
 # Creadit
