@@ -161,4 +161,14 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> CInputLayout::ConvertInputLayoutToDx()
 	return Result;
 }
 
+ID3D11InputLayout * CInputLayout::GetInputLayout()
+{
+	return mptr_InputLayoutDX;
+}
+
+ID3D11InputLayout ** CInputLayout::GetInputLayoutRef()
+{
+	return &mptr_InputLayoutDX;
+}
+
 #endif // USING_DIRECTX

@@ -49,7 +49,9 @@ public:
 	bool ReadShaderDataDX(ID3DBlob* ShaderData,int ShaderInputData);
 	//! convert MY input layout to directX native input layout plus returns a vector
 	std::vector<D3D11_INPUT_ELEMENT_DESC> ConvertInputLayoutToDx();
-
+	// 
+	ID3D11InputLayout* GetInputLayout();
+	ID3D11InputLayout**GetInputLayoutRef();
 #endif // USING_DIRECTX
 private:
 	std::vector<SInputDesc> m_InputLayouts;

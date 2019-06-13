@@ -8,7 +8,6 @@
 
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
-static float g_Time = 0.0f;
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
@@ -19,7 +18,6 @@ static float g_Time = 0.0f;
 #include "CDeviaceContext.h"
 #include "CSwapChian.h"
 #include "CBuffer.h"
-
 
 //! Give me the ability to use this include in other places 
 #include "CTexture.h"
@@ -59,7 +57,7 @@ Templates::CBuffer ConstantBufferChangeEveryFrame;// Replaced
 Templates::CBuffer ConstantBufferNeverChange;// Replaced
 Templates::CBuffer MY_VertexBuffer;// Replaced 
 //! Heres the index-buffer
-Templates::CBuffer IndexBuffer;// Replaced
+Templates::CBuffer MY_IndexBuffer;// Replaced
 CRenderTragetView MY_RenderTragetView;
 // ! the camera and values associated with it
 CCamera MY_Camera;
@@ -82,9 +80,6 @@ Timer MY_Timer;
 //
 CModel MY_Model;
 
-
-
-
 //--------------------------------------------------------------------------------------
 // Global Variables
 //--------------------------------------------------------------------------------------
@@ -92,22 +87,22 @@ HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
-ID3D11Device*                       g_pd3dDevice = NULL;
-ID3D11DeviceContext*                g_pImmediateContext = NULL;
-IDXGISwapChain*                     g_pSwapChain = NULL;
-ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
-ID3D11Texture2D*                    g_pDepthStencil = NULL;
-ID3D11DepthStencilView*             g_pDepthStencilView = NULL;
-ID3D11VertexShader*                 g_pVertexShader = NULL;
-ID3D11PixelShader*                  g_pPixelShader = NULL;
-ID3D11InputLayout*                  g_pVertexLayout = NULL;
-ID3D11Buffer*                       g_pVertexBuffer = NULL;
-ID3D11Buffer*                       g_pIndexBuffer = NULL;
-ID3D11Buffer*                       g_pCBNeverChanges = NULL;
-ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
-ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
-ID3D11ShaderResourceView*           g_pTextureRV = NULL;
-ID3D11SamplerState*                 g_pSamplerLinear = NULL;
+//ID3D11Device*                       g_pd3dDevice = NULL;
+//ID3D11DeviceContext*                g_pImmediateContext = NULL;
+//IDXGISwapChain*                     g_pSwapChain = NULL;
+//ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
+//ID3D11Texture2D*                    g_pDepthStencil = NULL;
+//ID3D11DepthStencilView*             g_pDepthStencilView = NULL;
+//ID3D11VertexShader*                 g_pVertexShader = NULL;
+//ID3D11PixelShader*                  g_pPixelShader = NULL;
+//ID3D11InputLayout*                  g_pVertexLayout = NULL;
+//ID3D11Buffer*                       g_pVertexBuffer = NULL;
+//ID3D11Buffer*                       g_pIndexBuffer = NULL;
+//ID3D11Buffer*                       g_pCBNeverChanges = NULL;
+//ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
+//ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
+//ID3D11ShaderResourceView*           g_pTextureRV = NULL;
+//ID3D11SamplerState*                 g_pSamplerLinear = NULL;
 XMMATRIX                            g_World;
 XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
@@ -117,7 +112,7 @@ XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 // Forward declarations
 //--------------------------------------------------------------------------------------
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
-HRESULT InitDevice();
+HRESULT Preamble();
 void CleanupDevice();
 LRESULT CALLBACK WindProc(HWND, UINT, WPARAM, LPARAM);
 void Render();
@@ -149,7 +144,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(InitWindow(hInstance, nCmdShow)))
 		return 0;
 
-	if (FAILED(InitDevice()))
+	if (FAILED(Preamble()))
 	{
 		CleanupDevice();
 		return 0;
@@ -251,7 +246,7 @@ HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szS
 //--------------------------------------------------------------------------------------
 // Create Direct3D device and swap chain
 //--------------------------------------------------------------------------------------
-HRESULT InitDevice()
+HRESULT Preamble()
 {
 	/* This is to make sure all the methods of the Device class work */
 	bool isSuccesful = false;
@@ -297,8 +292,6 @@ HRESULT InitDevice()
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
-
-	MY_Model.LoadModelFromFile("Models/Dwarf/dwarf.x");
 
 	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
 	{
@@ -403,13 +396,6 @@ HRESULT InitDevice()
 		static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
 
 	// Setup the viewport
-	//D3D11_VIEWPORT vp;
-	//vp.Width = (FLOAT) width;
-	//vp.Height = (FLOAT) height;
-	//vp.MinDepth = 0.0f;
-	//vp.MaxDepth = 1.0f;
-	//vp.TopLeftX = 0;
-	//vp.TopLeftY = 0;
 
 	MY_ViewPort.SetupViewPort(height, width, 0, 0);
 
@@ -430,7 +416,7 @@ HRESULT InitDevice()
 		return hr;
 	}
 
-	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(MY_VertexShader.GetVertexShaderData()), static_cast<void*> (&g_pVertexShader));
+	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(MY_VertexShader.GetVertexShaderData()), static_cast<void*> (MY_VertexShader.GetVertexShaderRef()));
 
 	MY_InputLayout.ReadShaderDataDX(MY_VertexShader.GetVertexShaderData(), static_cast<int>(D3D11_INPUT_PER_VERTEX_DATA));
 
@@ -464,8 +450,7 @@ HRESULT InitDevice()
 	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
 
 	isSuccesful = MY_Device.CreateInputLayout(static_cast<void*>(&LayoutConvertion[0]), static_cast<void*>(MY_VertexShader.GetVertexShaderData()),
-		LayoutConvertion.size(), static_cast<void*>(&g_pVertexLayout));
-
+		LayoutConvertion.size(), static_cast<void*>(MY_InputLayout.GetInputLayoutRef()));
 	//p_VertexShaderBlob->Release();
 
 	if (isSuccesful == false)
@@ -476,7 +461,7 @@ HRESULT InitDevice()
 
 	// Set the input layout
 	//g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
-	MY_DeviceContext.IASetInputLayout(static_cast<void *>(g_pVertexLayout));
+	MY_DeviceContext.IASetInputLayout(static_cast<void *>(MY_InputLayout.GetInputLayout()));
 
 	// reads information about the pixel shader 
 	isSuccesful = MY_PixelShader.InitPixelShader(L"Graficas_re.fx", "PS", "ps_4_0");
@@ -487,7 +472,6 @@ HRESULT InitDevice()
 		return hr;
 	}
 	// Compile the pixel shader
-	//ID3DBlob* p_PixelShaderBlob = NULL;
 	//hr = CompileShaderFromFile(L"Graficas_re.fx", "PS", "ps_4_0", &p_PixelShaderBlob);
 	if (FAILED(hr))
 	{
@@ -506,9 +490,6 @@ HRESULT InitDevice()
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-
-	using namespace Templates;
-
 	
 	// Create vertex buffer
 	SimpleVertex vertices[] =
@@ -545,7 +526,6 @@ HRESULT InitDevice()
 	};
 
 
-
 	D3D11_BUFFER_DESC bd;
 	SecureZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -559,8 +539,6 @@ HRESULT InitDevice()
 	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer)
 
 	MY_VertexBuffer.IntiVertexBuffer(vertices, 24, 0);
-
-	
 
 	/*Creates the vertexBuffer*/
 	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDesc())),
@@ -611,23 +589,22 @@ HRESULT InitDevice()
 	InitData.pSysMem = indices;
 	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
 
-	IndexBuffer.InitIndexBuffer(indices, 36, 0);
+	MY_IndexBuffer.InitIndexBuffer(indices, 36, 0);
 
 	/*!Creates the index buffer */
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_IndexBuffer.m_Discriptor)),
-		static_cast<void*>(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetBufferRef()),
-		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_IndexBuffer.m_Data))
-	);
+	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_IndexBuffer.GetDesc())),
+		static_cast<void*>(MY_IndexBuffer.GetBufferRef()),
+		static_cast<void*>(GiveSinglePointer(MY_IndexBuffer.GetData())));
+
 
 	if (isSuccesful == false)
 	{
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-
 	// Set index buffer
 	//g_pImmediateContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
+	MY_DeviceContext.IASetIndexBuffer(static_cast<void*>(MY_IndexBuffer.GetBuffer()), static_cast<int>(DXGI_FORMAT_R16_UINT), 0);
 
 	// Set primitive topology
 	//g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -639,7 +616,9 @@ HRESULT InitDevice()
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 
-	ConstantBufferNeverChange.InitConstBuffer(*g_pCBNeverChanges, 0);
+	XMMATRIX NeverChangeBuffer;
+
+	ConstantBufferNeverChange.InitConstBuffer(NeverChangeBuffer, 0);
 
 	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
 
@@ -655,7 +634,9 @@ HRESULT InitDevice()
 
 	bd.ByteWidth = sizeof(CBChangeOnResize);
 
-	ConstantBufferResize.InitConstBuffer(*g_pCBChangeOnResize, 0);
+	CBChangeOnResize ChangeOnResize;
+
+	ConstantBufferResize.InitConstBuffer(ChangeOnResize, 0);
 
 	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
 		static_cast<void*>(ConstantBufferResize.GetBufferRef()), nullptr);
@@ -758,7 +739,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	RECT WindowDimentions;
 
-	GetClientRect(g_hWnd, &WindowDimentions);
+	GetWindowRect(g_hWnd, &WindowDimentions);
 
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
@@ -943,13 +924,14 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void Render()
 {
+	static float Time = 0.00f;
 	// Start Timing to get fps count 
 	MY_Timer.StartTiming();
 
 	// Update our time
 	if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
 	{
-		g_Time += (float) XM_PI * 0.0125f;
+		Time += (float) XM_PI * 0.0125f;
 	}
 	else
 	{
@@ -957,16 +939,16 @@ void Render()
 		DWORD dwTimeCur = GetTickCount();
 		if (dwTimeStart == 0)
 			dwTimeStart = dwTimeCur;
-		g_Time = (dwTimeCur - dwTimeStart) / 1000.0f;
+		Time = (dwTimeCur - dwTimeStart) / 1000.0f;
 	}
 
 	// Rotate cube around the origin
-	g_World = XMMatrixRotationY(g_Time);
+	g_World = XMMatrixRotationY(Time);
 
 	// Modify the color
-	g_vMeshColor.x = (sinf(g_Time * 1.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.y = (cosf(g_Time * 3.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.z = (sinf(g_Time * 5.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.x = (sinf(Time * 1.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.y = (cosf(Time * 3.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.z = (sinf(Time * 5.0f) + 1.0f) * 0.5f;
 
 	//
 	// Clear the back buffer
@@ -1021,7 +1003,7 @@ void Render()
 	//
 	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
 
-	MY_DeviceContext.VSSetShader(static_cast<void*>(g_pVertexShader));
+	MY_DeviceContext.VSSetShader(static_cast<void*>(MY_VertexShader.GetVertexShader()));
 	MY_DeviceContext.VSSetConstantBuffers(0, 1, static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()));
 	MY_DeviceContext.VSSetConstantBuffers(1, 1, static_cast<void*>(ConstantBufferResize.GetBufferRef()));
 	MY_DeviceContext.VSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
@@ -1029,7 +1011,7 @@ void Render()
 	MY_DeviceContext.PSSetConstantBuffers(2, 1, static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()));
 	MY_DeviceContext.PSSetShaderResources(0, 1, static_cast<void*>(MY_ShaderResourceView.GetResourceViewRef()));
 	MY_DeviceContext.PSSetSamplers(0, 1, static_cast<void*>(MY_Sampler.GetSamplerRef()));
-	MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[1].mptr_IndexBuffer.GetElementCount(), 0, 0);
+	MY_DeviceContext.DrawIndexed(MY_IndexBuffer.GetElementCount(), 0, 0);
 	/* Making cube rotates */
 	//g_World *= XMMatrixTranslation(-3, 0, 0);
 	//cb.mWorld = XMMatrixTranspose(g_World);
@@ -1040,9 +1022,9 @@ void Render()
 	///*Make cube that rotate and Scales*/
 
 
-	//FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(g_Time)) * 1.25f, 1, 1);
+	//FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(Time)) * 1.25f, 1, 1);
 	//g_World = XMMatrixScalingFromVector(ScalingVector);
-	//g_World *= XMMatrixRotationY(g_Time);
+	//g_World *= XMMatrixRotationY(Time);
 	//g_World *= XMMatrixTranslation(0, 2, -2);
 	//cb.mWorld = XMMatrixTranspose(g_World);
 	//cb.vMeshColor = g_vMeshColor;
@@ -1063,7 +1045,7 @@ void Render()
 
 
 	MY_Timer.EndTiming();
-	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_Model.m_Meshs[1].mptr_VertexBuffer.GetElementCount());
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
 
 	//
 	// Present our back buffer to our front buffer
@@ -1077,22 +1059,22 @@ void Render()
 //--------------------------------------------------------------------------------------
 void CleanupDevice()
 {
-	if (g_pImmediateContext) g_pImmediateContext->ClearState();
+	//if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
-	if (g_pSamplerLinear) g_pSamplerLinear->Release();
-	if (g_pTextureRV) g_pTextureRV->Release();
-	if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
-	if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
-	if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-	if (g_pVertexBuffer) g_pVertexBuffer->Release();
-	if (g_pIndexBuffer) g_pIndexBuffer->Release();
-	if (g_pVertexLayout) g_pVertexLayout->Release();
-	if (g_pVertexShader) g_pVertexShader->Release();
-	if (g_pPixelShader) g_pPixelShader->Release();
-	if (g_pDepthStencil) g_pDepthStencil->Release();
-	if (g_pDepthStencilView) g_pDepthStencilView->Release();
-	if (g_pRenderTargetView) g_pRenderTargetView->Release();
-	if (g_pSwapChain) g_pSwapChain->Release();
-	if (g_pImmediateContext) g_pImmediateContext->Release();
-	if (g_pd3dDevice) g_pd3dDevice->Release();
+	//if (g_pSamplerLinear) g_pSamplerLinear->Release();
+	//if (g_pTextureRV) g_pTextureRV->Release();
+	//if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
+	//if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
+	//if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
+	//if (g_pVertexBuffer) g_pVertexBuffer->Release();
+	//if (g_pIndexBuffer) g_pIndexBuffer->Release();
+	//if (g_pVertexLayout) g_pVertexLayout->Release();
+	//if (g_pVertexShader) g_pVertexShader->Release();
+//	if (g_pPixelShader) g_pPixelShader->Release();
+	//if (g_pDepthStencil) g_pDepthStencil->Release();
+//	if (g_pDepthStencilView) g_pDepthStencilView->Release();
+	//if (g_pRenderTargetView) g_pRenderTargetView->Release();
+//	if (g_pSwapChain) g_pSwapChain->Release();
+	//if (g_pImmediateContext) g_pImmediateContext->Release();
+	//if (g_pd3dDevice) g_pd3dDevice->Release();
 }
