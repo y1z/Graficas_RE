@@ -32,7 +32,7 @@ public:// functions
 \param ptr_Stride [in] how big the vertex data type is
 \param ptr_offset [in] the distance between data
 */
-	void IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, void* VertexBuffer, void *ptr_Stride, void*ptr_offset);
+	void IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, void* VertexBuffer, uint32_t Stride, uint32_t Offset);
 
 	/*! Set the IndexBuffer
 \param IndexBuffer [out] the vertex buffer that's set

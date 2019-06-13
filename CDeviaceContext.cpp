@@ -42,12 +42,15 @@ void CDeviaceContext::IASetInputLayout(void * InputLayout)
 
 }
 
-void CDeviaceContext::IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, void * VertexBuffer, void * ptr_Stride, void * ptr_offset)
+void CDeviaceContext::IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, void * VertexBuffer, uint32_t Stride, uint32_t Offset)
 {
 #if defined(USING_DIRECTX)
+	UINT ConversionForStride = Stride;
+	UINT ConversionForOffset = Offset;
+
 	mptr_DeviceContext->IASetVertexBuffers(StratSlot, TotalBuffer,
-		static_cast<ID3D11Buffer **>(VertexBuffer), static_cast<UINT *>(ptr_Stride),
-		static_cast<UINT *>(ptr_offset));
+		static_cast<ID3D11Buffer **>(VertexBuffer), static_cast<UINT *>(&ConversionForStride),
+		static_cast<UINT *>(&ConversionForOffset));
 #elif
 #endif
 }

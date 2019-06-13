@@ -563,9 +563,9 @@ HRESULT InitDevice()
 	
 
 	/*Creates the vertexBuffer*/
-	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_VertexBuffer.m_Discriptor)),
-		static_cast<void*>(MY_Model.m_Meshs[1].mptr_VertexBuffer.GetBufferRef()),
-		static_cast<void*>(GiveSinglePointer(MY_Model.m_Meshs[1].mptr_VertexBuffer.m_Data)));
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDesc())),
+		static_cast<void*>(MY_VertexBuffer.GetBufferRef()),
+		static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDataRef())));
 
 	if (isSuccesful == false)
 	{
@@ -579,7 +579,7 @@ HRESULT InitDevice()
 	//g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
 
 	MY_DeviceContext.IASetVertexBuffers(0, 1,
-		static_cast<void*>(MY_Model.m_Meshs[1].mptr_VertexBuffer.GetBufferRef()), static_cast<void*>(&stride), static_cast<void*>(&offset));
+		static_cast<void*>(MY_VertexBuffer.GetBufferRef()), MY_VertexBuffer.GetStride(), MY_VertexBuffer.GetOffset());
 
 	// Create index buffer
 	// Create vertex buffer

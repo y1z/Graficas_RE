@@ -22,6 +22,9 @@ namespace Templates {
 			template<class T>
 			void InitConstBuffer(const T &DataStruct, uint32_t Offset);
 
+			UINT GetStride();
+			UINT GetOffset();
+
 		#ifdef USING_DIRECTX
 			ID3D11Buffer* GetBuffer();
 			ID3D11Buffer** GetBufferRef();
@@ -30,15 +33,18 @@ namespace Templates {
 			D3D11_SUBRESOURCE_DATA GetData();
 			D3D11_SUBRESOURCE_DATA& GetDataRef();
 		#endif // USING_DIRECTX
+
 			uint64_t GetElementCount();
+			// 
+
 			D3D11_BUFFER_DESC m_Discriptor;
 			D3D11_SUBRESOURCE_DATA m_Data;
 
 		private://variables
 			ID3D11Buffer *mptr_Buffer = nullptr;
 
-			uint64_t m_Stride = 0;
-			uint64_t m_Offset = 0;
+			uint32_t m_Stride = 0;
+			uint32_t m_Offset = 0;
 			uint64_t m_CountElemets = 0;
 		};
 
@@ -145,6 +151,16 @@ namespace Templates {
 		inline uint64_t CBuffer::GetElementCount()
 		{
 			return m_CountElemets;
+		}
+
+		inline uint32_t CBuffer::GetStride()
+		{
+			return m_Stride;
+		}
+
+		inline uint32_t CBuffer::GetOffset()
+		{
+			return m_Offset;
 		}
 	};
 };
