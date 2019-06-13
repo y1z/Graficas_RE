@@ -2,7 +2,12 @@
 
 #include"Usable_Windows.h"
 //TODO_Gl add include guard
-#include "DirectXHeader.h"
+
+#if USING_DIRECTX
+#include "DirectXHeader.h"  
+#endif // USING_DIRECTX
+
+
 #include <cinttypes>
 
 class CDevice

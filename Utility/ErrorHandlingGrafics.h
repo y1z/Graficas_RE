@@ -2,7 +2,6 @@
 
 #include "..//Usable_Windows.h"
 
-
 #if defined USING_DIRECTX
 /*! tell's if there is an error */
 static bool CheckForError(HRESULT hr)

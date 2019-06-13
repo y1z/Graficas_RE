@@ -12,7 +12,6 @@ CDevice::CDevice()
 {
 
 }
-
 //Descriptor
 
 CDevice::~CDevice()
@@ -34,7 +33,8 @@ bool CDevice::CreateRenderTargetView(void * BackBuffer, void * RenderTraget)
 	{
 		return true;
 	}
-	else {
+	else
+	{
 		return false;
 	}
 
@@ -110,7 +110,8 @@ bool CDevice::CreateVertexShader(void * BlobVertex, void * VertexShader)
 		nullptr,
 		static_cast<ID3D11VertexShader**>(VertexShader));
 
-	if (!CheckForError(hr)) {
+	if (!CheckForError(hr))
+	{
 		return true;
 	}
 
@@ -157,7 +158,8 @@ bool CDevice::CreatePixelShader(void * BlobPixel, void * PixelShader)
 		nullptr,
 		static_cast<ID3D11PixelShader**>(PixelShader));
 
-	if (!CheckForError(hr)) {
+	if (!CheckForError(hr))
+	{
 		return true;
 	}
 
@@ -179,7 +181,8 @@ bool CDevice::CreateBuffer(void * Descriptor, void * Buffer, void * Data = nullp
 			static_cast<D3D11_SUBRESOURCE_DATA*>(Data),
 			static_cast<ID3D11Buffer**>(Buffer));
 	}
-	else {
+	else
+	{
 		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
 			nullptr,
 			static_cast<ID3D11Buffer**>(Buffer));
