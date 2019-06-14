@@ -505,7 +505,7 @@ HRESULT Preamble()
 	}
 
 	// Create vertex buffer
-	VertexWithTexture VErtices[] = {
+	VertexWithTexture Vertices[] = {
 		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, -1.0f) ,glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
@@ -538,43 +538,8 @@ HRESULT Preamble()
 
 	};
 
-
-	SimpleVertex vertices[] =
-	{
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-	};
-
-
-	D3D11_BUFFER_DESC bd;
-	SecureZeroMemory(&bd, sizeof(bd));
+	//D3D11_BUFFER_DESC bd;
+	//SecureZeroMemory(&bd, sizeof(bd));
 	//bd.Usage = D3D11_USAGE_DEFAULT;
 	//bd.ByteWidth = sizeof(SimpleVertex) * 24;
 	//bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -585,7 +550,7 @@ HRESULT Preamble()
 	//InitData.pSysMem = vertices;
 	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer)
 
-	MY_VertexBuffer.IntiVertexBuffer(vertices, 24, 0);
+	MY_VertexBuffer.IntiVertexBuffer(Vertices, 24, 0);
 
 	/*Creates the vertexBuffer*/
 	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDesc())),
@@ -658,10 +623,10 @@ HRESULT Preamble()
 	MY_DeviceContext.IASetPrimitiveTopology(static_cast<int>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 	// Create the constant buffers
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(CBNeverChanges);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
+//bd.Usage = D3D11_USAGE_DEFAULT;
+//bd.ByteWidth = sizeof(CBNeverChanges);
+//bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+//bd.CPUAccessFlags = 0;
 
 	XMMATRIX NeverChangeBuffer;
 
@@ -679,7 +644,7 @@ HRESULT Preamble()
 		return hr;
 	}
 
-	bd.ByteWidth = sizeof(CBChangeOnResize);
+	//	bd.ByteWidth = sizeof(CBChangeOnResize);
 
 	CBChangeOnResize ChangeOnResize;
 
@@ -694,9 +659,7 @@ HRESULT Preamble()
 		return hr;
 	}
 
-	bd.ByteWidth = sizeof(CBChangesEveryFrame);
-
-
+	//	bd.ByteWidth = sizeof(CBChangesEveryFrame);
 	CBChangesEveryFrame ChangeEveryFrame;
 	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
 	ConstantBufferChangeEveryFrame.InitConstBuffer(ChangeEveryFrame, 0);
