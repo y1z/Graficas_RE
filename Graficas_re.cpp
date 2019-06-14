@@ -8,16 +8,24 @@
 
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
+
+
+
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
 #include "Utility/Timer.h"
+
 
 // Classes
 #include "CDevice.h"
 #include "CDeviaceContext.h"
 #include "CSwapChian.h"
 #include "CBuffer.h"
+
+//Window
+#include "CWindow.h"
+#include <GLFW/glfw3.h>
 
 //! Give me the ability to use this include in other places 
 #include "CTexture.h"
@@ -44,10 +52,10 @@ bool g_FinishInit = false;
 // assimp
 #include <assimp/Importer.hpp>
 #include "Structs.h"
+#include "Custom_Structs.h"
 
 
-//class CBuffer;
-
+CWindow MY_Window;
 
 CDevice MY_Device;// Replaced 
 CDeviaceContext MY_DeviceContext;// Replaced 
@@ -141,8 +149,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	if (FAILED(InitWindow(hInstance, nCmdShow)))
+	ptr_WindProc ptr_Proc = &WindProc;
+
+	if (!MY_Window.InitWindow(hInstance,ptr_Proc))
 		return 0;
+
+	//if (FAILED(InitWindow(hInstance, nCmdShow)))
+		//return 0;
 
 	if (FAILED(Preamble()))
 	{
@@ -254,7 +267,7 @@ HRESULT Preamble()
 	HRESULT hr = S_OK;
 
 	RECT rc;
-	GetClientRect(g_hWnd, &rc);
+	GetClientRect(MY_Window.GetHandler(), &rc);
 	UINT width = rc.right - rc.left;
 	UINT height = rc.bottom - rc.top;
 
@@ -288,7 +301,7 @@ HRESULT Preamble()
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = g_hWnd;
+	sd.OutputWindow = MY_Window.GetHandlerRef();
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = TRUE;
@@ -308,7 +321,7 @@ HRESULT Preamble()
 	//ID3D11Texture2D* pBackBuffer = NULL;
 	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	MY_Gui.Init(MY_Device, MY_DeviceContext, g_hWnd);
+	MY_Gui.Init(MY_Device, MY_DeviceContext, MY_Window.GetHandlerRef());
 
 	isSuccesful = MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
 
@@ -337,19 +350,19 @@ HRESULT Preamble()
 
 	// Create depth stencil texture
 	// old code 
-	D3D11_TEXTURE2D_DESC descDepth;
-	SecureZeroMemory(&descDepth, sizeof(descDepth));
-	descDepth.Width = width;
-	descDepth.Height = height;
-	descDepth.MipLevels = 1;
-	descDepth.ArraySize = 1;
-	descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	descDepth.SampleDesc.Count = 1;
-	descDepth.SampleDesc.Quality = 0;
-	descDepth.Usage = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	descDepth.CPUAccessFlags = 0;
-	descDepth.MiscFlags = 0;
+	//D3D11_TEXTURE2D_DESC descDepth;
+	//SecureZeroMemory(&descDepth, sizeof(descDepth));
+	//descDepth.Width = width;
+	//descDepth.Height = height;
+	//descDepth.MipLevels = 1;
+	//descDepth.ArraySize = 1;
+	//descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//descDepth.SampleDesc.Count = 1;
+	//descDepth.SampleDesc.Quality = 0;
+	//descDepth.Usage = D3D11_USAGE_DEFAULT;
+	//descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	//descDepth.CPUAccessFlags = 0;
+	//descDepth.MiscFlags = 0;
 
 	// old code 	
 	//hr = g_pd3dDevice->CreateTexture2D(&descDepth, NULL, &g_pDepthStencil);
@@ -490,52 +503,86 @@ HRESULT Preamble()
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-	
+
 	// Create vertex buffer
+	VertexWithTexture VErtices[] = {
+		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(1.0f, 1.0f, -1.0f) ,glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+
+		{glm::vec3(-1.0f, -1.0f, -1.0),glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(-1.0f, -1.0f, 1.0f),glm::vec2(0.0f, 1.0f) },
+
+		{glm::vec3(-1.0f, -1.0f, 1.0f),glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(-1.0f, -1.0f, -1.0),glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+
+		{glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(0.0f, 1.0f) },
+																						
+		{glm::vec3(-1.0f, -1.0f, -1.0),glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(0.0f, 1.0f) },
+
+		{glm::vec3(-1.0f, -1.0f, 1.0f),glm::vec2(0.0f, 0.0f) },
+		{glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
+		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
+		{glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
+	
+	};
+
+
 	SimpleVertex vertices[] =
 	{
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f   ), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f  ), XMFLOAT2(0.0f, 1.0f) },
 
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f  ), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f ), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f ), XMFLOAT2(0.0f, 0.0f) },
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f  ), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f  ), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f   ), XMFLOAT2(0.0f, 1.0f) },
 
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f ) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f ), XMFLOAT2(1.0f, 0.0f ) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f  ), XMFLOAT2(1.0f, 1.0f ) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f ), XMFLOAT2(0.0f, 1.0f ) },
 	};
 
 
 	D3D11_BUFFER_DESC bd;
 	SecureZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(SimpleVertex) * 24;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	D3D11_SUBRESOURCE_DATA InitData;
-	SecureZeroMemory(&InitData, sizeof(InitData));
-
-	InitData.pSysMem = vertices;
+	//bd.Usage = D3D11_USAGE_DEFAULT;
+	//bd.ByteWidth = sizeof(SimpleVertex) * 24;
+	//bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	//bd.CPUAccessFlags = 0;
+	//D3D11_SUBRESOURCE_DATA InitData;
+	//SecureZeroMemory(&InitData, sizeof(InitData));
+	//
+	//InitData.pSysMem = vertices;
 	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer)
 
 	MY_VertexBuffer.IntiVertexBuffer(vertices, 24, 0);
@@ -582,11 +629,11 @@ HRESULT Preamble()
 			23,20,22
 	};
 
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(WORD) * 36;
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	InitData.pSysMem = indices;
+	//bd.Usage = D3D11_USAGE_DEFAULT;
+	//bd.ByteWidth = sizeof(WORD) * 36;
+	//bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	//bd.CPUAccessFlags = 0;
+	//InitData.pSysMem = indices;
 	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
 
 	MY_IndexBuffer.InitIndexBuffer(indices, 36, 0);
@@ -739,7 +786,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	RECT WindowDimentions;
 
-	GetWindowRect(g_hWnd, &WindowDimentions);
+	GetWindowRect(MY_Window.GetHandlerRef(), &WindowDimentions);
 
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
@@ -837,7 +884,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			//MY_RenderTragetView.DestroyBuffers();
 
 			// tell the swap chine the size of the new window (affecting the buffer )
-			MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, g_hWnd);
+			MY_SwapChain.ResizeBuffer(WindowDimentions.right, WindowDimentions.bottom, MY_Window.GetHandlerRef());
 			// get a buffer(the one you just made nullptr) and reuse-it as a back buffer again and again and again and AGAIN FOR ALL OF EXISTENCES
 		//	MY_SwapChain.GetBuffer(0, static_cast<void*>(MY_RenderTragetView.GetBackBufferRef()));
 
