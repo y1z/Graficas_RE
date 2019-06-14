@@ -15,7 +15,7 @@ static bool CheckForError(HRESULT hr)
 		return true;
 	}
 	if (hr == E_INVALIDARG) {
-		return true;
+		return true; 
 	}
 
 	return false;

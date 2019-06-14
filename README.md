@@ -10,3 +10,4 @@ just get the zip and use the 2010 .sln file .
 - **imgui** : https://github.com/ocornut/imgui
 - **GLM** : https://github.com/g-truc/glm
 - **FreeGlut** : http://freeglut.sourceforge.net
+- **GLFW** : https://www.glfw.org

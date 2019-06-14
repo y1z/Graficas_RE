@@ -423,6 +423,7 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
     <ClCompile Include="CShaderResourceView.cpp" />
     <ClCompile Include="CSwapChian.cpp" />
     <ClCompile Include="CTexture.cpp" />
+    <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="Graficas_re.cpp" />
     <ClCompile Include="CRenderTragetView.cpp" />
     <ClCompile Include="CVertexShader.cpp" />
@@ -455,6 +456,7 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
     <ClInclude Include="CTexture.h" />
     <ClInclude Include="CRenderTragetView.h" />
     <ClInclude Include="Custom_Structs.h" />
+    <ClInclude Include="CWindow.h" />
     <ClInclude Include="imGuiManager.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />

@@ -151,7 +151,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	ptr_WindProc ptr_Proc = &WindProc;
 
-	if (!MY_Window.InitWindow(hInstance,ptr_Proc))
+	if (!MY_Window.InitWindow(hInstance, ptr_Proc))
 		return 0;
 
 	//if (FAILED(InitWindow(hInstance, nCmdShow)))
@@ -525,7 +525,7 @@ HRESULT Preamble()
 		{glm::vec3(1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
 		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(0.0f, 1.0f) },
-																						
+
 		{glm::vec3(-1.0f, -1.0f, -1.0),glm::vec2(0.0f, 0.0f) },
 		{glm::vec3(1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) },
@@ -535,41 +535,41 @@ HRESULT Preamble()
 		{glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
 		{glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
-	
+
 	};
 
 
 	SimpleVertex vertices[] =
 	{
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f   ), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f  ), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f  ), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f ), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f ), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f  ), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f  ), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f   ), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f ), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f  ), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f ), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
 
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f ) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f ), XMFLOAT2(1.0f, 0.0f ) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f  ), XMFLOAT2(1.0f, 1.0f ) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f ), XMFLOAT2(0.0f, 1.0f ) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 	};
 
 
@@ -670,7 +670,7 @@ HRESULT Preamble()
 	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
 
 		/*Creates NeverChanges buffer */
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(ConstantBufferNeverChange.GetDescRef())),
 		static_cast<void*>(ConstantBufferNeverChange.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
@@ -685,7 +685,7 @@ HRESULT Preamble()
 
 	ConstantBufferResize.InitConstBuffer(ChangeOnResize, 0);
 
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(ConstantBufferResize.GetDescRef())),
 		static_cast<void*>(ConstantBufferResize.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
@@ -696,9 +696,12 @@ HRESULT Preamble()
 
 	bd.ByteWidth = sizeof(CBChangesEveryFrame);
 
-	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
 
-	MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(bd)),
+	CBChangesEveryFrame ChangeEveryFrame;
+	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBChangesEveryFrame);
+	ConstantBufferChangeEveryFrame.InitConstBuffer(ChangeEveryFrame, 0);
+
+	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(ConstantBufferChangeEveryFrame.GetDescRef())),
 		static_cast<void*>(ConstantBufferChangeEveryFrame.GetBufferRef()), nullptr);
 
 	if (isSuccesful == false)
