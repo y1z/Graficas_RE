@@ -9,4 +9,4 @@ just get the zip and use the 2010 .sln file .
 - **Assimp** : https://github.com/assimp/assimp
 - **imgui** : https://github.com/ocornut/imgui
 - **GLM** : https://github.com/g-truc/glm
-
+- **FreeGlut** : http://freeglut.sourceforge.net
