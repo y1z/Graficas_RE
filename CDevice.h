@@ -1,13 +1,18 @@
 #pragma once
+// all classes created by CDevice
+class CBuffer;
+class CSampler;
+class CSwapChian;
+class CDeviaceContext;
+class CWindow;
 
 #include"Usable_Windows.h"
 //TODO_Gl add include guard
+#include "CWindow.h"
 
 #if USING_DIRECTX
 #include "DirectXHeader.h"  
 #endif // USING_DIRECTX
-
-
 #include <cinttypes>
 
 class CDevice
@@ -16,6 +21,8 @@ public:// constructors
 	CDevice();
 	~CDevice();
 public: // functions 
+
+	bool InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext,CWindow &Window);
 
 	/*! used to crate a render target or equivalent
 	\param BackBuffer [in] expecting it to be (ID3D11Texture2D*) or opengl equivalent

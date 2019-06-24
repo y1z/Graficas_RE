@@ -6,11 +6,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
+//#undef USING_DIRECTX
+
+
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
-
-
-
+// OpenGL 
+#include "glew-2.1.0/include/GL/glew.h"
+#include "freeglut/include/GL/glut.h"
+#include <GLFW/glfw3.h>
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
@@ -25,7 +29,7 @@ bool g_FinishInit = false;
 
 //Window
 #include "CWindow.h"
-#include <GLFW/glfw3.h>
+
 
 //! Give me the ability to use this include in other places 
 #include "CTexture.h"
@@ -93,8 +97,8 @@ CModel MY_Model;
 //--------------------------------------------------------------------------------------
 HINSTANCE                           g_hInst = NULL;
 HWND                                g_hWnd = NULL;
-D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
-D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
+//D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
+//D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 //ID3D11Device*                       g_pd3dDevice = NULL;
 //ID3D11DeviceContext*                g_pImmediateContext = NULL;
 //IDXGISwapChain*                     g_pSwapChain = NULL;
@@ -149,10 +153,49 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	/* Initialize the library */
+	if (!glfwInit())
+		return -1;
+
+	/// ADD ifDef for inti the glfw library
+
+	GLFWwindow* window;
+
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
+
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
+
+	/* Loop until the user closes the window */
+	while (!glfwWindowShouldClose(window))
+	{
+		/* Render here */
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		/* Swap front and back buffers */
+
+		glfwSwapBuffers(window);
+
+		/* Poll for and process events */
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+
 	ptr_WindProc ptr_Proc = &WindProc;
+#ifdef USING_DIRECTX
+
 
 	if (!MY_Window.InitWindow(hInstance, ptr_Proc))
 		return 0;
+
+#endif // USING_DIRECTX
 
 	//if (FAILED(InitWindow(hInstance, nCmdShow)))
 		//return 0;
@@ -176,7 +219,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		{
 			Render();
 		}
-	}// 
+	}
+	/* Terminate the library*/
+	glfwTerminate();
 
 	CleanupDevice();
 
@@ -266,56 +311,7 @@ HRESULT Preamble()
 
 	HRESULT hr = S_OK;
 
-	RECT rc;
-	GetClientRect(MY_Window.GetHandler(), &rc);
-	UINT width = rc.right - rc.left;
-	UINT height = rc.bottom - rc.top;
-
-	UINT createDeviceFlags = 0;
-#ifdef _DEBUG
-	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-	D3D_DRIVER_TYPE driverTypes[] =
-	{
-			D3D_DRIVER_TYPE_HARDWARE,
-			D3D_DRIVER_TYPE_WARP,
-			D3D_DRIVER_TYPE_REFERENCE,
-	};
-	UINT numDriverTypes = ARRAYSIZE(driverTypes);
-
-	D3D_FEATURE_LEVEL featureLevels[] =
-	{
-			D3D_FEATURE_LEVEL_11_0,
-			D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_10_0,
-	};
-	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
-
-	DXGI_SWAP_CHAIN_DESC sd;
-	SecureZeroMemory(&sd, sizeof(sd));
-	sd.BufferCount = 1;
-	sd.BufferDesc.Width = width;
-	sd.BufferDesc.Height = height;
-	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 60;
-	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = MY_Window.GetHandlerRef();
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;
-
-	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
-	{
-		g_driverType = driverTypes[driverTypeIndex];
-		hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, &sd, MY_SwapChain.GetSwapChianRef(), MY_Device.GetDeviceRef(), &g_featureLevel, MY_DeviceContext.GetDeviceContextRef());
-		if (SUCCEEDED(hr))
-			break;
-	}
-	if (FAILED(hr))
-		return hr;
+	isSuccesful = MY_Device.InitDevice(MY_SwapChain, MY_DeviceContext, MY_Window);
 	// Create a render target view
 
 	//ID3D11Texture2D* pBackBuffer = NULL;
@@ -368,7 +364,7 @@ HRESULT Preamble()
 	//hr = g_pd3dDevice->CreateTexture2D(&descDepth, NULL, &g_pDepthStencil);
 	//if (FAILED(hr))
 	//return hr;
-	MY_DepthStencilView.InitDepthStencil2D(height, width, static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
+	MY_DepthStencilView.InitDepthStencil2D(MY_Window.GetHeight(), MY_Window.GetWidth(), static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT));
 
 	///DepthStencil.InitTexture2D(width, height,
 	///	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
@@ -410,7 +406,7 @@ HRESULT Preamble()
 
 	// Setup the viewport
 
-	MY_ViewPort.SetupViewPort(height, width, 0, 0);
+	MY_ViewPort.SetupViewPort(MY_Window.GetHeight(), MY_Window.GetWidth(), 0, 0);
 
 	// /**/g_pImmediateContext->RSSetViewports(1, &vp);
 	MY_DeviceContext.RSSetViewports(1, static_cast<void*>(GiveSinglePointer(MY_ViewPort.GetViewPortRef())));
@@ -505,7 +501,7 @@ HRESULT Preamble()
 	}
 
 	// Create vertex buffer
-	VertexWithTexture Vertices[] = {
+	VertexWithTexture VErtices[] = {
 		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, -1.0f) ,glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
@@ -538,19 +534,7 @@ HRESULT Preamble()
 
 	};
 
-	//D3D11_BUFFER_DESC bd;
-	//SecureZeroMemory(&bd, sizeof(bd));
-	//bd.Usage = D3D11_USAGE_DEFAULT;
-	//bd.ByteWidth = sizeof(SimpleVertex) * 24;
-	//bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	//bd.CPUAccessFlags = 0;
-	//D3D11_SUBRESOURCE_DATA InitData;
-	//SecureZeroMemory(&InitData, sizeof(InitData));
-	//
-	//InitData.pSysMem = vertices;
-	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer)
-
-	MY_VertexBuffer.IntiVertexBuffer(Vertices, 24, 0);
+	MY_VertexBuffer.IntiVertexBuffer(VErtices, 24, 0);
 
 	/*Creates the vertexBuffer*/
 	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDesc())),
@@ -564,7 +548,7 @@ HRESULT Preamble()
 	}
 
 	// Set vertex buffer
-	UINT stride = sizeof(SimpleVertex);
+	UINT stride = sizeof(VertexWithTexture);
 	UINT offset = 0;
 	//g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
 
@@ -628,7 +612,7 @@ HRESULT Preamble()
 //bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 //bd.CPUAccessFlags = 0;
 
-	XMMATRIX NeverChangeBuffer;
+	glm::mat4x4 NeverChangeBuffer;
 
 	ConstantBufferNeverChange.InitConstBuffer(NeverChangeBuffer, 0);
 
@@ -691,9 +675,13 @@ HRESULT Preamble()
 
 	//hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
 
+#if USING_DIRECTX
 	MY_Sampler.SetUpSampler((int) D3D11_FILTER_MIN_MAG_MIP_LINEAR, (int) D3D11_TEXTURE_ADDRESS_WRAP,
 		(int) D3D11_TEXTURE_ADDRESS_WRAP, (int) D3D11_TEXTURE_ADDRESS_WRAP,
 		(int) D3D11_COMPARISON_NEVER, 0);
+#else
+
+#endif // USING_DIRECTX
 
 	// creates a sampler 
 	isSuccesful = MY_Device.CreateSamplerState(static_cast<void*>(GiveSinglePointer(MY_Sampler.ConvertSamplerToDx())),
@@ -709,7 +697,7 @@ HRESULT Preamble()
 	g_World = XMMatrixIdentity();
 
 	// Initialize the view matrix and Perceptive matrice
-	MY_Camera.InitCamara(width, height);
+	MY_Camera.InitCamara(MY_Window.GetWidth(), MY_Window.GetHeight());
 
 	// old code 
 	/*XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
@@ -773,6 +761,11 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	XMVECTOR AngelVector;
 
 	bool MoveCamara = true;
+	/*******************USE THIS TO GET THE WIDOW SIZE ************/
+//get the first 16-bits of the integer 
+	int ClientX = LOWORD(lParam);
+	// get the remaining 61-bits 
+	int ClienY = HIWORD(lParam);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter = GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D());
 
@@ -841,6 +834,7 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	case WM_SIZING:
+
 
 		if (g_FinishInit)
 		{
@@ -942,18 +936,17 @@ void Render()
 	MY_Timer.StartTiming();
 
 	// Update our time
-	if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
-	{
-		Time += (float) XM_PI * 0.0125f;
-	}
-	else
-	{
-		static DWORD dwTimeStart = 0;
-		DWORD dwTimeCur = GetTickCount();
-		if (dwTimeStart == 0)
-			dwTimeStart = dwTimeCur;
-		Time = (dwTimeCur - dwTimeStart) / 1000.0f;
-	}
+	//if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
+	//{
+	//	Time += (float) XM_PI * 0.0125f;
+	//}
+
+	static DWORD dwTimeStart = 0;
+	DWORD dwTimeCur = GetTickCount();
+	if (dwTimeStart == 0)
+		dwTimeStart = dwTimeCur;
+	Time = (dwTimeCur - dwTimeStart) / 1000.0f;
+
 
 	// Rotate cube around the origin
 	g_World = XMMatrixRotationY(Time);

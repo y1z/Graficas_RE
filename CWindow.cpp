@@ -1,6 +1,13 @@
 #include "CWindow.h"
 #include "Resource.h"
 
+#ifdef UNICODE
+static constexpr TCHAR *DefulatName = L"window";
+#else
+static constexpr TCHAR *DefulatName = "window";
+#endif // UNICODE
+
+
 CWindow::CWindow()
 {}
 
@@ -8,12 +15,15 @@ CWindow::CWindow()
 CWindow::~CWindow()
 {}
 
-bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc,int Width,int Height, int CommandShow)
+bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int Height, int CommandShow)
 {
-	// assign winpro to variable 
 	mptr_windProc = Proc;
 	m_Height = Height;
 	m_Width = Width;
+	m_Name = DefulatName;
+
+#ifdef USING_DIRECTX
+
 
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -26,23 +36,45 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc,int Width,int Hei
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = L"TutorialWindowClass";
+	wcex.lpszClassName = DefulatName;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR) IDI_TUTORIAL1);
 	if (!RegisterClassEx(&wcex))
 		return E_FAIL;
 
 	// Create window
-	RECT rc = { 0, 0, 640, 480 };
+	RECT rc = { 0, 0, m_Width, m_Height };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-	m_WindowHandler = CreateWindow(L"TutorialWindowClass", L"Direct3D 11 Tutorial 7", WS_OVERLAPPEDWINDOW,
+
+	m_WindowHandler = CreateWindow(DefulatName, L"Direct3D 11 Tutorial 7", WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, Instance,
 		NULL);
 	if (!m_WindowHandler)
 		return false;
 
 	ShowWindow(m_WindowHandler, CommandShow);
+#elif 
+	mptr_Window = glfwCreateWindow(m_Width, m_Height, "OpenGL Window", NULL, NULL);
+	glfwMakeContextCurrent(mptr_Window);
+
+	if (!mptr_Window)
+	{
+		MessageBox(NULL, L"ERROR!", L"Error With glfw Window ", 0);
+	}
+
+#endif // USING_DIRECTX
 
 	return true;
+}
+
+void CWindow::DestoryWindow()
+{
+#ifdef USING_DIRECTX
+	UnregisterClass(m_Name, m_Instance);
+
+#else
+	glfwDestroyWindow(mptr_Window);
+#endif // USING_DIRECTX
+
 }
 
 int CWindow::GetHeight()

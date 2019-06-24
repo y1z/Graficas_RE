@@ -1,4 +1,7 @@
 #include "CDevice.h"
+#include "CSwapChian.h"
+#include "CDeviaceContext.h"
+
 
 #include "Utility/ErrorHandlingGrafics.h"
 /* often used preprocessor statements
@@ -17,6 +20,73 @@ CDevice::CDevice()
 CDevice::~CDevice()
 {
 	if (mptr_Device != nullptr) { mptr_Device->Release(); }
+}
+
+bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext, CWindow &Window)
+{
+
+#if USING_DIRECTX
+	HRESULT hr = S_OK;
+
+	RECT rc;
+	GetClientRect(Window.GetHandler(), &rc);
+	UINT width = rc.right - rc.left;
+	UINT height = rc.bottom - rc.top;
+
+	UINT createDeviceFlags = 0;
+#ifdef _DEBUG
+	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	D3D_DRIVER_TYPE SelectedDriver = D3D_DRIVER_TYPE_HARDWARE;
+	D3D_FEATURE_LEVEL SelectedFeatureLevel = D3D_FEATURE_LEVEL_10_0;
+
+
+	D3D_DRIVER_TYPE driverTypes[] =
+	{
+			D3D_DRIVER_TYPE_HARDWARE,
+			D3D_DRIVER_TYPE_WARP,
+			D3D_DRIVER_TYPE_REFERENCE,
+	};
+	UINT numDriverTypes = ARRAYSIZE(driverTypes);
+
+	D3D_FEATURE_LEVEL featureLevels[] =
+	{
+			D3D_FEATURE_LEVEL_11_0,
+			D3D_FEATURE_LEVEL_10_1,
+			D3D_FEATURE_LEVEL_10_0,
+	};
+	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
+
+	DXGI_SWAP_CHAIN_DESC sd;
+	SecureZeroMemory(&sd, sizeof(sd));
+	sd.BufferCount = 1;
+	sd.BufferDesc.Width = width;
+	sd.BufferDesc.Height = height;
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = Window.GetHandlerRef();
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+
+	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
+	{
+		SelectedDriver = driverTypes[driverTypeIndex];
+		hr = D3D11CreateDeviceAndSwapChain(NULL, SelectedDriver, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
+			D3D11_SDK_VERSION, &sd, SwapChian.GetSwapChianRef(), this->GetDeviceRef(), &SelectedFeatureLevel, DeviaceContext.GetDeviceContextRef());
+		if (SUCCEEDED(hr))
+		{
+			return true;
+		}
+	}
+	if (FAILED(hr))
+		return false;
+#endif // USING_DIRECTX
+
+	return false;
 }
 
 bool CDevice::CreateRenderTargetView(void * BackBuffer, void * RenderTraget)

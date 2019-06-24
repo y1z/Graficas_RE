@@ -57,14 +57,11 @@ bool CInputLayout::ReadShaderDataDX(ID3DBlob * ShaderData, int ShaderInputData)
 
 	///---------------------------------
 	D3D11_SHADER_DESC ShaderDesc;
-	D3D11_SHADER_BUFFER_DESC ShaderBufferDesc;
 	// to know how long to make the for loop
 	ReflectorShader->GetDesc(&ShaderDesc);
 
-
 	for (uint32_t i = 0; i < ShaderDesc.InputParameters; ++i)
 	{
-		D3D11_INPUT_ELEMENT_DESC Temp;
 		// where to store the data i need for the input layout 
 		D3D11_SIGNATURE_PARAMETER_DESC paramDesc;
 		ReflectorShader->GetInputParameterDesc(i, &paramDesc);

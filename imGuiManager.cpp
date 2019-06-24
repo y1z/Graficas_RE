@@ -30,6 +30,7 @@ bool imGuiManager::Init(CDevice & Device, CDeviaceContext & DeviceContext, HWND&
 	isSuccesful = ImGui_ImplWin32_Init(Handle);
 #ifdef USING_DIRECTX
 	isSuccesful = ImGui_ImplDX11_Init(Device.GetDevice(), DeviceContext.GetDeviceContext());
+
 #endif // USING_DIRECTX
 	ImGui::StyleColorsDark();
 

@@ -193,7 +193,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;glfw3dll.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
@@ -203,6 +203,8 @@
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalLibraryDirectories>$(SolutionDir)bin</AdditionalLibraryDirectories>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
     <Manifest>
       <EnableDPIAwareness>true</EnableDPIAwareness>
@@ -218,6 +220,8 @@
     <PreLinkEvent>
       <Command>xcopy /y /d "$(SolutionDir)bin\assimp-vc140-mt.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
+xcopy /y /d "$(SolutionDir)glew-2.1.0\bin\Release\x64\glew32.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
+xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
@@ -284,7 +288,7 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -377,7 +381,7 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -404,6 +408,9 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
     <PreLinkEvent>
       <Command>xcopy /y /d "$(SolutionDir)bin\assimp-vc140-mt.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
+xcopy /y /d "$(SolutionDir)glew-2.1.0\bin\Release\x64\glew32.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
+xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
+
 </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
