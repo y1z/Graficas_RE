@@ -153,44 +153,43 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	/* Initialize the library */
-	if (!glfwInit())
-		return -1;
-
-	/// ADD ifDef for inti the glfw library
-
-	GLFWwindow* window;
-
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-
-	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window))
-	{
-		/* Render here */
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		/* Swap front and back buffers */
-
-		glfwSwapBuffers(window);
-
-		/* Poll for and process events */
-		glfwPollEvents();
-	}
-
-	glfwTerminate();
+	///* Initialize the library */
+	//if (!glfwInit())
+	//	return -1;
+	//
+	///// ADD ifDef for inti the glfw library
+	//
+	//GLFWwindow* window;
+	//
+	///* Create a windowed mode window and its OpenGL context */
+	//window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	//if (!window)
+	//{
+	//	glfwTerminate();
+	//	return -1;
+	//}
+	//
+	///* Make the window's context current */
+	//glfwMakeContextCurrent(window);
+	//
+	///* Loop until the user closes the window */
+	//while (!glfwWindowShouldClose(window))
+	//{
+	//	/* Render here */
+	//	glClear(GL_COLOR_BUFFER_BIT);
+	//
+	//	/* Swap front and back buffers */
+	//
+	//	glfwSwapBuffers(window);
+	//
+	//	/* Poll for and process events */
+	//	glfwPollEvents();
+	//}
+	//
+	//glfwTerminate();
 
 	ptr_WindProc ptr_Proc = &WindProc;
 #ifdef USING_DIRECTX
-
 
 	if (!MY_Window.InitWindow(hInstance, ptr_Proc))
 		return 0;
@@ -266,42 +265,6 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
 }
 
 //--------------------------------------------------------------------------------------
-// Helper for compiling shaders with D3DX11
-//--------------------------------------------------------------------------------------
-
-/*!
-\todo Create own version of this function later down the line.*/
-HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
-{
-	HRESULT hr = S_OK;
-
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-	// Setting this flag improves the shader debugging experience, but still allows 
-	// the shaders to be optimized and to run exactly the way they will run in 
-	// the release configuration of this program.
-	dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-	ID3DBlob* pErrorBlob;
-	hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
-		dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
-
-	if (FAILED(hr))
-	{
-		if (pErrorBlob != NULL)
-			OutputDebugStringA((char*) pErrorBlob->GetBufferPointer());
-		if (pErrorBlob) pErrorBlob->Release();
-		return hr;
-	}
-	if (pErrorBlob) pErrorBlob->Release();
-
-	return S_OK;
-}
-
-
-//--------------------------------------------------------------------------------------
 // Create Direct3D device and swap chain
 //--------------------------------------------------------------------------------------
 HRESULT Preamble()
@@ -329,8 +292,7 @@ HRESULT Preamble()
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
 	/// Render traget creation 
-	isSuccesful = MY_Device.CreateRenderTargetView(static_cast<void*>(MY_RenderTragetView.GetBackBuffer()),
-		static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()));// &g_pRenderTargetView 
+	isSuccesful = MY_Device.CreateRenderTargetView(MY_RenderTragetView);// &g_pRenderTargetView 
 
 //	RenderTragetView.ReleaseBackBuffer();
 
@@ -369,8 +331,7 @@ HRESULT Preamble()
 	///DepthStencil.InitTexture2D(width, height,
 	///	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
 
-	isSuccesful = MY_Device.CreateTexture2D(static_cast<void*>(MY_DepthStencilView.GetTexture2DRef()),
-		static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.GetTextureDescriptor())));
+	isSuccesful = MY_Device.CreateTexture2D(MY_DepthStencilView.GetTexture2DRef());
 
 	if (isSuccesful == false)
 	{
@@ -387,9 +348,11 @@ HRESULT Preamble()
 
 	/*D3D11_DEPTH_STENCIL_VIEW_DESC *ptr_DepthDescripter =*/
 	//g_pDepthStencill
-	isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
-		static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
-		static_cast<void*>(MY_RenderTragetView.GetDepthStencilViewRef()));// &g_pDepthStencilView
+	//isSuccesful = MY_Device.CreateDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetTexture2D()),
+	//	static_cast<void*>(GiveSinglePointer(MY_DepthStencilView.ConvertDepthStecilToDx2D())),
+	//	static_cast<void*>(MY_DepthStencilView.GetDepthStencilViewRef()));// &g_pDepthStencilView
+
+	isSuccesful = MY_Device.CreateDepthStencilView(MY_DepthStencilView);
 
 	if (isSuccesful == false)
 	{
@@ -402,7 +365,7 @@ HRESULT Preamble()
 
 	//g_pImmediateContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
 	MY_DeviceContext.OMSetRenderTargets(1, static_cast<void*>(MY_RenderTragetView.GetRenderTragetRef()),
-		static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()));
+		static_cast<void*>(MY_DepthStencilView.GetDepthStencilView()));
 
 	// Setup the viewport
 
@@ -425,7 +388,7 @@ HRESULT Preamble()
 		return hr;
 	}
 
-	isSuccesful = MY_Device.CreateVertexShader(static_cast<void*>(MY_VertexShader.GetVertexShaderData()), static_cast<void*> (MY_VertexShader.GetVertexShaderRef()));
+	isSuccesful = MY_Device.CreateVertexShader(MY_VertexShader);
 
 	MY_InputLayout.ReadShaderDataDX(MY_VertexShader.GetVertexShaderData(), static_cast<int>(D3D11_INPUT_PER_VERTEX_DATA));
 
@@ -434,12 +397,6 @@ HRESULT Preamble()
 		HRESULT hr = S_FALSE;
 		return hr;
 	}
-
-	/*if (FAILED(hr))
-	{
-		p_VertexShaderBlob->Release();
-		return hr;
-	}*/
 
 	///old code 
 	// Define the input layout
@@ -452,14 +409,11 @@ HRESULT Preamble()
 	//
 	//MY_InputLayout.ConvertDxToInputLayout(layout, 2);
 
-	auto LayoutConvertion = MY_InputLayout.ConvertInputLayoutToDx();
-
 	// old code
 	//hr = g_pd3dDevice->CreateInputLayout(layout, numElements, p_VertexShaderBlob->GetBufferPointer(),
 	//	p_VertexShaderBlob->GetBufferSize(), &g_pVertexLayout);
 
-	isSuccesful = MY_Device.CreateInputLayout(static_cast<void*>(&LayoutConvertion[0]), static_cast<void*>(MY_VertexShader.GetVertexShaderData()),
-		LayoutConvertion.size(), static_cast<void*>(MY_InputLayout.GetInputLayoutRef()));
+	isSuccesful = MY_Device.CreateInputLayout(MY_InputLayout,MY_VertexShader);
 	//p_VertexShaderBlob->Release();
 
 	if (isSuccesful == false)
@@ -501,7 +455,7 @@ HRESULT Preamble()
 	}
 
 	// Create vertex buffer
-	VertexWithTexture VErtices[] = {
+	VertexWithTexture Vertices[] = {
 		{glm::vec3(-1.0f, 1.0f, -1.0f),glm::vec2(0.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, -1.0f) ,glm::vec2(1.0f, 0.0f) },
 		{glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(1.0f, 1.0f) },
@@ -534,7 +488,7 @@ HRESULT Preamble()
 
 	};
 
-	MY_VertexBuffer.IntiVertexBuffer(VErtices, 24, 0);
+	MY_VertexBuffer.IntiVertexBuffer(Vertices, 24, 0);
 
 	/*Creates the vertexBuffer*/
 	isSuccesful = MY_Device.CreateBuffer(static_cast<void*>(GiveSinglePointer(MY_VertexBuffer.GetDesc())),
@@ -556,7 +510,6 @@ HRESULT Preamble()
 		static_cast<void*>(MY_VertexBuffer.GetBufferRef()), MY_VertexBuffer.GetStride(), MY_VertexBuffer.GetOffset());
 
 	// Create index buffer
-	// Create vertex buffer
 	WORD indices[] =
 	{
 			3,1,0,
@@ -974,7 +927,7 @@ void Render()
 	// Clear the depth buffer to 1.0 (max depth)
 	//
 
-	MY_DeviceContext.ClearDepthStencilView(static_cast<void*>(MY_RenderTragetView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
+	MY_DeviceContext.ClearDepthStencilView(static_cast<void*>(MY_DepthStencilView.GetDepthStencilView()), static_cast<int>(D3D11_CLEAR_DEPTH), 1.0f, 0);
 	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	float MyCubeColor[4] = { g_vMeshColor.x * -1, 	g_vMeshColor.y * -1, 	g_vMeshColor.z * -1, 1.0f };

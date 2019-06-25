@@ -9,7 +9,6 @@ CRenderTragetView::CRenderTragetView()
 CRenderTragetView::~CRenderTragetView()
 {
 	if (mptr_RenderTraget) { mptr_RenderTraget->Release(); }
-	if (mptr_DepthStencilView) { mptr_DepthStencilView->Release(); }
 	if (isBackBufferReleased == false && mptr_buffer != nullptr) { mptr_buffer->Release(); }
 }
 
@@ -21,16 +20,6 @@ ID3D11RenderTargetView * CRenderTragetView::GetRenderTraget()
 ID3D11RenderTargetView ** CRenderTragetView::GetRenderTragetRef()
 {
 	return &mptr_RenderTraget;
-}
-
-ID3D11DepthStencilView * CRenderTragetView::GetDepthStencilView()
-{
-	return mptr_DepthStencilView;
-}
-
-ID3D11DepthStencilView ** CRenderTragetView::GetDepthStencilViewRef()
-{
-	return &mptr_DepthStencilView;
 }
 
 ID3D11Texture2D * CRenderTragetView::GetBackBuffer()
@@ -46,11 +35,6 @@ ID3D11Texture2D ** CRenderTragetView::GetBackBufferRef()
 void CRenderTragetView::DestroyBuffers()
 {
 
-	if (mptr_DepthStencilView)
-	{
-		mptr_DepthStencilView->Release();
-		mptr_DepthStencilView = nullptr;
-	}
 	if (mptr_buffer)
 	{
 		mptr_buffer->Release();

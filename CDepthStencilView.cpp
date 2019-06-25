@@ -35,14 +35,14 @@ ID3D11DepthStencilView ** CDepthStencilView::GetDepthStencilViewRef()
 	return &mptr_DepthStencilView;
 }
 
-ID3D11Texture2D * CDepthStencilView::GetTexture2D()
+CTexture2D * CDepthStencilView::GetTexture2D()
 {
-	return mptr_DepthStencil->GetTexture();
+	return mptr_DepthStencil;
 }
 
-ID3D11Texture2D ** CDepthStencilView::GetTexture2DRef()
+CTexture2D & CDepthStencilView::GetTexture2DRef()
 {
-	return  mptr_DepthStencil->GetTextureRef();
+	return  *mptr_DepthStencil;
 }
 
 D3D11_TEXTURE2D_DESC CDepthStencilView::GetTextureDescriptor()

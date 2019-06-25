@@ -1,7 +1,10 @@
 #include "CDevice.h"
 #include "CSwapChian.h"
 #include "CDeviaceContext.h"
-
+#include "CRenderTragetView.h"
+#include "CDepthStencilView.h"
+#include "CVertexShader.h"
+#include "CInputLayout.h"
 
 #include "Utility/ErrorHandlingGrafics.h"
 /* often used preprocessor statements
@@ -89,15 +92,15 @@ bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext,
 	return false;
 }
 
-bool CDevice::CreateRenderTargetView(void * BackBuffer, void * RenderTraget)
+bool CDevice::CreateRenderTargetView(CRenderTragetView &RenderTragetView)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr;
 
-	hr = mptr_Device->CreateRenderTargetView(reinterpret_cast<ID3D11Texture2D*>(BackBuffer),
+	hr = mptr_Device->CreateRenderTargetView(reinterpret_cast<ID3D11Texture2D*>(RenderTragetView.GetBackBuffer()),
 		nullptr,
-		reinterpret_cast<ID3D11RenderTargetView**> (RenderTraget));
+		reinterpret_cast<ID3D11RenderTargetView**> (RenderTragetView.GetRenderTragetRef()));
 
 	if (!CheckForError(hr))
 	{
@@ -117,15 +120,15 @@ bool CDevice::CreateRenderTargetView(void * BackBuffer, void * RenderTraget)
 	return false;
 }
 
-bool CDevice::CreateTexture2D(void * Texture, void * Descriptor)
+bool CDevice::CreateTexture2D(CTexture2D &Texture)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr = S_OK;
 
-	hr = mptr_Device->CreateTexture2D(static_cast<D3D11_TEXTURE2D_DESC*>(Descriptor),
+	hr = mptr_Device->CreateTexture2D(static_cast<D3D11_TEXTURE2D_DESC*>(&Texture.GetDescriptor()),
 		nullptr,
-		static_cast<ID3D11Texture2D**>(Texture));
+		static_cast<ID3D11Texture2D**>(Texture.GetTextureRef()));
 	// For knowing if something went wrong 
 	if (!CheckForError(hr))
 	{
@@ -142,15 +145,15 @@ bool CDevice::CreateTexture2D(void * Texture, void * Descriptor)
 	return false;
 }
 
-bool CDevice::CreateDepthStencilView(void * Texture, void * DiscriptorDepth, void * DepthStencilView)
+bool CDevice::CreateDepthStencilView(CDepthStencilView &DepthStencilView)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr = S_OK;
 
-	hr = mptr_Device->CreateDepthStencilView(static_cast<ID3D11Texture2D*>(Texture),
-		static_cast<D3D11_DEPTH_STENCIL_VIEW_DESC *>(DiscriptorDepth),
-		static_cast <ID3D11DepthStencilView **>(DepthStencilView));
+	hr = mptr_Device->CreateDepthStencilView(static_cast<ID3D11Texture2D*>(DepthStencilView.GetTexture2D()->GetTexture()),
+		static_cast<D3D11_DEPTH_STENCIL_VIEW_DESC *>(&DepthStencilView.ConvertDepthStecilToDx2D()),
+		static_cast <ID3D11DepthStencilView **>(DepthStencilView.GetDepthStencilViewRef()));
 
 	// For knowing if something went wrong 
 	if (!CheckForError(hr))
@@ -167,18 +170,18 @@ bool CDevice::CreateDepthStencilView(void * Texture, void * DiscriptorDepth, voi
 	return false;
 }
 
-bool CDevice::CreateVertexShader(void * BlobVertex, void * VertexShader)
+bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr = S_OK;
 
-	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(BlobVertex);
+	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(VertexShader.GetVertexShaderData());
 
 	hr = mptr_Device->CreateVertexShader(ptr_temp->GetBufferPointer(),
 		ptr_temp->GetBufferSize(),
 		nullptr,
-		static_cast<ID3D11VertexShader**>(VertexShader));
+		static_cast<ID3D11VertexShader**>(VertexShader.GetVertexShaderRef()));
 
 	if (!CheckForError(hr))
 	{
@@ -193,18 +196,20 @@ bool CDevice::CreateVertexShader(void * BlobVertex, void * VertexShader)
 	return false;
 }
 
-bool CDevice::CreateInputLayout(void * Layout, void * BlobVertex, uint32_t TotalElements, void * InputLayout)
+bool CDevice::CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShader)
 {
 #if defined(USING_DIRECTX)
 
-	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(BlobVertex);
-
+	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(VertexShader.GetVertexShaderData());
+	auto InputLayoutDesc = Layout.ConvertInputLayoutToDx();
 	HRESULT hr = S_OK;
-	hr = mptr_Device->CreateInputLayout(static_cast<D3D11_INPUT_ELEMENT_DESC*>(Layout),
-		TotalElements,
+
+
+	hr = mptr_Device->CreateInputLayout(&InputLayoutDesc[0],
+		InputLayoutDesc.size(),
 		ptr_temp->GetBufferPointer(),
 		ptr_temp->GetBufferSize(),
-		static_cast<ID3D11InputLayout**>(InputLayout));
+		static_cast<ID3D11InputLayout**>(Layout.GetInputLayoutRef()));
 
 	if (!CheckForError(hr))
 	{

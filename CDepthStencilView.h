@@ -27,16 +27,16 @@ public:// constructor
 public:// functions
 	/*! To get the necessary information needed for the Depth-Stencil-view*/
 	void InitDepthStencil2D(uint32_t Height, uint32_t Width, int Format);
+	//! for functions that require pointers 
+	CTexture2D * GetTexture2D();
+	//! for functions that require two pointers 
+	CTexture2D & GetTexture2DRef();
 
 #ifdef USING_DIRECTX
 	//! for functions that require two pointers 
 	ID3D11DepthStencilView* GetDepthStencilView();
 	//! for functions that require two pointers 
 	ID3D11DepthStencilView** GetDepthStencilViewRef();
-	//! for functions that require pointers 
-	ID3D11Texture2D * GetTexture2D();
-	//! for functions that require two pointers 
-	ID3D11Texture2D ** GetTexture2DRef();
 	//! for parameters that need the texture description
 	D3D11_TEXTURE2D_DESC GetTextureDescriptor();
 	//! take my struct and converts it to DirectX native struct.
@@ -46,8 +46,11 @@ public:// functions
 	void DestoryBuffer();
 
 private://variables
-	/*! for interfacing with directX */
+#if USING_DIRECTX
+			/*! for interfacing with directX */
 	ID3D11DepthStencilView* mptr_DepthStencilView = nullptr;
+#endif // USING_DIRECTX
+
 	/*! the texture to project on to */
 	CTexture2D *mptr_DepthStencil = nullptr;
 	/*! an Intermediate class for my classes and directX */

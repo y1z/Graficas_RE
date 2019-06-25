@@ -5,7 +5,11 @@ class CSampler;
 class CSwapChian;
 class CDeviaceContext;
 class CWindow;
-
+class CRenderTragetView;
+class CTexture2D;
+class CDepthStencilView;
+class CVertexShader;
+class CInputLayout;
 #include"Usable_Windows.h"
 //TODO_Gl add include guard
 #include "CWindow.h"
@@ -21,36 +25,35 @@ public:// constructors
 	CDevice();
 	~CDevice();
 public: // functions 
-
+	/*!
+	\param [out] SwapChian used to also init SwapChian 
+	\param [out] DeviaceContext used to init DeviaceContext
+	\param [in] used to know which Window to associate with Device,SwapChian and DeviceContext to the Window*/
 	bool InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext,CWindow &Window);
 
 	/*! used to crate a render target or equivalent
-	\param BackBuffer [in] expecting it to be (ID3D11Texture2D*) or opengl equivalent
-	\param RenderTraget [out] expecting it to be (ID3D11RenderTargetView*) or opengl equivalent
+	\param RenderTragetView [out] This class Contains both the back buffer and render-target necessary for making rendertargetView.
 	*/
-	bool CreateRenderTargetView(void* BackBuffer, void* RenderTraget);
+	bool CreateRenderTargetView(CRenderTragetView &RenderTragetView);
 	/*! used to crate a 2d texture
-	\param Descriptor [in] tell us the attributes of the Texture (D3D11_TEXTURE2D_DESC) or OpenGl equivalent
-	\param Texture [out] the Texture to be modified (ID3D11Texture2D*) or OpenGl equivalent*/
-	bool CreateTexture2D(void * Texture, void *DescriptorTexture);
+	\param Texture [out] the Texture to be modified */
+	bool CreateTexture2D(CTexture2D &Texture);
 	/*! used to create a DepthSencill
-	\param Texture [in] it's just a resource (ID3D11Texture2D)
-	\param DiscriptorDepth [in] this will dictate how are depth-stencil will come out (D3D11_DEPTH_STENCIL_VIEW_DESC)
-	\param DepthStencilView [out] this will be the resulting DepthstencilView (ID3D11DepthStencilView)
+	\param DepthStencilView [out] this will be the resulting DepthstencilView 
 	*/
-	bool CreateDepthStencilView(void* Texture, void * DiscriptorDepth, void* DepthStencilView);
+	bool CreateDepthStencilView(CDepthStencilView &DepthStencilView);
 	/*! Used to create the vertexShader
 	\param BlobVertex [in] it's just a buffer (ID3DBlob*)
 	\param VertexShader [out] The Resulting vertex-shader (ID3D11VertexShader*)
 	*/
-	bool CreateVertexShader(void *BlobVertex,void *VertexShader);
+	bool CreateVertexShader(CVertexShader &VertexShader);
 	/*! Used to know how to interpret the data
 	\param Layout [in] To know how the data is organized (D3D11_INPUT_ELEMENT_DESC)
 	\param BlobVertex [in] To obtain information about the VertexShader(ID3DBlob*)
 	\param TotalElements[in] To know the amount of configuration there are (uint32_t)
 	\param InputLayout [out] the resulting input layout (ID3D11InputLayout*)
 	*/
-	bool CreateInputLayout(void *Layout,void *BlobVertex,uint32_t TotalElements, void *InputLayout);
+	bool CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShader);
 	/*! Used to create the pixel shader
 	\param BlobPixel [in] Information about the pixel-shader.(ID3DBlob*)
 	\param PixelShader [out] The resulting pixel-shader.(ID3D11PixelShader*)
