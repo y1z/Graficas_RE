@@ -3,6 +3,7 @@
 #include "DirectXHeader.h"
 #include <vector>
 #include <string_view>
+class CVertexShader;
 
 /*struct D3D11_INPUT_ELEMENT_DESC
 		{
@@ -46,7 +47,7 @@ public:
 	/*! used to create a dynamic input-layout 
 	\param [in] ShaderData is used to get the necessary from the shader 
 	\param [in] ShaderInputData used to know what type of data I'm receiving from the buffer(D3D11_INPUT_CLASSIFICATION) */
-	bool ReadShaderDataDX(ID3DBlob* ShaderData,int ShaderInputData);
+	bool ReadShaderDataDX(CVertexShader& ShaderData,int ShaderInputData);
 	//! convert MY input layout to directX native input layout plus returns a vector
 	std::vector<D3D11_INPUT_ELEMENT_DESC> ConvertInputLayoutToDx();
 	// 
@@ -58,7 +59,7 @@ private:
 
 #ifdef USING_DIRECTX
 	ID3D11InputLayout* mptr_InputLayoutDX = nullptr;
-#elif
+#else
 #endif // USING_DIRECTX
 
 };

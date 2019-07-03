@@ -1,6 +1,7 @@
 #pragma once
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
+#include "glm.hpp"
 #include <cinttypes>
 #include <cmath>
 
@@ -34,7 +35,8 @@ public:// functions
 	XMMATRIX GetTrasformMatrice();
 	XMMATRIX GetProyectionMatrice();
 	void MoveCamera(XMVECTOR Vec);
-#elif
+#else
+
 #endif
 
 private:
@@ -63,8 +65,20 @@ public:// REMOVE public
 	XMVECTOR m_Eye;
 	XMVECTOR m_At;
 
+#else
+	// matrices
+	glm::mat4x4 m_Trasfrom;
+	glm::mat4x4 m_View;
+	glm::mat4x4 m_Proyection;
+	// Position vectors 
+	glm::vec4 m_RightVector;
+	glm::vec4 m_UpVector;
+	glm::vec4 m_FrontVector;
 
-#elif
+	glm::vec4 m_Up;
+
+	glm::vec4 m_Eye;
+	glm::vec4 m_At;
 #endif
 };
 

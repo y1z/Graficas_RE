@@ -11,6 +11,7 @@ public:// constructor
 	CRenderTragetView();
 	~CRenderTragetView();
 public:// functions
+
 #if defined (USING_DIRECTX)
 	ID3D11RenderTargetView * GetRenderTraget();
 /*! For Arguments that require more that 1 pointer*/
@@ -20,14 +21,15 @@ public:// functions
 
 	void DestroyBuffers();
 
-#elif
+#else
 #endif
 
+	void ** GetVoidRefRef();
 private:// variables 
 	bool isBackBufferReleased = false;
 #if defined (USING_DIRECTX)
 	ID3D11RenderTargetView *mptr_RenderTraget = nullptr;
 	ID3D11Texture2D * mptr_buffer = nullptr;
-#elif
+#else
 #endif
 };

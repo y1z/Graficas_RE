@@ -60,7 +60,6 @@ void CCamera::AlterProyectionMatric(int NewWidth, int NewHeight, float Fov , flo
 	m_Near = Near;
 	m_Far = Far;
 
-
 	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, NewWidth / (FLOAT) NewHeight, m_Near, m_Far);
 #elif
 #endif

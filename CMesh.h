@@ -17,11 +17,11 @@ public:
 	~CMesh();
 
 public:
-	Templates::CBuffer &GetIndexBuffer();
-	Templates::CBuffer &GetVertexBuffer();
+	CBuffer &GetIndexBuffer();
+	CBuffer &GetVertexBuffer();
 
-	Templates::CBuffer mptr_IndexBuffer;
-	Templates::CBuffer mptr_VertexBuffer;
+	CBuffer mptr_IndexBuffer;
+	CBuffer mptr_VertexBuffer;
 
 private:
 

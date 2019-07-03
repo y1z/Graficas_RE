@@ -9,8 +9,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-using namespace Templates;
-
 class CModel
 {
 public:

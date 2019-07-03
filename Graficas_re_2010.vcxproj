@@ -418,6 +418,7 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
     <Text Include="list.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBuffer.cpp" />
     <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CDepthStencilView.cpp" />
     <ClCompile Include="CDeviaceContext.cpp" />

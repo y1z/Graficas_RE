@@ -52,8 +52,8 @@ D3D11_VIEWPORT CViewPort::GetViewPort()
 {
 	return m_dxViewport;
 }
-D3D11_VIEWPORT & CViewPort::GetViewPortRef()
+D3D11_VIEWPORT * CViewPort::GetViewPortRef()
 {
-	return m_dxViewport;
+	return &m_dxViewport;
 }
 #endif // DEBUG

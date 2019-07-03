@@ -15,8 +15,10 @@ public:
 
 	ID3DBlob* GetPixelShaderData();
 	ID3DBlob** GetPixelShaderDataRef();
-#endif // USING_DIRECTX
+
 	ID3D11PixelShader* mptr_PixelShader = nullptr;
 	ID3DBlob* mptr_ShaderData = nullptr;
+#endif // USING_DIRECTX
+
 };
 

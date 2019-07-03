@@ -21,6 +21,6 @@ static bool CheckForError(HRESULT hr)
 	return false;
 }
 
-#elif //TODO_GL 
+#else//TODO_GL 
 
 #endif // USING_DIRECTX

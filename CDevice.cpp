@@ -1,10 +1,13 @@
 #include "CDevice.h"
+#include "CBuffer.h"
 #include "CSwapChian.h"
 #include "CDeviaceContext.h"
 #include "CRenderTragetView.h"
 #include "CDepthStencilView.h"
 #include "CVertexShader.h"
 #include "CInputLayout.h"
+#include "CPixelShader.h"
+#include "CSampler.h"
 
 #include "Utility/ErrorHandlingGrafics.h"
 /* often used preprocessor statements
@@ -222,16 +225,16 @@ bool CDevice::CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShade
 	return false;
 }
 
-bool CDevice::CreatePixelShader(void * BlobPixel, void * PixelShader)
+bool CDevice::CreatePixelShader(CPixelShader &PixelShader)
 {
 #if defined(USING_DIRECTX)
-	ID3DBlob *ptr_temp = static_cast<ID3DBlob*> (BlobPixel);
+	ID3DBlob *ptr_temp = static_cast<ID3DBlob*> (PixelShader.GetPixelShaderData());
 	HRESULT hr = S_OK;
 
 	mptr_Device->CreatePixelShader(ptr_temp->GetBufferPointer(),
 		ptr_temp->GetBufferSize(),
 		nullptr,
-		static_cast<ID3D11PixelShader**>(PixelShader));
+		static_cast<ID3D11PixelShader**>(PixelShader.GetPixelShaderRef()));
 
 	if (!CheckForError(hr))
 	{
@@ -245,22 +248,23 @@ bool CDevice::CreatePixelShader(void * BlobPixel, void * PixelShader)
 	return false;
 }
 
-bool CDevice::CreateBuffer(void * Descriptor, void * Buffer, void * Data = nullptr)
+bool CDevice::CreateBuffer(CBuffer &Buffer)
 {
 #if defined(USING_DIRECTX)
-
+	
+	
 	HRESULT hr = S_OK;
-	if (Data != nullptr)
+	if (Buffer.GetDataRef()->pSysMem != nullptr)
 	{
-		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
-			static_cast<D3D11_SUBRESOURCE_DATA*>(Data),
-			static_cast<ID3D11Buffer**>(Buffer));
+		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Buffer.GetDescRef()),
+			static_cast<D3D11_SUBRESOURCE_DATA*>(Buffer.GetDataRef()),
+			static_cast<ID3D11Buffer**>(Buffer.GetBufferRef()));
 	}
 	else
 	{
-		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Descriptor),
+		hr = mptr_Device->CreateBuffer(static_cast<D3D11_BUFFER_DESC*>(Buffer.GetDescRef()),
 			nullptr,
-			static_cast<ID3D11Buffer**>(Buffer));
+			static_cast<ID3D11Buffer**>(Buffer.GetBufferRef()));
 	}
 
 
@@ -276,13 +280,15 @@ bool CDevice::CreateBuffer(void * Descriptor, void * Buffer, void * Data = nullp
 	return false;
 }
 
-bool CDevice::CreateSamplerState(void * DescriptorSampler, void * Sampler)
+bool CDevice::CreateSamplerState(CSampler &Sampler)
 {
 #if defined(USING_DIRECTX)
 	HRESULT hr = S_OK;
 
-	hr = mptr_Device->CreateSamplerState(static_cast<D3D11_SAMPLER_DESC*>(DescriptorSampler),
-		static_cast<ID3D11SamplerState**>(Sampler));
+	auto Temp = Sampler.ConvertSamplerToDx();
+
+	hr = mptr_Device->CreateSamplerState(static_cast<D3D11_SAMPLER_DESC*>(&Temp),
+		static_cast<ID3D11SamplerState**>(Sampler.GetSamplerRef()));
 
 	if (!CheckForError(hr))
 	{

@@ -25,7 +25,7 @@ public:
 
 #ifdef USING_DIRECTX
 	D3D11_VIEWPORT GetViewPort();
-	D3D11_VIEWPORT &GetViewPortRef();
+	D3D11_VIEWPORT *GetViewPortRef();
 #else
 #endif // USING_DIRECTX
 

@@ -10,6 +10,10 @@ class CTexture2D;
 class CDepthStencilView;
 class CVertexShader;
 class CInputLayout;
+class CPixelShader;
+class CVertexShader;
+class CSampler;
+
 #include"Usable_Windows.h"
 //TODO_Gl add include guard
 #include "CWindow.h"
@@ -48,37 +52,35 @@ public: // functions
 	*/
 	bool CreateVertexShader(CVertexShader &VertexShader);
 	/*! Used to know how to interpret the data
-	\param Layout [in] To know how the data is organized (D3D11_INPUT_ELEMENT_DESC)
-	\param BlobVertex [in] To obtain information about the VertexShader(ID3DBlob*)
-	\param TotalElements[in] To know the amount of configuration there are (uint32_t)
-	\param InputLayout [out] the resulting input layout (ID3D11InputLayout*)
+	\param Layout [out] will tell me how the data is organized 
+	\param VertexShader [in] this is where we get how the data is organized  
 	*/
 	bool CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShader);
 	/*! Used to create the pixel shader
-	\param BlobPixel [in] Information about the pixel-shader.(ID3DBlob*)
-	\param PixelShader [out] The resulting pixel-shader.(ID3D11PixelShader*)
+	\param PixelShader [out] The resulting pixel-shader.
 	*/
-	bool CreatePixelShader(void *BlobPixel,void *PixelShader);
+	bool CreatePixelShader(CPixelShader &PixelShader);
 	/*! Creates buffers 
-	\param DescriptorBuffer [in] dictates how what the buffer is and it's usage (D3D11_BUFFER_DESC)
-	\param Buffer [out] The Resulting buffer (ID3D11Buffer*)
-	\param Data [out] used to later manipulate the information (D3D11_SUBRESOURCE_DATA)
+	\param Buffer [out] The Resulting buffer
 	*/
-	bool CreateBuffer(void *DescriptorBuffer, void *Buffer,void *Data);
+	bool CreateBuffer(CBuffer &Buffer);
 	/*! Creates A Sampler
 	\param DescriptorSampler [in] Dictates what are sampler does 
 	\param Sampler [out] The Resulting sampler */
-	bool CreateSamplerState(void *DescriptorSampler,void *Sampler);
+	bool CreateSamplerState(CSampler &Sampler);
 
 	/*! This is just for testing 
 	\todo when the classes "CSwapChain" and "CDeviceContext" Remove this method*/
 #if defined(USING_DIRECTX)
 	ID3D11Device* GetDevice();
 	ID3D11Device** GetDeviceRef();
-#elif
+#else
 #endif
 
 private:// variables 
 	//TODO_GL replace this with equivalent
+#if USING_DIRECTX
 	ID3D11Device *mptr_Device = nullptr;
+#endif // USING_DIRECTX
+
 };

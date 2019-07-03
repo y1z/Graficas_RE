@@ -1,6 +1,7 @@
 #include "CSwapChian.h"
 #include "CDevice.h"
-
+#include "CBuffer.h"
+#include "CRenderTragetView.h"
 
 CSwapChian::CSwapChian()
 {}
@@ -13,13 +14,13 @@ CSwapChian::~CSwapChian()
 
 
 
-bool CSwapChian::GetBuffer(int32_t BufferIndex, void * Buffer)
+bool CSwapChian::GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget)
 {
 #if defined(USING_DIRECTX)
 
 	HRESULT hr = S_OK;
-
-	hr = mptr_SwapChian->GetBuffer(BufferIndex, __uuidof(ID3D11Texture2D), static_cast<void**>(Buffer));
+	/// later make safe 
+	hr = mptr_SwapChian->GetBuffer(BufferIndex, __uuidof(ID3D11Texture2D), RenderTraget.GetVoidRefRef());
 	if (!CheckForError(hr))
 	{
 		return true;

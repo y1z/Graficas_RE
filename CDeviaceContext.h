@@ -1,6 +1,15 @@
 #pragma once
 #include "DirectXHeader.h"
 #include <cinttypes>
+class CRenderTragetView;
+class CDepthStencilView;
+class CViewPort;
+class CInputLayout;
+class CBuffer;
+class CVertexShader;
+class CPixelShader;
+class CShaderResourceView;
+class CSampler;
 
 class CDeviaceContext
 {
@@ -13,17 +22,17 @@ public:// functions
 \param totalView [in] to know how many view to set
 \param RenderTragetView [out] The Resulting RenderTraget (ID3D11RenderTargetView*)
 \param DepthStencilView [out] paints things on screen (ID3D11DepthStencilView*)*/
-	void OMSetRenderTargets(int32_t totalViews, void *RenderTrageView, void* DepthStencilView);
+	void OMSetRenderTargets(int32_t totalViews, CRenderTragetView &renderTragetView, CDepthStencilView &DepthStencilView);
 
 	/*! set the viewports
 \param TotalViews [in] how many view there are
 \param ViewPort [out] the View port (D3D11_VIEWPORT*)*/
-	void RSSetViewports(int32_t TotalViews, void* ViewPort);
+	void RSSetViewports(int32_t TotalViews, CViewPort &ViewPort);
 
 	/*! For the InputLyout
 \param InputLayout [in] tells the machine how to interpret data ( ID3D11InputLayout*)
 */
-	void IASetInputLayout(void * InputLayout);
+	void IASetInputLayout(CInputLayout &InputLayout);
 
 	/*! Sets the VertexBuffer
 \param StartSlot [in] placement
@@ -32,13 +41,13 @@ public:// functions
 \param ptr_Stride [in] how big the vertex data type is
 \param ptr_offset [in] the distance between data
 */
-	void IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, void* VertexBuffer, uint32_t Stride, uint32_t Offset);
+	void IASetVertexBuffers(int32_t StratSlot, int32_t TotalBuffer, CBuffer &VertexBuffer, uint32_t Stride, uint32_t Offset);
 
 	/*! Set the IndexBuffer
 \param IndexBuffer [out] the vertex buffer that's set
 \param Format [in] how to interpret the IndexBuffer
 \param Offset [in] distance between data we dont care for */
-	void IASetIndexBuffer(void *VertexBuffer, int Format, int Offset);
+	void IASetIndexBuffer(CBuffer &VertexBuffer, int Format, int Offset);
 
 	/*! set the topology
 	\param Topology [in] dictates how the geometry is going to be drawn */
@@ -49,49 +58,47 @@ public:// functions
 \param OriginResrouce [in] where it came from
 \param ReservedCopyLocation [out] A specified place to copy information
 \param*/
-	void UpdateSubresource(void *DistResource, void* OriginResrouce, int32_t IndexSubResourceFinder, void *ReservedCopyLocation = nullptr, uint32_t PitchRow = 0, uint32_t PitchDepth = 0);
+	void UpdateSubresource(CBuffer &DistResource, void* OriginResrouce, int32_t IndexSubResourceFinder, void *ReservedCopyLocation = nullptr, uint32_t PitchRow = 0, uint32_t PitchDepth = 0);
 
 	/*! dictates what color the RenderTraget
 \param RenderTraget[out] the render target (ID3D11RenderTargetView*)
 \param Color [in] dictates which color the screen will clear to*/
-	void ClearRenderTargetView(void *RenderTraget, float *Color = nullptr);
+	void ClearRenderTargetView(CRenderTragetView &RenderTraget, float *Color = nullptr);
 
 	/*! Clear the Depth buffer and StencilView
 \param DepthStnecilView [out] Cleared DepthStencilView (ID3D11DepthStencilView*)
 \param Flags [in] aditional options
 \param DepthBfferClear [in] floatthing point value
 \param ClearStencil [in] Color /to crear.*/
-	void ClearDepthStencilView(void * DepthStencilView, int Flags, float DepthBufferClear, int8_t ClearStencil);
+	void ClearDepthStencilView(CDepthStencilView &DepthStencilView, int Flags, float DepthBufferClear, int8_t ClearStencil);
 
 	/*! Clear the Depth buffer and StencilView
-\param DepthStnecilView [out] Cleared DepthStencilView (ID3D11DepthStencilView*)
-\param Flags [in] aditional options
-\param DepthBfferClear [in] floatthing point value
-\param ClearStencil [in] Color /to crear.*/
-	void VSSetShader(void*VertexShader);
+\param VertexShader [out] This is where we set the shader */
+	void VSSetShader(CVertexShader &VertexShader);
 
 	/*! Sets the constant Buffer
 \param StartSlot[in] where will the buffer be placed
 \param TotalBuffers [in] for knowing how many buffer there are
+\param Buffer [in] the buffer that going te be set 
 .*/
-	void VSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffers, void *Buffer);
+	void VSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffers, CBuffer *Buffer);
 
 	/*! Set the Pixel Shader
 	\param PixelShader[out] The Resulting Shader*/
-	void PSSetShader(void *PixelShader);
+	void PSSetShader(CPixelShader &PixelShader);
 
-	void PSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffers, void *Buffer);
+	void PSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffers, CBuffer *Buffer);
 	/*!
 \param StratSlot [in] dictates where you are
 \param TotalViews [in] How many view are there
 \param ShaderResourceView [in] allows you to see data from the shader.
 */
-	void PSSetShaderResources(int32_t StratSlot, int32_t TotalViews, void *ShaderResourceView);
+	void PSSetShaderResources(int32_t StratSlot, int32_t TotalViews, CShaderResourceView &ShaderResourceView);
 	/*!
 \param StratSlot [in] dictates where you are in compaction to others
 \param TotalSamplers [in] dictates how many Samplers there are .
 */
-	void PSSetSamplers(int32_t StartSlot, int32_t TotalSamplers, void* Sampler);
+	void PSSetSamplers(int32_t StartSlot, int32_t TotalSamplers, CSampler &Sampler);
 	/*!
 \param TotalIndexs [in] how many triangles there are
 \param StartIndex [in] where to start drawing 
@@ -101,7 +108,8 @@ public:// functions
 #if defined(USING_DIRECTX)
 	ID3D11DeviceContext ** GetDeviceContextRef();
 	ID3D11DeviceContext * GetDeviceContext();
-#elif
+#else
+
 #endif
 private:
 #ifdef USING_DIRECTX

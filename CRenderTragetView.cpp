@@ -12,6 +12,13 @@ CRenderTragetView::~CRenderTragetView()
 	if (isBackBufferReleased == false && mptr_buffer != nullptr) { mptr_buffer->Release(); }
 }
 
+void ** CRenderTragetView::GetVoidRefRef()
+{
+	void ** Result = reinterpret_cast<void**>(&mptr_buffer);
+
+	return Result;
+}
+
 ID3D11RenderTargetView * CRenderTragetView::GetRenderTraget()
 {
 	return mptr_RenderTraget;

@@ -1,5 +1,6 @@
 #include"CInputLayout.h"
 #include "Utility/ErrorHandlingGrafics.h"
+#include "CVertexShader.h"
 #include <fstream>
 
 CInputLayout::CInputLayout()
@@ -39,7 +40,7 @@ void CInputLayout::ConvertDxToInputLayout(D3D11_INPUT_ELEMENT_DESC *Layout, int 
 }
 
 
-bool CInputLayout::ReadShaderDataDX(ID3DBlob * ShaderData, int ShaderInputData)
+bool CInputLayout::ReadShaderDataDX(CVertexShader& ShaderData, int ShaderInputData)
 {
 	// checking for errors 
 	HRESULT hr = S_FALSE;
@@ -47,7 +48,7 @@ bool CInputLayout::ReadShaderDataDX(ID3DBlob * ShaderData, int ShaderInputData)
 	ID3D11ShaderReflection *ReflectorShader = nullptr;
 
 	// to init a shader Reflection
-	hr = D3DReflect(ShaderData->GetBufferPointer(), ShaderData->GetBufferSize(),
+	hr = D3DReflect(ShaderData.GetVertexShaderData()->GetBufferPointer(), ShaderData.GetVertexShaderData()->GetBufferSize(),
 		IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&ReflectorShader));
 
 	if (CheckForError(hr))

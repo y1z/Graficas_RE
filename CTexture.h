@@ -19,13 +19,13 @@ public:// functions
 
 	D3D11_TEXTURE2D_DESC GetDescriptor();
 
-#elif// TODO_GL
+#else//TODO_GL
 #endif
 private:// variables
 #if(USING_DIRECTX)
 	ID3D11Texture2D *mptr_Texture = nullptr;
 	D3D11_TEXTURE2D_DESC m_TextureDescriptor;
-#elif// TODO_GL 
+#else// TODO_GL 
 #endif
 };
 

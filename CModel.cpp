@@ -2,8 +2,6 @@
 #include "DirectXHeader.h"
 #include "Structs.h"
 
-using namespace Templates;
-
 CModel::CModel()
 {}
 

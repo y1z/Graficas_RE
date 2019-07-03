@@ -24,7 +24,7 @@ public:
 	HWND& GetHandlerRef();
 	/*! return a pointer to WindProc */
 	ptr_WindProc GetWindProcPtr();
-#elif// TODO_GL
+#else// TODO_GL
 
 
 #endif // USING_DIRECTX
@@ -39,7 +39,7 @@ private:
 	//! this is here to later un-register the class 
 	HINSTANCE m_Instance;
 	GLFWwindow* mptr_Window;
-#elif
+#else
 #endif // USING_DIRECTX
 	int m_Width;
 	int m_Height;
