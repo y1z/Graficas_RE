@@ -24,7 +24,11 @@ public:// functions
 	IDXGISwapChain** GetSwapChianRef();
 public:// variable
 	IDXGISwapChain* mptr_SwapChian = nullptr;
+#elif USING_OPEN_GL
+	unsigned int m_BackBufferID;
 #endif // USING_DIRECTX
+
+
 
 };
 

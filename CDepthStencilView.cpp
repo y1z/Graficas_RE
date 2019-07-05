@@ -9,7 +9,10 @@ CDepthStencilView::CDepthStencilView()
 CDepthStencilView::~CDepthStencilView()
 {
 	if (mptr_DepthStencil != nullptr) { delete mptr_DepthStencil; }
-//	if (mptr_DepthStencilView != nullptr) { mptr_DepthStencilView->Release(); }
+#if USING_DIRECTX
+	if (mptr_DepthStencilView != nullptr) { mptr_DepthStencilView->Release(); }
+#endif // USING_DIRECTX
+
 }
 
 void CDepthStencilView::InitDepthStencil2D(uint32_t Height, uint32_t Width, int Format)
@@ -23,18 +26,19 @@ void CDepthStencilView::InitDepthStencil2D(uint32_t Height, uint32_t Width, int 
 #endif // USING_DIRECTX
 }
 
-#ifdef USING_DIRECTX
 
+#ifdef USING_DIRECTX
 ID3D11DepthStencilView * CDepthStencilView::GetDepthStencilView()
 {
 	return mptr_DepthStencilView;
 }
-
+#endif // USING_DIRECTX
+#ifdef USING_DIRECTX
 ID3D11DepthStencilView ** CDepthStencilView::GetDepthStencilViewRef()
 {
 	return &mptr_DepthStencilView;
 }
-
+#endif // USING_DIRECTX
 CTexture2D * CDepthStencilView::GetTexture2D()
 {
 	return mptr_DepthStencil;
@@ -44,12 +48,14 @@ CTexture2D & CDepthStencilView::GetTexture2DRef()
 {
 	return  *mptr_DepthStencil;
 }
-
+#ifdef USING_DIRECTX
 D3D11_TEXTURE2D_DESC CDepthStencilView::GetTextureDescriptor()
 {
 	return mptr_DepthStencil->GetDescriptor();
 }
+#endif // USING_DIRECTX
 
+#ifdef USING_DIRECTX
 D3D11_DEPTH_STENCIL_VIEW_DESC CDepthStencilView::ConvertDepthStecilToDx2D()
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC Result;
@@ -60,15 +66,18 @@ D3D11_DEPTH_STENCIL_VIEW_DESC CDepthStencilView::ConvertDepthStecilToDx2D()
 
 	return Result;
 }
-
-
 #endif // USING_DIRECTX
+
+
 
 
 void CDepthStencilView::DestoryBuffer()
 {
 	if (mptr_DepthStencil) { 
-		mptr_DepthStencil->GetTexture()->Release(); 
+	#if USING_DIRECTX
+		mptr_DepthStencil->GetTexture()->Release();
+	#endif // USING_DIRECTX
+
 		mptr_DepthStencil->MakeNull();
 	
 	}

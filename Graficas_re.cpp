@@ -5,26 +5,21 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
- #undef USING_DIRECTX	
+#define MODEL_LOAD 
 
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
 // OpenGL 
-#include "glew-2.1.0/include/GL/glew.h"
-#include "freeglut/include/GL/glut.h"
-#include <GLFW/glfw3.h>
+#include "OpenglHeader.h"
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
 #include "Utility/Timer.h"
-
-
 // Classes
 #include "CDevice.h"
 #include "CDeviaceContext.h"
 #include "CSwapChian.h"
 #include "CBuffer.h"
-
 //Window
 #include "CWindow.h"
 //! Give me the ability to use this include in other places 
@@ -36,14 +31,9 @@ bool g_FinishInit = false;
 #include "CDepthStencilView.h"
 #include "CSampler.h"
 #include "CShaderResourceView.h"
-#include "CModel.h"
-
 // shaders 
 #include "CVertexShader.h"
 #include "CPixelShader.h"
-// standard library
-#include <numeric>
-#include <algorithm>
 // imgui Files 
 #include"imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
@@ -53,12 +43,15 @@ bool g_FinishInit = false;
 #include <assimp/Importer.hpp>
 #include "Structs.h"
 #include "Custom_Structs.h"
+// model 
+#include "CModel.h"
+
+#include <array>
 
 
 CWindow MY_Window;
-
 CDevice MY_Device;// Replaced 
-CDeviaceContext MY_DeviceContext;// Replaced 
+CDeviceContext MY_DeviceContext;// Replaced 
 CSwapChian MY_SwapChain;// Replaced
 CBuffer ConstantBufferResize;// Replaced
 CBuffer ConstantBufferChangeEveryFrame;// Replaced
@@ -85,7 +78,7 @@ CSampler MY_Sampler;
 imGuiManager MY_Gui;
 /// This is used to find delta time 
 Timer MY_Timer;
-//
+//! used to load models 
 CModel MY_Model;
 
 //--------------------------------------------------------------------------------------
@@ -112,10 +105,11 @@ HWND                                g_hWnd = NULL;
 //ID3D11ShaderResourceView*           g_pTextureRV = NULL;
 //ID3D11SamplerState*                 g_pSamplerLinear = NULL;
 XMMATRIX                            g_World;
-XMMATRIX                            g_View;
-XMMATRIX                            g_Projection;
-XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
-
+//XMMATRIX                            g_View;
+//XMMATRIX                            g_Projection;
+//XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
+glm::vec4		g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
+//glm::mat4 g_World(1.0f);
 //--------------------------------------------------------------------------------------
 // Forward declarations
 //--------------------------------------------------------------------------------------
@@ -149,11 +143,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	///* Initialize the library */
-	//if (!glfwInit())
-	//	return -1;
-	//
-	///// ADD ifDef for inti the glfw library
 	//
 	//GLFWwindow* window;
 	//
@@ -183,15 +172,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//}
 	//
 	//glfwTerminate();
+	///* Initialize the library */
 
+#if USING_OPEN_GL
+	if (!glewInit())
+	{
+		return -1;
+	}
+	if (!glfwInit())
+	{ return -1; }
+#endif // USING_OPEN_GL
 	ptr_WindProc ptr_Proc = &WindProc;
-#ifdef USING_DIRECTX
 
 	if (!MY_Window.InitWindow(hInstance, ptr_Proc))
 		return 0;
-
-#endif // USING_DIRECTX
-
 	//if (FAILED(InitWindow(hInstance, nCmdShow)))
 		//return 0;
 
@@ -215,8 +209,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			Render();
 		}
 	}
+
+#if USING_OPEN_GL
 	/* Terminate the library*/
 	glfwTerminate();
+#endif // USING_OPEN_GL
 
 	CleanupDevice();
 
@@ -276,9 +273,7 @@ HRESULT Preamble()
 	//ID3D11Texture2D* pBackBuffer = NULL;
 	//hr = g_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 #if USING_DIRECTX
-
 	MY_Gui.Init(MY_Device, MY_DeviceContext, MY_Window.GetHandlerRef());
-
 #endif // USING_DIRECTX
 
 	isSuccesful = MY_SwapChain.GetBuffer(0, MY_RenderTragetView);
@@ -433,7 +428,6 @@ HRESULT Preamble()
 	isSuccesful = MY_PixelShader.InitPixelShader(L"Graficas_re.fx", "PS", "ps_4_0");
 #endif // USING_DIRECTX
 
-
 	if (isSuccesful == false)
 	{
 		HRESULT hr = S_FALSE;
@@ -450,9 +444,7 @@ HRESULT Preamble()
 	// Create the pixel shader
 	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
 	MY_Device.CreatePixelShader(MY_PixelShader);
-
-	//	p_PixelShaderBlob->Release();
-
+#ifndef MODEL_LOAD
 	if (isSuccesful == false)
 	{
 		HRESULT hr = S_FALSE;
@@ -493,7 +485,7 @@ HRESULT Preamble()
 
 	};
 
-	MY_VertexBuffer.IntiVertexBuffer(Vertices, 24, 0, sizeof(VertexWithTexture));
+	MY_VertexBuffer.InitVertexBuffer(Vertices, 24, 0, sizeof(VertexWithTexture));
 
 	/*Creates the vertexBuffer*/
 	isSuccesful = MY_Device.CreateBuffer(MY_VertexBuffer);
@@ -542,7 +534,6 @@ HRESULT Preamble()
 	/*!Creates the index buffer */
 	MY_Device.CreateBuffer(MY_IndexBuffer);
 
-
 	if (isSuccesful == false)
 	{
 		HRESULT hr = S_FALSE;
@@ -553,6 +544,11 @@ HRESULT Preamble()
 	/// DXGI_FORMAT_R16_UINT = 57
 	MY_DeviceContext.IASetIndexBuffer(MY_IndexBuffer, 57, 0);
 
+#else
+	MY_Model.LoadModelFromFile("Models/Dwarf/dwarf.x", MY_Device);
+	//MY_Model.CreateModelBuffers(MY_Device);
+
+#endif //MODEL_LOADs
 	// Set primitive topology
 	//g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 #if USING_DIRECTX
@@ -651,9 +647,6 @@ HRESULT Preamble()
 		return hr;
 	}
 
-	// Initialize the world matrices
-	g_World = XMMatrixIdentity();
-
 	// Initialize the view matrix and Perceptive matrice
 	MY_Camera.InitCamara(MY_Window.GetWidth(), MY_Window.GetHeight());
 
@@ -663,19 +656,14 @@ HRESULT Preamble()
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	g_View = XMMatrixLookAtLH(Eye, At, Up);*/
 
-	//CBNeverChanges cbNeverChanges;
-	//cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
+	CBNeverChanges cbNeverChanges;
+	cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
 	///
-		///
-		///
-		/// HERE IS FOR UPDATING RESROUCES 
-		/// 
-		///
-		///
-		///
-		///
-		///
-	//MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
+	///
+	/// HERE IS FOR UPDATING RESROUCES 
+	/// 
+	///
+	MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
 	// old code 
 	//g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
 
@@ -683,15 +671,178 @@ HRESULT Preamble()
 	//g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
 
 		// Initialize the projection matrix
-	//CBChangeOnResize cbChangesOnResize;
-	//cbChangesOnResize.mProjection = XMMatrixTranspose(MY_Camera.GetProyectionMatrice());
+	CBChangeOnResize cbChangesOnResize;
+	cbChangesOnResize.mProjection = XMMatrixTranspose(MY_Camera.GetProyectionMatrice());
 
 	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
-	//MY_DeviceContext.UpdateSubresource(ConstantBufferResize, static_cast<void*>(&cbChangesOnResize), 0);
+	MY_DeviceContext.UpdateSubresource(ConstantBufferResize, static_cast<void*>(&cbChangesOnResize), 0);
 
 	g_FinishInit = true;
 	return S_OK;
 }
+
+//--------------------------------------------------------------------------------------
+// Render a frame
+//--------------------------------------------------------------------------------------
+
+
+void Render()
+{
+	static float Time = 0.00f;
+	// Start Timing to get fps count 
+	MY_Timer.StartTiming();
+
+	static DWORD dwTimeStart = 0;
+	DWORD dwTimeCur = GetTickCount();
+	if (dwTimeStart == 0)
+		dwTimeStart = dwTimeCur;
+	Time = (dwTimeCur - dwTimeStart) / 1000.0f;
+
+	// Rotate cube around the origin
+	//g_World = XMMatrixRotationY(Time);
+
+	// Modify the color
+	g_vMeshColor.x = (sinf(Time * 1.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.y = (cosf(Time * 3.0f) + 1.0f) * 0.5f;
+	g_vMeshColor.z = (sinf(Time * 5.0f) + 1.0f) * 0.5f;
+
+	//
+	// Clear the back buffer
+	//
+	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
+
+	CBNeverChanges cbNeverChanges;
+	cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
+
+	MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
+
+	//g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
+
+	MY_DeviceContext.ClearRenderTargetView(MY_RenderTragetView, ClearColor);
+
+	//
+	// Clear the depth buffer to 1.0 (max depth)
+	//
+
+	MY_DeviceContext.ClearDepthStencilView(MY_DepthStencilView, 1, 1.0f, 0);
+	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	float MyCubeColor[4] = { g_vMeshColor.x, 	g_vMeshColor.y , 	g_vMeshColor.z, 1.0f };
+	//
+	// Update variables that change once per frame
+	//
+#if USING_DIRECTX
+	CBChangesEveryFrame cb;
+	cb.mWorld = XMMatrixTranspose(g_World * MY_Camera.GetTrasformMatrice());
+	cb.vMeshColor = MyCubeColor;
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	MY_DeviceContext.UpdateSubresource(ConstantBufferChangeEveryFrame, static_cast<void*>(&cb), 0);
+
+	// Initialize the projection matrix
+	CBChangeOnResize cbChangesOnResize;
+	cbChangesOnResize.mProjection = XMMatrixTranspose(MY_Camera.GetProyectionMatrice());
+
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
+	MY_DeviceContext.UpdateSubresource(ConstantBufferResize, static_cast<void*>(&cbChangesOnResize), 0);
+#endif // USING_DIRECTX
+	// Render the cube
+	//g_pImmediateContext->VSSetShader(g_pVertexShader, NULL, 0);
+	//g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
+	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
+	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
+	//g_pImmediateContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
+	//7g_pImmediateContext->PSSetShader(g_pPixelShader, NULL, 0);
+	//g_pImmediateContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
+	//g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
+	//g_pImmediateContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
+	//g_pImmediateContext->DrawIndexed(36, 0, 0);
+	// 
+	MY_DeviceContext.RSSetViewports(1, MY_ViewPort);
+
+	MY_DeviceContext.VSSetShader(MY_VertexShader);
+	MY_DeviceContext.VSSetConstantBuffers(0, 1, &ConstantBufferNeverChange);
+	MY_DeviceContext.VSSetConstantBuffers(1, 1, &ConstantBufferResize);
+	MY_DeviceContext.VSSetConstantBuffers(2, 1, &ConstantBufferChangeEveryFrame);
+
+
+	std::array<CBuffer *, 3> ConstBufferArray = {
+		&ConstantBufferNeverChange,
+		&ConstantBufferResize,
+		&ConstantBufferChangeEveryFrame
+	};
+
+	MY_DeviceContext.PSSetShader(MY_PixelShader);
+	MY_DeviceContext.PSSetConstantBuffers(2, 1, &ConstantBufferChangeEveryFrame);
+	MY_DeviceContext.PSSetShaderResources(0, 1, MY_ShaderResourceView);
+	MY_DeviceContext.PSSetSamplers(0, 1, MY_Sampler);
+
+	//MY_DeviceContext.DrawIndexed(MY_IndexBuffer.GetElementCount(), 0, 0);
+	/* Making cube rotates */
+	g_World *= XMMatrixTranslation(0, 0, -20);
+	cb.mWorld = XMMatrixTranspose(g_World);
+	//cb.vMeshColor = g_vMeshColor;
+	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	//MY_DeviceContext.UpdateSubresource(ConstantBufferChangeEveryFrame, static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
+	///*Make cube that rotate and Scales*/
+	MY_Model.DrawAllMeshes(MY_DeviceContext, ConstBufferArray, MY_Camera);
+	FXMVECTOR ScalingVector = { 3.0f,3.0f,3.0f,3.0f };
+
+	//FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(Time)) * 1.25f, 1, 1);
+	g_World = XMMatrixScalingFromVector(ScalingVector);
+	g_World *= XMMatrixRotationY(Time);
+	//g_World *= XMMatrixTranslation(0, 2, -2);
+	//cb.mWorld = XMMatrixTranspose(g_World);
+	//cb.vMeshColor = g_vMeshColor;
+	////g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
+	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
+
+
+	//g_World = XMMatrixRotationY(0);
+	//g_World = XMMatrixScalingFromVector(ScalingVector);
+	//g_World *= XMMatrixTranslation(3, 0, 0);
+	//cb.mWorld = XMMatrixTranspose(g_World);
+	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
+	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
+
+	/// imGui events ----------------------
+	MY_Timer.EndTiming();
+#if USING_DIRECTX
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
+#endif // USING_DIRECTX
+
+	// Present our back buffer to our front buffer
+	//
+	//g_pSwapChain->Present(0, 0);
+	MY_SwapChain.Present(0, 0);
+}
+
+//--------------------------------------------------------------------------------------
+// Clean up the objects we've created
+//--------------------------------------------------------------------------------------
+void CleanupDevice()
+{
+	//if (g_pImmediateContext) g_pImmediateContext->ClearState();
+
+	//if (g_pSamplerLinear) g_pSamplerLinear->Release();
+	//if (g_pTextureRV) g_pTextureRV->Release();
+	//if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
+	//if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
+	//if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
+	//if (g_pVertexBuffer) g_pVertexBuffer->Release();
+	//if (g_pIndexBuffer) g_pIndexBuffer->Release();
+	//if (g_pVertexLayout) g_pVertexLayout->Release();
+	//if (g_pVertexShader) g_pVertexShader->Release();
+//	if (g_pPixelShader) g_pPixelShader->Release();
+	//if (g_pDepthStencil) g_pDepthStencil->Release();
+//	if (g_pDepthStencilView) g_pDepthStencilView->Release();
+	//if (g_pRenderTargetView) g_pRenderTargetView->Release();
+//	if (g_pSwapChain) g_pSwapChain->Release();
+	//if (g_pImmediateContext) g_pImmediateContext->Release();
+	//if (g_pd3dDevice) g_pd3dDevice->Release();
+}
+
 
 //--------------------------------------------------------------------------------------
 // Called every time the application receives a message
@@ -714,8 +865,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 #endif // USING_DIRECTX
-
-
 	// messages for mouse 
 	/*
 	MK_LBUTTON          0x0001
@@ -739,9 +888,6 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	int ClientX = LOWORD(lParam);
 	// get the remaining 61-bits 
 	int ClienY = HIWORD(lParam);
-
-
-
 	switch (msg)
 	{
 	case WM_KEYDOWN:// checks if ANY key was pressed 
@@ -855,174 +1001,4 @@ LRESULT CALLBACK WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 #endif // USING_DIRECTX
 	return 0;
-
-
-}
-
-
-//--------------------------------------------------------------------------------------
-// Render a frame
-//--------------------------------------------------------------------------------------
-
-
-void Render()
-{
-	static float Time = 0.00f;
-	// Start Timing to get fps count 
-	MY_Timer.StartTiming();
-
-	// Update our time
-	//if (g_driverType == D3D_DRIVER_TYPE_REFERENCE)
-	//{
-	//	Time += (float) XM_PI * 0.0125f;
-	//}
-
-	static DWORD dwTimeStart = 0;
-	DWORD dwTimeCur = GetTickCount();
-	if (dwTimeStart == 0)
-		dwTimeStart = dwTimeCur;
-	Time = (dwTimeCur - dwTimeStart) / 1000.0f;
-	
-
-	// Rotate cube around the origin
-	//g_World = XMMatrixRotationY(Time);
-
-	// Modify the color
-	g_vMeshColor.x = (sinf(Time * 1.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.y = (cosf(Time * 3.0f) + 1.0f) * 0.5f;
-	g_vMeshColor.z = (sinf(Time * 5.0f) + 1.0f) * 0.5f;
-
-	//
-	// Clear the back buffer
-	//
-	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // red, green, blue, alpha
-
-	//CBNeverChanges cbNeverChanges;
-	//cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
-
-	//MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
-
-	//g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
-
-	MY_DeviceContext.ClearRenderTargetView(MY_RenderTragetView, ClearColor);
-
-	//
-	// Clear the depth buffer to 1.0 (max depth)
-	//
-
-	MY_DeviceContext.ClearDepthStencilView(MY_DepthStencilView, 1, 1.0f, 0);
-	//g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-	float MyCubeColor[4] = { g_vMeshColor.x * .01f, 	g_vMeshColor.y * .35f, 	g_vMeshColor.z * .10f, 1.0f };
-	//
-	// Update variables that change once per frame
-	//
-#if USING_DIRECTX
-	CBChangesEveryFrame cb;
-	cb.mWorld = XMMatrixTranspose(g_World * MY_Camera.GetTrasformMatrice());
-	cb.vMeshColor = MyCubeColor;
-	//g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	MY_DeviceContext.UpdateSubresource(ConstantBufferChangeEveryFrame, static_cast<void*>(&cb), 0);
-
-	// Initialize the projection matrix
-	CBChangeOnResize cbChangesOnResize;
-	cbChangesOnResize.mProjection = XMMatrixTranspose(MY_Camera.GetProyectionMatrice());
-
-	//g_pImmediateContext->UpdateSubresource(g_pCBChangeOnResize, 0, NULL, &cbChangesOnResize, 0, 0);
-	MY_DeviceContext.UpdateSubresource(ConstantBufferResize, static_cast<void*>(&cbChangesOnResize), 0);
-
-
-#endif // USING_DIRECTX
-	//
-	// Render the cube
-	//g_pImmediateContext->VSSetShader(g_pVertexShader, NULL, 0);
-	//g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
-	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
-	//g_pImmediateContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
-	//g_pImmediateContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
-	//7g_pImmediateContext->PSSetShader(g_pPixelShader, NULL, 0);
-	//g_pImmediateContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
-	//g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
-	//g_pImmediateContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
-	//g_pImmediateContext->DrawIndexed(36, 0, 0);
-	//
-	MY_DeviceContext.RSSetViewports(1, MY_ViewPort);
-
-	MY_DeviceContext.VSSetShader(MY_VertexShader);
-	MY_DeviceContext.VSSetConstantBuffers(0, 1, &ConstantBufferNeverChange);
-	MY_DeviceContext.VSSetConstantBuffers(1, 1, &ConstantBufferResize);
-	MY_DeviceContext.VSSetConstantBuffers(2, 1, &ConstantBufferChangeEveryFrame);
-	MY_DeviceContext.PSSetShader(MY_PixelShader);
-	MY_DeviceContext.PSSetConstantBuffers(2, 1, &ConstantBufferChangeEveryFrame);
-	MY_DeviceContext.PSSetShaderResources(0, 1, MY_ShaderResourceView);
-	MY_DeviceContext.PSSetSamplers(0, 1, MY_Sampler);
-	MY_DeviceContext.DrawIndexed(MY_IndexBuffer.GetElementCount(), 0, 0);
-	/* Making cube rotates */
-	//g_World *= XMMatrixTranslation(-3, 0, 0);
-	//cb.mWorld = XMMatrixTranspose(g_World);
-	//cb.vMeshColor = g_vMeshColor;
-	////g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
-	///*Make cube that rotate and Scales*/
-
-
-	//FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(Time)) * 1.25f, 1, 1);
-	//g_World = XMMatrixScalingFromVector(ScalingVector);
-	//g_World *= XMMatrixRotationY(Time);
-	//g_World *= XMMatrixTranslation(0, 2, -2);
-	//cb.mWorld = XMMatrixTranspose(g_World);
-	//cb.vMeshColor = g_vMeshColor;
-	////g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
-
-
-	//g_World = XMMatrixRotationY(0);
-	//g_World = XMMatrixScalingFromVector(ScalingVector);
-	//g_World *= XMMatrixTranslation(3, 0, 0);
-	//cb.mWorld = XMMatrixTranspose(g_World);
-	//MY_DeviceContext.UpdateSubresource(static_cast<void*>(ConstantBufferChangeEveryFrame.GetBuffer()), static_cast<void*>(&cb), 0);
-	//MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
-
-	/// imGui events ----------------------
-	//MY_Gui.MakeBasicWindow("Ventana Bien Pinche meca");
-
-
-	MY_Timer.EndTiming();
-#if USING_DIRECTX
-	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
-#endif // USING_DIRECTX
-
-
-	//
-	// Present our back buffer to our front buffer
-	//
-	//g_pSwapChain->Present(0, 0);
-	MY_SwapChain.Present(0, 0);
-}
-
-//--------------------------------------------------------------------------------------
-// Clean up the objects we've created
-//--------------------------------------------------------------------------------------
-void CleanupDevice()
-{
-	//if (g_pImmediateContext) g_pImmediateContext->ClearState();
-
-	//if (g_pSamplerLinear) g_pSamplerLinear->Release();
-	//if (g_pTextureRV) g_pTextureRV->Release();
-	//if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
-	//if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
-	//if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-	//if (g_pVertexBuffer) g_pVertexBuffer->Release();
-	//if (g_pIndexBuffer) g_pIndexBuffer->Release();
-	//if (g_pVertexLayout) g_pVertexLayout->Release();
-	//if (g_pVertexShader) g_pVertexShader->Release();
-//	if (g_pPixelShader) g_pPixelShader->Release();
-	//if (g_pDepthStencil) g_pDepthStencil->Release();
-//	if (g_pDepthStencilView) g_pDepthStencilView->Release();
-	//if (g_pRenderTargetView) g_pRenderTargetView->Release();
-//	if (g_pSwapChain) g_pSwapChain->Release();
-	//if (g_pImmediateContext) g_pImmediateContext->Release();
-	//if (g_pd3dDevice) g_pd3dDevice->Release();
 }

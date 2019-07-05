@@ -18,12 +18,13 @@ public:
 	int GetHeight();
 	//! returns the width
 	int GetWidth();
+	
+	ptr_WindProc GetWindProcPtr();
 #ifdef USING_DIRECTX
 	/*! returns the handler of the window in directX */
 	HWND GetHandler();
 	HWND& GetHandlerRef();
 	/*! return a pointer to WindProc */
-	ptr_WindProc GetWindProcPtr();
 #else// TODO_GL
 
 
@@ -31,15 +32,15 @@ public:
 
 
 private:
-#ifdef USING_DIRECTX
 	ptr_WindProc	mptr_windProc;
+	TCHAR *m_Name;
+#ifdef USING_DIRECTX
 	HWND m_WindowHandler;
 	//! to keep track of the name and to unregister the class 
-	TCHAR *m_Name;
 	//! this is here to later un-register the class 
 	HINSTANCE m_Instance;
+#elif USING_OPEN_GL
 	GLFWwindow* mptr_Window;
-#else
 #endif // USING_DIRECTX
 	int m_Width;
 	int m_Height;

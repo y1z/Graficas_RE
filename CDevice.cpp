@@ -25,10 +25,13 @@ CDevice::CDevice()
 
 CDevice::~CDevice()
 {
+#if USING_DIRECTX
 	if (mptr_Device != nullptr) { mptr_Device->Release(); }
+#endif // USING_DIRECTX
+
 }
 
-bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext, CWindow &Window)
+bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviceContext &DeviaceContext, CWindow &Window)
 {
 
 #if USING_DIRECTX
@@ -90,9 +93,12 @@ bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext,
 	}
 	if (FAILED(hr))
 		return false;
+#elif USING_OPEN_GL
+
+
 #endif // USING_DIRECTX
 
-	return false;
+	return true;
 }
 
 bool CDevice::CreateRenderTargetView(CRenderTragetView &RenderTragetView)
@@ -115,7 +121,7 @@ bool CDevice::CreateRenderTargetView(CRenderTragetView &RenderTragetView)
 	}
 
 
-#elif//! TODO add opengl Functionality
+#elif USING_OPEN_GL//! TODO add opengl Functionality
 
 
 #endif
@@ -140,7 +146,7 @@ bool CDevice::CreateTexture2D(CTexture2D &Texture)
 
 	return false;
 
-#elif//! TODO add opengl Functionality
+#elif USING_OPEN_GL//! TODO add opengl Functionality
 
 
 #endif
@@ -166,7 +172,7 @@ bool CDevice::CreateDepthStencilView(CDepthStencilView &DepthStencilView)
 
 	return false;
 
-#elif//! TODO add opengl Functionality
+#elif USING_OPEN_GL//! TODO add opengl Functionality
 
 
 #endif
@@ -176,7 +182,6 @@ bool CDevice::CreateDepthStencilView(CDepthStencilView &DepthStencilView)
 bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 {
 #if defined(USING_DIRECTX)
-
 	HRESULT hr = S_OK;
 
 	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(VertexShader.GetVertexShaderData());
@@ -192,7 +197,7 @@ bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 	}
 
 	return false;
-#elif//TODO_GL
+#elif USING_OPEN_GL//TODO_GL
 
 #endif
 
@@ -220,7 +225,7 @@ bool CDevice::CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShade
 	}
 
 	return false;
-#elif
+#elif USING_OPEN_GL
 #endif
 	return false;
 }
@@ -243,7 +248,7 @@ bool CDevice::CreatePixelShader(CPixelShader &PixelShader)
 
 	return false;
 
-#elif
+#elif USING_OPEN_GL
 #endif
 	return false;
 }
@@ -251,8 +256,6 @@ bool CDevice::CreatePixelShader(CPixelShader &PixelShader)
 bool CDevice::CreateBuffer(CBuffer &Buffer)
 {
 #if defined(USING_DIRECTX)
-	
-	
 	HRESULT hr = S_OK;
 	if (Buffer.GetDataRef()->pSysMem != nullptr)
 	{
@@ -267,14 +270,12 @@ bool CDevice::CreateBuffer(CBuffer &Buffer)
 			static_cast<ID3D11Buffer**>(Buffer.GetBufferRef()));
 	}
 
-
 	if (!CheckForError(hr))
 	{
 		return true;
 	}
-
 	return false;
-#elif
+#elif USING_OPEN_GL
 #endif
 
 	return false;
@@ -284,7 +285,6 @@ bool CDevice::CreateSamplerState(CSampler &Sampler)
 {
 #if defined(USING_DIRECTX)
 	HRESULT hr = S_OK;
-
 	auto Temp = Sampler.ConvertSamplerToDx();
 
 	hr = mptr_Device->CreateSamplerState(static_cast<D3D11_SAMPLER_DESC*>(&Temp),
@@ -296,8 +296,7 @@ bool CDevice::CreateSamplerState(CSampler &Sampler)
 	}
 
 	return false;
-
-#elif
+#elif USING_OPEN_GL
 #endif
 
 	return false;
@@ -313,5 +312,5 @@ ID3D11Device ** CDevice::GetDeviceRef()
 {
 	return &mptr_Device;
 }
-#elif
+#elif USING_OPEN_GL
 #endif 

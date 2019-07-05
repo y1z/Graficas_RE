@@ -18,11 +18,11 @@ public:// functions
 	ID3D11RenderTargetView ** GetRenderTragetRef();
 	ID3D11Texture2D*GetBackBuffer();
 	ID3D11Texture2D** GetBackBufferRef();
-
-	void DestroyBuffers();
-
-#else
+#elif USING_OPEN_GL
+	uint32_t GetBackBuffer();
+	uint32_t &GetBackBufferRef();
 #endif
+	void DestroyBuffers();
 
 	void ** GetVoidRefRef();
 private:// variables 
@@ -30,6 +30,8 @@ private:// variables
 #if defined (USING_DIRECTX)
 	ID3D11RenderTargetView *mptr_RenderTraget = nullptr;
 	ID3D11Texture2D * mptr_buffer = nullptr;
-#else
+#elif USING_OPEN_GL
+	uint32_t m_BufferID;
+	uint32_t m_RenderTragetID;
 #endif
 };

@@ -8,9 +8,13 @@ CShaderResourceView::CShaderResourceView()
 
 CShaderResourceView::~CShaderResourceView()
 {
+#if USING_DIRECTX
 	if (mptr_ResourceView != nullptr) { mptr_ResourceView->Release(); }
+#endif
 }
 
+
+#if USING_DIRECTX
 ID3D11ShaderResourceView * CShaderResourceView::GetResourceView()
 {
 	return mptr_ResourceView;
@@ -20,6 +24,8 @@ ID3D11ShaderResourceView ** CShaderResourceView::GetResourceViewRef()
 {
 	return &mptr_ResourceView;
 }
+#endif // USING_DIRECTX
+
 
 bool CShaderResourceView::CreateShaderResourceViewFromFile(CDevice & Device, wchar_t * FileName)
 {

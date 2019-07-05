@@ -7,8 +7,12 @@ CSampler::CSampler()
 
 CSampler::~CSampler()
 {
+#if USING_DIRECTX
 	if (mptr_Sampler != nullptr) { mptr_Sampler->Release(); }
+#endif // USING_DIRECTX
+
 }
+#if USING_DIRECTX
 
 void CSampler::ConvertDxToSampler(D3D11_SAMPLER_DESC & DxDescriptor)
 {
@@ -32,7 +36,7 @@ void CSampler::ConvertDxToSampler(D3D11_SAMPLER_DESC & DxDescriptor)
 D3D11_SAMPLER_DESC CSampler::ConvertSamplerToDx()
 {
 	D3D11_SAMPLER_DESC Result;
-	Result.Filter = static_cast<D3D11_FILTER>( m_Descriptor.Filter);
+	Result.Filter = static_cast<D3D11_FILTER>(m_Descriptor.Filter);
 
 	Result.AddressU = static_cast<D3D11_TEXTURE_ADDRESS_MODE> (m_Descriptor.ExampleAddressU);
 	Result.AddressV = static_cast<D3D11_TEXTURE_ADDRESS_MODE> (m_Descriptor.ExampleAddressV);
@@ -40,7 +44,7 @@ D3D11_SAMPLER_DESC CSampler::ConvertSamplerToDx()
 
 	Result.MipLODBias = m_Descriptor.MipsOffset;
 	Result.MaxAnisotropy = m_Descriptor.AnisotropicLevel;
-	Result.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>( m_Descriptor.ComparisonType);
+	Result.ComparisonFunc = static_cast<D3D11_COMPARISON_FUNC>(m_Descriptor.ComparisonType);
 
 	for (int i = 0; i < 4; ++i)
 	{
@@ -62,6 +66,8 @@ ID3D11SamplerState ** CSampler::GetSamplerRef()
 {
 	return &mptr_Sampler;
 }
+
+#endif // USING_DIRECTX
 
 void CSampler::SetUpSampler(int Filter, int AddressU,
 	int AddressV, int AddressW,

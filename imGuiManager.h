@@ -16,7 +16,7 @@ public:
 	~imGuiManager();
 public:
 	/*! start the imgui class*/
-	bool Init(CDevice &Device, CDeviaceContext &DeviceContext, HWND& Handle);
+	bool Init(CDevice &Device, CDeviceContext &DeviceContext, HWND& Handle);
 	//! has nothing just the simplest window you can make 
 	void MakeBasicWindow(const char* WindowName);
 	//! here is a window that contains very specific information 

@@ -143,7 +143,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;USING_OPEN_GL;USING_OPEN_GL;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -186,14 +186,14 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
-      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;GLEW_STATIC;GLEW_STATIC;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Z7 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;glfw3dll.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;glew32s.lib;opengl32.lib;d3dx11d.lib;d3dx9d.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
@@ -220,7 +220,6 @@
     <PreLinkEvent>
       <Command>xcopy /y /d "$(SolutionDir)bin\assimp-vc140-mt.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
-xcopy /y /d "$(SolutionDir)glew-2.1.0\bin\Release\x64\glew32.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Configuration)\"
 </Command>
     </PreLinkEvent>
@@ -238,7 +237,7 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;USING_OPEN_GL;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -282,13 +281,13 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
-      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;GLEW_STATIC;GLEW_BUILD;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Z7 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;glew32.lib;opengl32.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -331,7 +330,7 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;USING_OPEN_GL;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -375,13 +374,13 @@ xcopy /y /d "$(SolutionDir)freeglut\bin\x64\freeglut.dll" "$(SolutionDir)$(Platf
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
       <AdditionalIncludeDirectories>DXUT\Core;DXUT\Optional;$(SolutionDir);$(DEVLIBS)glm</AdditionalIncludeDirectories>
-      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>WIN32;USING_DIRECTX;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;USING_DIRECTX;GLEW_STATIC;GLEW_BUILD;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Z7 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;assimp-vc140-mt.lib;freeglut.lib;glfw3dll.lib;glew32.lib;opengl32.lib;assimp-vc140-mt.lib;d3dx11.lib;d3dx9.lib;dxerr.lib;dxguid.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -474,6 +473,7 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="OpenglHeader.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="Usable_Windows.h" />

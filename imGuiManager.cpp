@@ -20,7 +20,7 @@ imGuiManager::~imGuiManager()
 	ImGui::DestroyContext();
 }
 
-bool imGuiManager::Init(CDevice & Device, CDeviaceContext & DeviceContext, HWND& Handle)
+bool imGuiManager::Init(CDevice & Device, CDeviceContext & DeviceContext, HWND& Handle)
 {
 	bool isSuccesful = false;
 	IMGUI_CHECKVERSION();

@@ -9,7 +9,10 @@ CInputLayout::CInputLayout()
 
 CInputLayout::~CInputLayout()
 {
+#if USING_DIRECTX
 	if (mptr_InputLayoutDX) { mptr_InputLayoutDX->Release(); }
+#endif // USING_DIRECTX
+
 }
 
 std::vector<SInputDesc> CInputLayout::GetDescriptionVec()

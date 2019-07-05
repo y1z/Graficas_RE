@@ -23,8 +23,6 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int H
 	m_Name = DefulatName;
 
 #ifdef USING_DIRECTX
-
-
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -52,13 +50,15 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int H
 		return false;
 
 	ShowWindow(m_WindowHandler, CommandShow);
-#elif 
-	mptr_Window = glfwCreateWindow(m_Width, m_Height, "OpenGL Window", NULL, NULL);
+#elif USING_OPEN_GL
+	mptr_Window = glfwCreateWindow(m_Width, m_Height, "OpenGL Window", nullptr, nullptr);
 	glfwMakeContextCurrent(mptr_Window);
 
 	if (!mptr_Window)
 	{
-		MessageBox(NULL, L"ERROR!", L"Error With glfw Window ", 0);
+		glfwTerminate();
+		MessageBox(nullptr, L"ERROR!", L"Error With glfw Window ", 0);
+		return false;
 	}
 
 #endif // USING_DIRECTX
@@ -86,6 +86,7 @@ int CWindow::GetWidth()
 {
 	return m_Width;
 }
+#if USING_DIRECTX
 
 HWND CWindow::GetHandler()
 {
@@ -96,6 +97,8 @@ HWND & CWindow::GetHandlerRef()
 {
 	return m_WindowHandler;
 }
+
+#endif // USING_DIRECTX
 
 ptr_WindProc CWindow::GetWindProcPtr()
 {

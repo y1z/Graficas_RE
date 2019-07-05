@@ -4,12 +4,22 @@
 #include "CRenderTragetView.h"
 
 CSwapChian::CSwapChian()
-{}
+{
+#if USING_DIRECTX
+	mptr_SwapChian = nullptr;
+#elif USING_OPEN_GL
+	m_BackBufferID = 0;
+#endif
+}
 
 
 CSwapChian::~CSwapChian()
 {
+#if USING_DIRECTX
 	if (mptr_SwapChian != nullptr) { mptr_SwapChian->Release(); }
+#elif	USING_OPEN_GL
+#endif // USING_DIRECTX
+
 }
 
 
@@ -27,7 +37,14 @@ bool CSwapChian::GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget)
 	}
 
 	return false;
-#elif
+#elif	USING_OPEN_GL
+
+	if (RenderTraget.GetBackBuffer() != 0)
+	{
+		this->m_BackBufferID = RenderTraget.GetBackBuffer();
+		return true;
+	}
+	return false;
 #endif
 
 	return false;
@@ -45,7 +62,7 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 	}
 	return false;
 
-#elif
+#elif USING_OPEN_GL
 #endif
 
 	return false;
@@ -53,11 +70,15 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 
 void CSwapChian::ResizeBuffer(int width, int height, HWND g_hWnd)
 {
+#if USING_DIRECTX
 	mptr_SwapChian->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+#endif // USING_DIRECTX
+
 }
 
 void CSwapChian::ResizeTarget(int width, int height)
 {
+#if USING_DIRECTX
 	DXGI_MODE_DESC Description;
 	Description.Format = DXGI_FORMAT_UNKNOWN;
 	Description.Height = height;
@@ -70,10 +91,15 @@ void CSwapChian::ResizeTarget(int width, int height)
 	DXGI_SWAP_CHAIN_DESC temp;
 
 	mptr_SwapChian->GetDesc(&temp);
+#endif // USING_DIRECTX
+
 
 }
 
+#if USING_DIRECTX
 IDXGISwapChain ** CSwapChian::GetSwapChianRef()
 {
 	return &mptr_SwapChian;
 }
+
+#endif // USING_DIRECTX

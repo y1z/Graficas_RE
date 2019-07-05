@@ -3,7 +3,7 @@
 class CBuffer;
 class CSampler;
 class CSwapChian;
-class CDeviaceContext;
+class CDeviceContext;
 class CWindow;
 class CRenderTragetView;
 class CTexture2D;
@@ -33,7 +33,7 @@ public: // functions
 	\param [out] SwapChian used to also init SwapChian 
 	\param [out] DeviaceContext used to init DeviaceContext
 	\param [in] used to know which Window to associate with Device,SwapChian and DeviceContext to the Window*/
-	bool InitDevice(CSwapChian &SwapChian, CDeviaceContext &DeviaceContext,CWindow &Window);
+	bool InitDevice(CSwapChian &SwapChian, CDeviceContext &DeviaceContext,CWindow &Window);
 
 	/*! used to crate a render target or equivalent
 	\param RenderTragetView [out] This class Contains both the back buffer and render-target necessary for making rendertargetView.

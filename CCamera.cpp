@@ -1,7 +1,7 @@
 #include "CCamera.h"
 // creating defualt values 
 CCamera::CCamera()
-	:m_Far(100.0f),
+	:m_Far(500.0f),
 	m_Near(0.01f),
 	// This is 45 degrees in radians
 	m_Fov(0.785398163f)
@@ -21,7 +21,8 @@ void CCamera::InitCamara(uint32_t WindowWidth, uint32_t WindowHeight)
 	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, WindowWidth / (FLOAT) WindowHeight, m_Near, m_Far);
 
 	m_Trasfrom = XMMatrixIdentity();
-#elif
+#elif USING_OPEN_GL
+
 #endif
 }
 
@@ -61,7 +62,7 @@ void CCamera::AlterProyectionMatric(int NewWidth, int NewHeight, float Fov , flo
 	m_Far = Far;
 
 	m_Proyection = XMMatrixPerspectiveFovLH(m_Fov, NewWidth / (FLOAT) NewHeight, m_Near, m_Far);
-#elif
+#elif USING_OPEN_GL
 #endif
 }
 
@@ -90,7 +91,7 @@ void CCamera::MoveCamera(XMVECTOR Vec)
 	CoordinateUpdate();
 }
 
-#elif
+#elif USING_OPEN_GL
 #endif
 void CCamera::MoveTrasfromMatrice(float x, float y, float z)
 {
@@ -98,7 +99,7 @@ void CCamera::MoveTrasfromMatrice(float x, float y, float z)
 	FXMVECTOR Vector = XMVectorSet(x, y, z, 1);
 
 	m_Trasfrom *= XMMatrixTranslationFromVector(Vector);
-#elif
+#elif USING_OPEN_GL
 #endif
 }
 
@@ -107,7 +108,7 @@ void CCamera::RotateTrasformMatrice(void * Rotation)
 #if defined(USING_DIRECTX)
 	XMMATRIX* Temp = static_cast<XMMATRIX*>(Rotation);
 	m_Trasfrom *= (*Temp);
-#elif
+#elif USING_OPEN_GL
 #endif
 }
 
@@ -115,8 +116,7 @@ void CCamera::ResetTrasformMatrice()
 {
 #if defined(USING_DIRECTX)
 	m_Trasfrom = XMMatrixIdentity();
-
-#elif
+#elif USING_OPEN_GL
 #endif
 }
 
@@ -132,7 +132,7 @@ void CCamera::CoordinateUpdate()
 	m_UpVector = (XMVector3Cross(m_FrontVector, m_RightVector));
 
 	m_At = m_Eye + m_FrontVector;
-#elif
+#elif USING_OPEN_GL
 #endif
 }
 

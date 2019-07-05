@@ -6,8 +6,11 @@ CPixelShader::CPixelShader()
 
 CPixelShader::~CPixelShader()
 {
+#if USING_DIRECTX
 	if (mptr_PixelShader) { mptr_PixelShader->Release(); }
 	if (mptr_ShaderData) { mptr_ShaderData->Release(); }
+#endif // USING_DIRECTX
+
 }
 
 bool CPixelShader::InitPixelShader(wchar_t * ShaderFile, char * ShaderEntry, char * ShaderVersion)
@@ -42,6 +45,7 @@ bool CPixelShader::InitPixelShader(wchar_t * ShaderFile, char * ShaderEntry, cha
 	return true;
 }
 
+#if USING_DIRECTX
 ID3D11PixelShader * CPixelShader::GetPixelShader()
 {
 	return mptr_PixelShader;
@@ -61,3 +65,5 @@ ID3DBlob ** CPixelShader::GetPixelShaderDataRef()
 {
 	return &mptr_ShaderData;
 }
+
+#endif // USING_DIRECTX
