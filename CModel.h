@@ -27,7 +27,10 @@ public:
 //	D3D11_BUFFER_DESC GetDescVertex(int Index);
 //	D3D11_BUFFER_DESC GetDescIndex(int Index);
 	std::vector<CMesh*> m_Meshs;
+
+	uint64_t GetTotalVertices() const;
 private:
+	mutable uint64_t m_CountVertices = 0;
 	// go recursively through the tree 
 	void GetTreeInfo(const aiScene *Scene, aiNode * node, CDevice &Device);
 	void ExtracMesh(aiMesh * meshInfo, CDevice &Device);

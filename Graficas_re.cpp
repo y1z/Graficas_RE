@@ -658,11 +658,7 @@ HRESULT Preamble()
 
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
-	///
-	///
-	/// HERE IS FOR UPDATING RESROUCES 
-	/// 
-	///
+	// HERE IS FOR UPDATING RESROUCES 
 	MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
 	// old code 
 	//g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
@@ -684,8 +680,6 @@ HRESULT Preamble()
 //--------------------------------------------------------------------------------------
 // Render a frame
 //--------------------------------------------------------------------------------------
-
-
 void Render()
 {
 	static float Time = 0.00f;
@@ -808,8 +802,11 @@ void Render()
 
 	/// imGui events ----------------------
 	MY_Timer.EndTiming();
-#if USING_DIRECTX
+#ifdef USING_DIRECTX && MODEL_LOAD
+	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_Model.GetTotalVertices());
+#elif USING_DIRECTX
 	MY_Gui.MakeWindowFpsAndVertexCount("Stats Window", MY_Timer.GetResultSeconds(), MY_VertexBuffer.GetElementCount());
+
 #endif // USING_DIRECTX
 
 	// Present our back buffer to our front buffer

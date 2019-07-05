@@ -67,6 +67,17 @@ void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *,3
 #endif
 }
 
+uint64_t CModel::GetTotalVertices() const
+{
+	m_CountVertices = 0;
+	for (CMesh * mesh : m_Meshs)
+	{
+		m_CountVertices += mesh->GetVertexBuffer().GetElementCount();
+	}
+
+	return m_CountVertices;
+}
+
 void CModel::GetTreeInfo(const aiScene * Scene, aiNode * node, CDevice & Device)
 {
 	// get the meshes
