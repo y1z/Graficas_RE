@@ -1,6 +1,17 @@
 #pragma once
+#if USING_OPEN_GL
+#undef USING_DIRECTX
+#endif
+
+
+#if USING_DIRECTX
+#include "DirectXHeader.h" 
+#elif USING_OPEN_GL
+#include "OpenglHeader.h"
+#endif // USING_DIRECTX
 #include	"Usable_Windows.h"
-#include "DirectXHeader.h"
+
+
 #include <cinttypes>
 class CTexture2D
 {
@@ -13,6 +24,8 @@ public:// functions
 
 	void MakeNull();
 
+
+public:
 #if(USING_DIRECTX)
 	ID3D11Texture2D *GetTexture();
 	ID3D11Texture2D **GetTextureRef();
@@ -20,12 +33,22 @@ public:// functions
 	D3D11_TEXTURE2D_DESC GetDescriptor();
 
 #else//TODO_GL
+
+	uint32_t GetTexture();
+	uint32_t &GetTextureRef();
+	uint32_t GetWidth();
+	uint32_t GetHeight();
+
+
 #endif
 private:// variables
 #if(USING_DIRECTX)
 	ID3D11Texture2D *mptr_Texture = nullptr;
 	D3D11_TEXTURE2D_DESC m_TextureDescriptor;
-#else// TODO_GL 
+#elif USING_OPEN_GL// TODO_GL 
+	uint32_t m_TextureID = 0;
 #endif
+	uint32_t m_Width = 0;
+	uint32_t m_Height = 0;
 };
 

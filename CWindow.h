@@ -20,13 +20,14 @@ public:
 	int GetWidth();
 	
 	ptr_WindProc GetWindProcPtr();
-#ifdef USING_DIRECTX
 	/*! returns the handler of the window in directX */
+#ifdef USING_DIRECTX
+
 	HWND GetHandler();
 	HWND& GetHandlerRef();
 	/*! return a pointer to WindProc */
 #else// TODO_GL
-
+	GLFWwindow *GetHandler();
 
 #endif // USING_DIRECTX
 

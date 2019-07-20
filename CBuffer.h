@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Usable_Windows.h"
 #if USING_DIRECTX
 #include "DirectXHeader.h"  
@@ -12,8 +13,6 @@ class CBuffer
 public:
 	CBuffer();
 	~CBuffer();
-
-
 public:// functions 
 
 	/*! This function set up the buffer to later become a Vertex buffer*/
@@ -23,10 +22,11 @@ public:// functions
 	void InitIndexBuffer(const void * DataStruct, uint64_t TotalElements, uint32_t OffSet, uint32_t SizeOfBuffer);
 
 	/*! This function set up the buffer to later become a constant buffer.*/
-	void InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t SizeOfBuffer);
+	void InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t SizeOfBuffer,unsigned int &Program , uint32_t Index = 0);
 
 	UINT GetStride();
 	UINT GetOffset();
+	uint64_t GetElementCount();
 
 #ifdef USING_DIRECTX
 	ID3D11Buffer* GetBuffer();
@@ -35,10 +35,10 @@ public:// functions
 	D3D11_BUFFER_DESC* GetDescRef();
 	D3D11_SUBRESOURCE_DATA GetData();
 	D3D11_SUBRESOURCE_DATA* GetDataRef();
+#elif USING_OPEN_GL
+
 #endif // USING_DIRECT
 
-	uint64_t GetElementCount();
-	// 
 #if USING_DIRECTX
 	D3D11_BUFFER_DESC m_Discriptor;
 	D3D11_SUBRESOURCE_DATA m_Data;

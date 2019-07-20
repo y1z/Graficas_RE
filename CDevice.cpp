@@ -1,3 +1,7 @@
+//Other
+#include "OpenglHeader.h"
+#include "Utility/ErrorHandlingGrafics.h"
+// class inclues 
 #include "CDevice.h"
 #include "CBuffer.h"
 #include "CSwapChian.h"
@@ -8,8 +12,8 @@
 #include "CInputLayout.h"
 #include "CPixelShader.h"
 #include "CSampler.h"
+#include <cassert>
 
-#include "Utility/ErrorHandlingGrafics.h"
 /* often used preprocessor statements
 #if defined(USING_DIRECTX)
 #elif
@@ -95,6 +99,7 @@ bool CDevice::InitDevice(CSwapChian &SwapChian, CDeviceContext &DeviaceContext, 
 		return false;
 #elif USING_OPEN_GL
 
+	SwapChian.ptr_Window = Window.GetHandler();
 
 #endif // USING_DIRECTX
 
@@ -122,8 +127,22 @@ bool CDevice::CreateRenderTargetView(CRenderTragetView &RenderTragetView)
 
 
 #elif USING_OPEN_GL//! TODO add opengl Functionality
+	GlRemoveAllErrors();
+	glGenFramebuffers(1, RenderTragetView.GetRenderTragetRef());
+	glBindFramebuffer(GL_FRAMEBUFFER, RenderTragetView.GetRenderTraget());
 
 
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+	{
+		 std::string ErrorCode = std::to_string(status);
+		 assert(true == false && "Frame buffer Errror :");
+	}
+
+	if (!GlCheckForError())
+	{
+		return true;
+	}
 #endif
 
 	return false;
@@ -148,6 +167,22 @@ bool CDevice::CreateTexture2D(CTexture2D &Texture)
 
 #elif USING_OPEN_GL//! TODO add opengl Functionality
 
+	GlRemoveAllErrors();
+
+	glBindTexture(GL_TEXTURE_2D, Texture.GetTextureRef());
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture.GetWidth(), Texture.GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (!GlCheckForError())
+	{
+		return true;
+	}
 
 #endif
 
@@ -173,7 +208,23 @@ bool CDevice::CreateDepthStencilView(CDepthStencilView &DepthStencilView)
 	return false;
 
 #elif USING_OPEN_GL//! TODO add opengl Functionality
+	GlRemoveAllErrors();
+	glEnable(GL_DEPTH_TEST);
+	glGenRenderbuffers(1, &DepthStencilView.GetDepthBufferRef());
+	glBindRenderbuffer(GL_RENDERBUFFER, DepthStencilView.GetDepthBuffer());
+	
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, DepthStencilView.GetTexture2D()->GetWidth(), DepthStencilView.GetTexture2D()->GetHeight());
 
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	if (!GlCheckForError())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 
 #endif
 	return false;
@@ -198,7 +249,16 @@ bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 
 	return false;
 #elif USING_OPEN_GL//TODO_GL
-
+	GlRemoveAllErrors();
+	const char * Shader = VertexShader.m_Shader.c_str();
+	// for checking the string 
+	OutputDebugStringA(Shader);
+	glShaderSource(VertexShader.m_VertexShaderID, 1, &Shader, nullptr);
+	glCompileShader(VertexShader.m_VertexShaderID);
+	if (!GlCheckForError())
+	{
+		return true;
+	}
 #endif
 
 	return false;
@@ -226,6 +286,9 @@ bool CDevice::CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShade
 
 	return false;
 #elif USING_OPEN_GL
+
+
+	return true;
 #endif
 	return false;
 }
@@ -249,6 +312,15 @@ bool CDevice::CreatePixelShader(CPixelShader &PixelShader)
 	return false;
 
 #elif USING_OPEN_GL
+	GlRemoveAllErrors();
+	const char * Shader = PixelShader.m_Shader.c_str();
+	OutputDebugStringA(Shader);
+	glShaderSource(PixelShader.m_PixelShaderID, 1, &Shader, nullptr);
+	glCompileShader(PixelShader.m_PixelShaderID);
+	if (!GlCheckForError())
+	{
+		return true;
+	}
 #endif
 	return false;
 }
@@ -276,6 +348,9 @@ bool CDevice::CreateBuffer(CBuffer &Buffer)
 	}
 	return false;
 #elif USING_OPEN_GL
+
+	//TODO_GL
+	return true;
 #endif
 
 	return false;
@@ -313,4 +388,5 @@ ID3D11Device ** CDevice::GetDeviceRef()
 	return &mptr_Device;
 }
 #elif USING_OPEN_GL
+
 #endif 

@@ -107,6 +107,8 @@ public:// functions
 \param IndexDiff [in]  */
 	void DrawIndexed(int32_t TotalIndexs, int32_t StartIndex, int32_t IndexDiff = 0);
 
+	void DrawIndexed(CBuffer& IndexBuffer);
+
 #ifdef USING_DIRECTX
 	ID3D11DeviceContext ** GetDeviceContextRef();
 	ID3D11DeviceContext * GetDeviceContext();

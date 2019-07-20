@@ -1,5 +1,6 @@
 #include "CDepthStencilView.h"
-
+#include "Utility/ErrorHandlingGrafics.h"
+#include <cassert>
 CDepthStencilView::CDepthStencilView()
 {
 	mptr_DepthStencil = new CTexture2D();
@@ -11,6 +12,8 @@ CDepthStencilView::~CDepthStencilView()
 	if (mptr_DepthStencil != nullptr) { delete mptr_DepthStencil; }
 #if USING_DIRECTX
 	if (mptr_DepthStencilView != nullptr) { mptr_DepthStencilView->Release(); }
+#elif USING_OPEN_GL
+	if (m_DepthBufferID != 0) { glDeleteFramebuffers(1, &m_DepthBufferID); }
 #endif // USING_DIRECTX
 
 }
@@ -23,6 +26,18 @@ void CDepthStencilView::InitDepthStencil2D(uint32_t Height, uint32_t Width, int 
 	m_Descriptor.AccessFlags = (int) D3D11_DSV_DIMENSION_TEXTURE2D;
 	m_Descriptor.TextureType = 2;
 	m_Descriptor.ReadingType = 0; //means that you can write to this texture
+#elif USING_OPEN_GL
+	GlRemoveAllErrors();
+	glEnable(Format);
+	if (!GlCheckForError())
+	{
+		return;
+	}
+	else
+	{
+		assert(true == false);
+	}
+
 #endif // USING_DIRECTX
 }
 
@@ -66,6 +81,20 @@ D3D11_DEPTH_STENCIL_VIEW_DESC CDepthStencilView::ConvertDepthStecilToDx2D()
 
 	return Result;
 }
+#elif USING_OPEN_GL
+
+
+uint32_t CDepthStencilView::GetDepthBuffer()
+{
+	return m_DepthBufferID;
+}
+
+uint32_t & CDepthStencilView::GetDepthBufferRef()
+{
+	return m_DepthBufferID;
+}
+
+
 #endif // USING_DIRECTX
 
 
@@ -73,13 +102,14 @@ D3D11_DEPTH_STENCIL_VIEW_DESC CDepthStencilView::ConvertDepthStecilToDx2D()
 
 void CDepthStencilView::DestoryBuffer()
 {
-	if (mptr_DepthStencil) { 
+	if (mptr_DepthStencil)
+	{
 	#if USING_DIRECTX
 		mptr_DepthStencil->GetTexture()->Release();
 	#endif // USING_DIRECTX
 
 		mptr_DepthStencil->MakeNull();
-	
+
 	}
 
 }

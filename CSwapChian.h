@@ -15,7 +15,7 @@ public:
 public:// functions
 
 	bool GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget);
-	bool Present(int32_t Syc = 0 , int32_t PresentOpction = 0);
+	bool Present(int32_t Syc = 0 , unsigned int PresentOpction = 0);
 
 	void ResizeBuffer(int width, int height, HWND g_hWnd);
 	void ResizeTarget(int width, int height);
@@ -25,7 +25,10 @@ public:// functions
 public:// variable
 	IDXGISwapChain* mptr_SwapChian = nullptr;
 #elif USING_OPEN_GL
-	unsigned int m_BackBufferID;
+	//! used in openGL need to be able to manipulate the render-target back-buffer 
+	unsigned int *m_BackBufferID;
+	//! this is used to present an image an screen 
+	GLFWwindow *ptr_Window;
 #endif // USING_DIRECTX
 
 

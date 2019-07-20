@@ -1,14 +1,17 @@
+#include "OpenglHeader.h"
 #include "CSwapChian.h"
 #include "CDevice.h"
 #include "CBuffer.h"
 #include "CRenderTragetView.h"
+
 
 CSwapChian::CSwapChian()
 {
 #if USING_DIRECTX
 	mptr_SwapChian = nullptr;
 #elif USING_OPEN_GL
-	m_BackBufferID = 0;
+	m_BackBufferID = nullptr;
+	ptr_Window = nullptr;
 #endif
 }
 
@@ -18,6 +21,7 @@ CSwapChian::~CSwapChian()
 #if USING_DIRECTX
 	if (mptr_SwapChian != nullptr) { mptr_SwapChian->Release(); }
 #elif	USING_OPEN_GL
+	m_BackBufferID = nullptr;
 #endif // USING_DIRECTX
 
 }
@@ -39,18 +43,17 @@ bool CSwapChian::GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget)
 	return false;
 #elif	USING_OPEN_GL
 
-	if (RenderTraget.GetBackBuffer() != 0)
-	{
-		this->m_BackBufferID = RenderTraget.GetBackBuffer();
-		return true;
-	}
+	this->m_BackBufferID = RenderTraget.GetBackBufferRef();
+
+	return true;
+
 	return false;
 #endif
 
 	return false;
 }
 
-bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
+bool CSwapChian::Present(int32_t Syc, unsigned int PresentOpction)
 {
 #if defined(USING_DIRECTX)
 	HRESULT hr = S_OK;
@@ -63,6 +66,14 @@ bool CSwapChian::Present(int32_t Syc, int32_t PresentOpction)
 	return false;
 
 #elif USING_OPEN_GL
+	//glEnableVertexAttribArray(0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1, 0, 0, 1);
+
+	glfwSwapBuffers(this->ptr_Window);
+	glfwPollEvents();
+	
 #endif
 
 	return false;

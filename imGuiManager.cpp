@@ -15,7 +15,6 @@ imGuiManager::~imGuiManager()
 	ImGui_ImplDX11_Shutdown();
 #endif // USING_DIRECTX
 
-
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 }

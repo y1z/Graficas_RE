@@ -1,5 +1,7 @@
 #include "CVertexShader.h"
+
 #include "Utility/ErrorHandlingGrafics.h"
+#include "Utility/FileHelper.h"
 
 CVertexShader::CVertexShader()
 {}
@@ -40,11 +42,33 @@ bool CVertexShader::InitVertexShader(wchar_t * ShaderFile, char * ShaderEntry, c
 		return false;
 	}
 	if (pErrorBlob) pErrorBlob->Release();
+#elif USING_OPEN_GL
+
 
 #endif // USING_DIRECTX
 
+
 	return true;
 }
+
+#if USING_OPEN_GL
+bool CVertexShader::InitVertexShader(const char *ShaderFile, const char *ShaderEntry, const char *ShaderVersion)
+{
+	GlRemoveAllErrors();
+	m_Shader = FileHelper::ReadFileGl(ShaderFile, 1);
+
+	m_VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+
+
+	
+	if (!GlCheckForError())
+	{
+		return true;
+	}
+	return false;
+}
+
+#endif // USING_OPEN_GL
 
 #ifdef USING_DIRECTX
 ID3D11VertexShader * CVertexShader::GetVertexShader()

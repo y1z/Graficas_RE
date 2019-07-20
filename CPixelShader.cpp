@@ -1,4 +1,6 @@
 #include "CPixelShader.h"
+#include "Utility/ErrorHandlingGrafics.h"
+#include "Utility/FileHelper.h"
 
 CPixelShader::CPixelShader()
 {}
@@ -39,10 +41,27 @@ bool CPixelShader::InitPixelShader(wchar_t * ShaderFile, char * ShaderEntry, cha
 		return false;
 	}
 	if (pErrorBlob) pErrorBlob->Release();
+#elif USING_OPEN_GL
 
 #endif // USING_DIRECTX
 
 	return true;
+}
+
+bool CPixelShader::InitPixelShader(const char * ShaderFile)
+{
+#if USING_OPEN_GL
+	GlRemoveAllErrors();
+	m_Shader = FileHelper::ReadFileGl(ShaderFile, 2);
+	m_PixelShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	if (!GlCheckForError())
+	{
+		return true;
+	}
+
+	return false;
+#endif // USING_OPEN_GL
+	return false;
 }
 
 #if USING_DIRECTX

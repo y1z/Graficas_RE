@@ -4,6 +4,9 @@ CRenderTragetView::CRenderTragetView()
 {
 #if USING_DIRECTX
 	mptr_buffer = nullptr;
+#elif USING_OPEN_GL
+	m_BufferID = -1;
+	m_RenderTragetID = -1;
 #endif // USING_DIRECTX
 
 }
@@ -50,14 +53,24 @@ ID3D11Texture2D ** CRenderTragetView::GetBackBufferRef()
 }
 
 #elif	 USING_OPEN_GL	
-uint32_t CRenderTragetView::GetBackBuffer()
+unsigned int  CRenderTragetView::GetBackBuffer()
 {
 	return this->m_BufferID;
 }
 
-uint32_t &CRenderTragetView::GetBackBufferRef()
+unsigned int  *CRenderTragetView::GetBackBufferRef()
 {
-	return this->m_BufferID;
+	return &this->m_BufferID;
+}
+
+unsigned int  CRenderTragetView::GetRenderTraget()
+{
+	return this->m_RenderTragetID;
+}
+
+unsigned int  *CRenderTragetView::GetRenderTragetRef()
+{
+	return &this->m_RenderTragetID;
 }
 
 #endif // USING_DIRECTX

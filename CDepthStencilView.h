@@ -41,6 +41,9 @@ public:// functions
 	D3D11_TEXTURE2D_DESC GetTextureDescriptor();
 	//! take my struct and converts it to DirectX native struct.
 	D3D11_DEPTH_STENCIL_VIEW_DESC ConvertDepthStecilToDx2D();
+#elif USING_OPEN_GL
+	uint32_t GetDepthBuffer();
+	uint32_t &GetDepthBufferRef();
 #endif // USING_DIRECTX
 
 	void DestoryBuffer();
@@ -49,10 +52,15 @@ private://variables
 #if USING_DIRECTX
 			/*! for interfacing with directX */
 	ID3D11DepthStencilView* mptr_DepthStencilView = nullptr;
+#elif USING_OPEN_GL
+
+	uint32_t m_DepthBufferID = 0;
 #endif // USING_DIRECTX
+
 
 	/*! the texture to project on to */
 	CTexture2D *mptr_DepthStencil = nullptr;
+
 	/*! an Intermediate class for my classes and directX */
 	SDepthStencilView m_Descriptor;
 };

@@ -51,7 +51,14 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int H
 
 	ShowWindow(m_WindowHandler, CommandShow);
 #elif USING_OPEN_GL
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	mptr_Window = glfwCreateWindow(m_Width, m_Height, "OpenGL Window", nullptr, nullptr);
+
 	glfwMakeContextCurrent(mptr_Window);
 
 	if (!mptr_Window)
@@ -96,6 +103,11 @@ HWND CWindow::GetHandler()
 HWND & CWindow::GetHandlerRef()
 {
 	return m_WindowHandler;
+}
+#elif USING_OPEN_GL
+GLFWwindow *  CWindow::GetHandler()
+{
+	return	mptr_Window;
 }
 
 #endif // USING_DIRECTX

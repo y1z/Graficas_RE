@@ -1,3 +1,4 @@
+#include "OpenglHeader.h"
 #include "ViewPort.h"
 
 CViewPort::CViewPort()
@@ -17,7 +18,9 @@ void CViewPort::SetupViewPort(float height, float Width, float TopLeftPosX, floa
 	m_dxViewport.TopLeftY = TopLeftPosY;
 	m_dxViewport.MinDepth = 0.0f;
 	m_dxViewport.MaxDepth = 1.0f;
-#else// TODO_GL 
+#else// TODO_GL 	
+	glViewport(0, 0, Width, height);
+
 #endif // USING_DIRECTX
 }
 

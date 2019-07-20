@@ -1,12 +1,14 @@
 #pragma once
 
+#include "..//OpenglHeader.h"
 #include "..//Usable_Windows.h"
+#include <string>
 
 #if defined USING_DIRECTX
 /*! tell's if there is an error */
 static bool CheckForError(HRESULT hr)
 {
-	if (FAILED(hr)) 
+	if (FAILED(hr))
 	{
 		return true;
 	}
@@ -14,13 +16,36 @@ static bool CheckForError(HRESULT hr)
 	{
 		return true;
 	}
-	if (hr == E_INVALIDARG) {
-		return true; 
+	if (hr == E_INVALIDARG)
+	{
+		return true;
 	}
 
 	return false;
 }
 
-#else//TODO_GL 
+#elif USING_OPEN_GL//TODO_GL 
+
+//! remove all the error that are currently present 
+static void GlRemoveAllErrors()
+{
+
+	while (glGetError() != GL_NO_ERROR)
+	{}
+}
+
+static bool GlCheckForError()
+{
+
+	while (GLenum Error = glGetError())
+	{
+
+		std::string Result = std::to_string(Error).c_str();
+
+		OutputDebugStringA(Result.c_str());
+	}
+	return false;
+}
+
 
 #endif // USING_DIRECTX

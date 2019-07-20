@@ -29,6 +29,8 @@ void CDeviceContext::OMSetRenderTargets(int32_t totalViews, CRenderTragetView &r
 		static_cast<ID3D11RenderTargetView**>(renderTragetView.GetRenderTragetRef()),
 		static_cast<ID3D11DepthStencilView*>(DepthStencilView.GetDepthStencilView()));
 #elif USING_OPEN_GL
+
+
 #endif
 }
 
@@ -47,6 +49,7 @@ void CDeviceContext::IASetInputLayout(CInputLayout &InputLayout)
 #if defined(USING_DIRECTX)
 	mptr_DeviceContext->IASetInputLayout(static_cast<ID3D11InputLayout*>(InputLayout.GetInputLayout()));
 #elif USING_OPEN_GL
+	
 #endif
 
 }
@@ -201,6 +204,20 @@ void CDeviceContext::DrawIndexed(int32_t TotalIndexs, int32_t StartIndex, int32_
 #elif USING_OPEN_GL
 #endif
 }
+
+void CDeviceContext::DrawIndexed(CBuffer & IndexBuffer)
+{
+	
+#if defined(USING_DIRECTX)
+	mptr_DeviceContext->DrawIndexed(IndexBuffer.GetElementCount(), 0, 0);
+#elif USING_OPEN_GL
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer.m_BufferID);
+	glDrawBuffers(1,&IndexBuffer.m_BufferID);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif
+}
+
 
 #if defined(USING_DIRECTX)
 ID3D11DeviceContext **CDeviceContext::GetDeviceContextRef()

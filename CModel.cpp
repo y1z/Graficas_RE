@@ -24,7 +24,7 @@ bool CModel::LoadModelFromFile(const char * FilePath, CDevice &Device)
 {
 	Assimp::Importer importer;
 
-	const aiScene* TheScene = importer.ReadFile(FilePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+	const aiScene* TheScene = importer.ReadFile(FilePath, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
 
 	if (TheScene == nullptr)
 	{
@@ -63,6 +63,7 @@ void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *,3
 	DeviceContext.UpdateSubresource(*BufferArray[2], static_cast<void*>(&cbChangesOnResize), 0);
 
 #else
+
 
 #endif
 }
