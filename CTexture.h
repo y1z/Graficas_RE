@@ -1,16 +1,8 @@
 #pragma once
-#if USING_OPEN_GL
-#undef USING_DIRECTX
-#endif
 
 
-#if USING_DIRECTX
-#include "DirectXHeader.h" 
-#elif USING_OPEN_GL
-#include "OpenglHeader.h"
-#endif // USING_DIRECTX
 #include	"Usable_Windows.h"
-
+#include "GraphicsLIbsHeader.h"
 
 #include <cinttypes>
 class CTexture2D
@@ -39,6 +31,8 @@ public:
 	uint32_t GetWidth();
 	uint32_t GetHeight();
 
+	void SetWidth( int Width);
+	void SetHeight(int Height);
 
 #endif
 private:// variables

@@ -1,6 +1,6 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include "GraphicsLibsHeader.h"
 #include "CDevice.h"
 #include <cinttypes>
 
@@ -15,9 +15,9 @@ public:
 public:// functions
 
 	bool GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget);
-	bool Present(int32_t Syc = 0 , unsigned int PresentOpction = 0);
+	bool Present(int32_t Syc = 0, unsigned int PresentOpction = 0);
 
-	void ResizeBuffer(int width, int height, HWND g_hWnd);
+	void ResizeBuffer(int width, int height, HWND hWnd);
 	void ResizeTarget(int width, int height);
 #if USING_DIRECTX
 	/*! This is just for creating the SwapChian*/

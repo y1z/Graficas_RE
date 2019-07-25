@@ -108,12 +108,25 @@ void CModel::ExtracMesh(aiMesh * meshInfo, CDevice & Device)
 		ResultVertex.Pos.x = meshInfo->mVertices[i].x;
 		ResultVertex.Pos.y = meshInfo->mVertices[i].y;
 		ResultVertex.Pos.z = meshInfo->mVertices[i].z;
+		ResultVertex.Pos.w = 1.0f;
 
 		//	 check for texture 
 		if (meshInfo->HasTextureCoords(i))
 		{
 			ResultVertex.TexCoord.y = (float) meshInfo->mTextureCoords[0][i].y;
 			ResultVertex.TexCoord.x = (float) meshInfo->mTextureCoords[0][i].x;
+		}
+		else// for when there are no TexCoord's 
+		{
+			ResultVertex.TexCoord.x = 0.0f;
+			ResultVertex.TexCoord.y = 0.0f;
+		}
+
+		if(meshInfo->HasNormals())
+		{
+			ResultVertex.Norm.x = meshInfo->mNormals[i].x;
+			ResultVertex.Norm.y = meshInfo->mNormals[i].y;
+			ResultVertex.Norm.z = meshInfo->mNormals[i].z;
 		}
 
 		Vertexes.emplace_back(ResultVertex);

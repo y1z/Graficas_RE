@@ -1,6 +1,6 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include "GraphicsLIbsHeader.h"
 #include <string>
 #include <cinttypes>
 
@@ -12,9 +12,10 @@ public:// construcctor
 public:// functions 
 	bool InitVertexShader(wchar_t *ShaderFile, char * ShaderEntry, char* ShaderVersion);
 
-#if USING_OPEN_GL
-	bool InitVertexShader(const char *ShaderFile, const char *ShaderEntry, const char *ShaderVersion);
+#if USING_OPEN_GL 
+	bool InitVertexShader(const char *ShaderFile);
 
+	unsigned int GetShaderID();
 #endif // USING_OPEN_GL
 
 

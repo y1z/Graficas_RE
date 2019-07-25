@@ -1,6 +1,6 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include "GraphicsLIbsHeader.h"
 #include <cfloat>// for  the macro FLT_MAX
 
 //! this is my own descriptor struct that work as an intermediate between. mi and directX offset

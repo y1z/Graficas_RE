@@ -1,6 +1,6 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include "GraphicsLibsHeader.h"
 #include "CTexture.h"
 /**
 @brief here is an abstraction of the DepthStencilview class from DirectX

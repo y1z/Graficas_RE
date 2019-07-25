@@ -4,7 +4,7 @@
 #include "..//Usable_Windows.h"
 #include <string>
 
-#if defined USING_DIRECTX
+#ifdef USING_DIRECTX
 /*! tell's if there is an error */
 static bool CheckForError(HRESULT hr)
 {

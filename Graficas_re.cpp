@@ -1,4 +1,5 @@
-#include "OpenglHeader.h"
+// OpenGL 
+#include "GraphicsLIbsHeader.h"
 //--------------------------------------------------------------------------------------
 // File: Graficas_re.cpp
 //
@@ -6,16 +7,12 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
-//#define MODEL_LOAD 1
-#define USING_OPEN_GL 1
-#undef USING_DIRECTX
-
+#define MODEL_LOAD 1
 
 unsigned int g_ShaderProgram{ 0 };
 
 bool g_FinishInit = false;
 /// --------------------------------MY INCLUDES---------------------------------------///
-// OpenGL 
 //  Utility
 #include "Usable_Windows.h"
 #include "DirectXHeader.h"
@@ -27,7 +24,7 @@ bool g_FinishInit = false;
 #include "CBuffer.h"
 //Window
 #include "CWindow.h"
-//! Give me the ability to use this include in other places 
+
 #include "CTexture.h"
 #include "CCamera.h"
 #include "CRenderTragetView.h"
@@ -44,19 +41,18 @@ bool g_FinishInit = false;
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imGuiManager.h"
-// assimp
-#include <assimp/Importer.hpp>
+// structs 
 #include "Structs.h"
 #include "Custom_Structs.h"
 // model 
 #include "CModel.h"
-
+//standered includes 
 #include <array>
-
+#include <cassert>
 
 CWindow MY_Window;
 CDevice MY_Device;// Replaced 
-CDeviceContext MY_DeviceContext;// Replaced 
+CDeviceContext MY_DeviceContext;// Replaced  
 CSwapChian MY_SwapChain;// Replaced
 CBuffer ConstantBufferResize;// Replaced
 CBuffer ConstantBufferChangeEveryFrame;// Replaced
@@ -89,8 +85,8 @@ CModel MY_Model;
 //--------------------------------------------------------------------------------------
 // Global Variables
 //--------------------------------------------------------------------------------------
-HINSTANCE                           g_hInst = NULL;
-HWND                                g_hWnd = NULL;
+HINSTANCE                           g_hInst = nullptr;
+HWND                                g_hWnd = nullptr;
 //D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 //D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 //ID3D11Device*                       g_pd3dDevice = NULL;
@@ -171,7 +167,6 @@ static bool GlAttachShaders(CVertexShader& vs, CPixelShader &ps)
 
 }
 
-
 //--------------------------------------------------------------------------------------
 // Entry point to the program. Initializes everything and goes into a message processing 
 // loop. Idle time is used to render the scene.
@@ -181,36 +176,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	//
-	//GLFWwindow* window;
-	//
-	///* Create a windowed mode window and its OpenGL context */
-	//window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-	//if (!window)
-	//{
-	//	glfwTerminate();
-	//	return -1;
-	//}
-	//
-	///* Make the window's context current */
+	/* Make the window's context current */
 	//glfwMakeContextCurrent(window);
-	//
-	///* Loop until the user closes the window */
-	//while (!glfwWindowShouldClose(window))
-	//{
-	//	/* Render here */
-	//	glClear(GL_COLOR_BUFFER_BIT);
-	//
-	//	/* Swap front and back buffers */
-	//
-	//	glfwSwapBuffers(window);
-	//
-	//	/* Poll for and process events */
-	//	glfwPollEvents();
-	//}
-	//
-	//glfwTerminate();
-	///* Initialize the library */
 	ptr_WindProc ptr_Proc = &WindProc;
 	/// NEED TO MAKE A RENDER CONTEXT before initiating 
 #if USING_OPEN_GL
@@ -218,24 +185,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	{ return -1; }
 #endif // USING_OPEN_GL
 
-	// create 
 	if (!MY_Window.InitWindow(hInstance, ptr_Proc))
 	{
 		return -1;
 	}
 
-	/// create after render context 
+	// create after render context 
 #if USING_OPEN_GL
+	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 	{
 		return -1;
 	}
 #endif
-	//if (FAILED(InitWindow(hInstance, nCmdShow)))
-		//return 0;
 
-	if (FAILED(Preamble()))
+	if ((Preamble() == S_FALSE))
 	{
+		MessageBox(NULL,
+			L"Error Ocurred with the function Preamble ", L"Error", MB_OK);
 		CleanupDevice();
 		return 0;
 	}
@@ -325,24 +292,20 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 	// old code 
 	//hr = g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_pRenderTargetView);
-	/// Render traget creation GLed 
-	//isSuccesful = MY_Device.CreateRenderTargetView(MY_RenderTragetView);// &g_pRenderTargetView 
-
-//	RenderTragetView.ReleaseBackBuffer();
-
+	/// Render target creation 
+	isSuccesful = MY_Device.CreateRenderTargetView(MY_RenderTragetView);// &g_pRenderTargetView 
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
-	//pBackBuffer->Release();
 	if (FAILED(hr))
 		return hr;
 
@@ -373,16 +336,14 @@ HRESULT Preamble()
 	MY_DepthStencilView.InitDepthStencil2D(MY_Window.GetHeight(), MY_Window.GetWidth(), GL_DEPTH_TEST);
 
 #endif // USING_DIRECTX
-
-
 	///DepthStencil.InitTexture2D(width, height,
 	///	static_cast<int>(DXGI_FORMAT_D24_UNORM_S8_UINT), static_cast<int>(D3D11_BIND_DEPTH_STENCIL));
 
-	//isSuccesful = MY_Device.CreateTexture2D(MY_DepthStencilView.GetTexture2DRef());
+	isSuccesful = MY_Device.CreateTexture2D(MY_DepthStencilView.GetTexture2DRef());
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 	// Create the depth stencil view
@@ -403,7 +364,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 	// old code 
@@ -419,26 +380,27 @@ HRESULT Preamble()
 	// /**/g_pImmediateContext->RSSetViewports(1, &vp);
 	MY_DeviceContext.RSSetViewports(1, MY_ViewPort);
 
-	// Internaly does the CompileShaderFromFile function
-#if USING_DIRECTX
+	wchar_t *ShaderFile = L"shaders/Lambert.fx";
 
-	MY_VertexShader.InitVertexShader(L"Graficas_re.fx", "VS", "vs_4_0");
+	// Internally does the CompileShaderFromFile function
+#if USING_DIRECTX
+	// used to be vs_4_0
+	MY_VertexShader.InitVertexShader(ShaderFile, "vs_main", "vs_4_0");
 #elif USING_OPEN_GL
-	MY_VertexShader.InitVertexShader("VertexShader.vert", "", "");
+	MY_VertexShader.InitVertexShader("Shaders/basic.vert");
 #endif // USING_DIRECTX
 
 	// Compile the vertex shader
 	//ID3DBlob* p_VertexShaderBlob = nullptr;
 	//hr = CompileShaderFromFile(L"Graficas_re.fx", "VS", "vs_4_0", &p_VertexShaderBlob);
 
-
-	if (FAILED(hr))
+	if (FAILED(hr) || !isSuccesful)
 	{
 		MessageBox(NULL,
 			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return hr;
 	}
-	/// GLed 
+
 	isSuccesful = MY_Device.CreateVertexShader(MY_VertexShader);
 
 #if USING_DIRECTX
@@ -447,7 +409,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -471,36 +433,37 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
 	// Set the input layout
-	//g_pImmediateContext->IASetInputLayout(g_pVertexLayout);
+	//g_pImmediateContext->IASetInputLayout(g_pVertexLayout); 
 	MY_DeviceContext.IASetInputLayout(MY_InputLayout);
 
 	// reads information about the pixel shader 
 #if USING_DIRECTX
-	isSuccesful = MY_PixelShader.InitPixelShader(L"Graficas_re.fx", "PS", "ps_4_0");
+		// used to be ps_4_0
+	isSuccesful = MY_PixelShader.InitPixelShader(ShaderFile, "ps_main", "ps_4_0");
 #elif USING_OPEN_GL
-	isSuccesful = MY_PixelShader.InitPixelShader("GlPixelShader.glsl");
+	isSuccesful = MY_PixelShader.InitPixelShader("Shaders/basic.frag");
 #endif // USING_DIRECTX
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
+
 	// Compile the pixel shader
-	//hr = CompileShaderFromFile(L"Graficas_re.fx", "PS", "ps_4_0", &p_PixelShaderBlob);
 	if (FAILED(hr))
 	{
 		MessageBox(NULL,
 			L"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
 		return hr;
 	}
+
 	// Create the pixel shader
-	/*hr = g_pd3dDevice->CreatePixelShader(p_PixelShaderBlob->GetBufferPointer(), p_PixelShaderBlob->GetBufferSize(), NULL, &g_pPixelShader);*/
 	MY_Device.CreatePixelShader(MY_PixelShader);
 
 #ifdef USING_OPEN_GL
@@ -510,7 +473,7 @@ HRESULT Preamble()
 #ifndef MODEL_LOAD
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -555,7 +518,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -585,13 +548,6 @@ HRESULT Preamble()
 			23,20,22
 	};
 
-	//bd.Usage = D3D11_USAGE_DEFAULT;
-	//bd.ByteWidth = sizeof(WORD) * 36;
-	//bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	//bd.CPUAccessFlags = 0;
-	//InitData.pSysMem = indices;
-	//hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
-
 	MY_IndexBuffer.InitIndexBuffer(static_cast<void*>(&indices), 36, 0, sizeof(WORD));
 
 	/*!Creates the index buffer */
@@ -599,7 +555,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 	// Set index buffer
@@ -608,7 +564,7 @@ HRESULT Preamble()
 	MY_DeviceContext.IASetIndexBuffer(MY_IndexBuffer, 57, 0);
 
 #else
-	MY_Model.LoadModelFromFile("Models/Dwarf/dwarf.x", MY_Device);
+	MY_Model.LoadModelFromFile("Models/Basic/Esfera.fbx", MY_Device);
 	//MY_Model.CreateModelBuffers(MY_Device);
 
 #endif //MODEL_LOADs
@@ -628,20 +584,21 @@ HRESULT Preamble()
 //bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 //bd.CPUAccessFlags = 0;
 
+#ifdef USING_OPEN_GL
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+#endif // USING_OPEN_GL
 
-	//	hr = g_pd3dDevice->CreateBuffer(&bd, NULL, &g_pCBNeverChanges);
-
-		/*Creates NeverChanges buffer */
+	/*Creates NeverChanges buffer */
 	isSuccesful = MY_Device.CreateBuffer(ConstantBufferNeverChange);
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -654,7 +611,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -668,7 +625,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -682,20 +639,9 @@ HRESULT Preamble()
 	//	return hr;
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
-
-	// Create the sample state
-	//D3D11_SAMPLER_DESC sampDesc;
-	//SecureZeroMemory(&sampDesc, sizeof(sampDesc));
-	//sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;//D3D11_FILTER_MIN_MAG_MIP_POINT
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	//sampDesc.MinLOD = 0;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	//hr = g_pd3dDevice->CreateSamplerState(&sampDesc, &g_pSamplerLinear);
 
@@ -711,7 +657,7 @@ HRESULT Preamble()
 
 	if (isSuccesful == false)
 	{
-		HRESULT hr = S_FALSE;
+		hr = S_FALSE;
 		return hr;
 	}
 
@@ -777,7 +723,6 @@ void Render()
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.mView = XMMatrixTranspose(MY_Camera.GetViewMatrice());
 
-
 	MY_DeviceContext.UpdateSubresource(ConstantBufferNeverChange, static_cast<void*>(&cbNeverChanges), 0);
 #endif // USING_DIRECTX
 
@@ -841,10 +786,13 @@ void Render()
 	MY_DeviceContext.PSSetShaderResources(0, 1, MY_ShaderResourceView);
 	MY_DeviceContext.PSSetSamplers(0, 1, MY_Sampler);
 
-
+#ifndef	MODEL_LOAD
 	MY_DeviceContext.DrawIndexed(MY_IndexBuffer);
+#endif 
 #if MODEL_LOAD
 
+	MY_Model.DrawAllMeshes(MY_DeviceContext, ConstBufferArray, MY_Camera);
+	MY_SwapChain.Present(0, 0);
 	//MY_DeviceContext.DrawIndexed(MY_IndexBuffer.GetElementCount(), 0, 0);
 	/* Making cube rotates */
 	//g_World *= XMMatrixTranslation(0, 0, -20);
@@ -854,7 +802,6 @@ void Render()
 	////MY_DeviceContext.UpdateSubresource(ConstantBufferChangeEveryFrame, static_cast<void*>(&cb), 0);
 	////MY_DeviceContext.DrawIndexed(MY_Model.m_Meshs[0].mptr_IndexBuffer.GetElementCount(), 0, 0);
 	/////*Make cube that rotate and Scales*/
-	MY_Model.DrawAllMeshes(MY_DeviceContext, ConstBufferArray, MY_Camera);
 	//FXMVECTOR ScalingVector = { 1.0f,1.0f,1.0f,3.0f };
 	//
 	////FXMVECTOR ScalingVector = XMVectorSet(1, std::fabs(std::sin(Time)) * 1.25f, 1, 1);
@@ -891,9 +838,9 @@ void Render()
 	// Present our back buffer to our front buffer
 	//
 	//g_pSwapChain->Present(0, 0);
+#ifdef USING_OPEN_GL
 	glPushMatrix();
 	glTranslatef(MY_Window.GetWidth() / 2, MY_Window.GetHeight() / 2, -500);
-
 	glBindBuffer(GL_ARRAY_BUFFER, MY_VertexBuffer.m_BufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MY_IndexBuffer.m_BufferID);
 
@@ -902,6 +849,7 @@ void Render()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif // using_open_gl 
 }
 
 //--------------------------------------------------------------------------------------

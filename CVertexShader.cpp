@@ -6,7 +6,6 @@
 CVertexShader::CVertexShader()
 {}
 
-
 CVertexShader::~CVertexShader()
 {
 #if USING_DIRECTX
@@ -52,20 +51,23 @@ bool CVertexShader::InitVertexShader(wchar_t * ShaderFile, char * ShaderEntry, c
 }
 
 #if USING_OPEN_GL
-bool CVertexShader::InitVertexShader(const char *ShaderFile, const char *ShaderEntry, const char *ShaderVersion)
+bool CVertexShader::InitVertexShader(const char *ShaderFile)
 {
 	GlRemoveAllErrors();
-	m_Shader = FileHelper::ReadFileGl(ShaderFile, 1);
+	m_Shader = FileHelper::ReadFileGl(ShaderFile);
 
 	m_VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
-
-	
 	if (!GlCheckForError())
 	{
 		return true;
 	}
 	return false;
+}
+
+unsigned int CVertexShader::GetShaderID()
+{
+	return m_VertexShaderID;
 }
 
 #endif // USING_OPEN_GL
@@ -90,5 +92,6 @@ ID3DBlob ** CVertexShader::GetVertexShaderDataRef()
 {
 	return &mptr_ShaderData;
 }
+#elif USING_OPEN_GL
 
 #endif // USING_DIRECTX

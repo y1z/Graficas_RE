@@ -1,5 +1,5 @@
 #include "CWindow.h"
-#include "Resource.h"
+#include  "Resource.h"
 
 #ifdef UNICODE
 static constexpr TCHAR *DefulatName = L"window";
@@ -51,6 +51,7 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int H
 
 	ShowWindow(m_WindowHandler, CommandShow);
 #elif USING_OPEN_GL
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

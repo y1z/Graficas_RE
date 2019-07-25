@@ -94,6 +94,14 @@ void CSampler::SetUpSampler(int Filter, int AddressU,
 		}
 
 	}
+	else
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			m_Descriptor.PossibleBorderColor[i] = Color4[i];
+		}
+
+	}
 	m_Descriptor.LowerRangedDetail = LowerRange;
 	m_Descriptor.UpperRangedDetail = UpperRange;
 

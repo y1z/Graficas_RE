@@ -96,6 +96,16 @@ uint32_t CTexture2D::GetHeight()
 	return m_Height;
 }
 
+void CTexture2D::SetWidth(int Width)
+{
+	this->m_Width = Width;
+}
+
+void CTexture2D::SetHeight(int Height)
+{
+	this->m_Height = Height;
+}
+
 
 #endif // USING_DIRECTX
 

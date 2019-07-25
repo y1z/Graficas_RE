@@ -2,34 +2,30 @@
 namespace FileHelper {
 
 	/*
-	 0 = none 
-	 1 = vertex 
-	 2 = fragment/pixel 
+	 0 = none
+	 1 = vertex
+	 2 = fragment/pixel
 	*/
 
-	string ReadFileGl(const char * FilePath, int Type)
+	string ReadFileGl(const char * FilePath)
 	{
-		string Result;
+		string Result {"Error"};
 		std::ifstream File(FilePath);
 		if (File.is_open())
 		{
-			while (!File.eof())
-			{
-				string Temp;
-				std::getline(File, Temp);
-				Result += Temp;
-			}
+			std::stringstream SStream;
+			SStream << File.rdbuf();
+			Result = SStream.str();
+
+			File.close();
+			return Result;
 		}
 		else
 		{
-			const char *Message = "Error : Can't open File ";  
+			const char *Message = "Error : Can't open File ";
 
 			OutputDebugStringA(Message);
 		}
-
-
-
-		File.close();
 		return Result;
 	}
 

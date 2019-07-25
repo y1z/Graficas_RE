@@ -1,7 +1,6 @@
 #include"CInputLayout.h"
-#include "Utility/ErrorHandlingGrafics.h"
 #include "CVertexShader.h"
-#include <fstream>
+#include "Utility/ErrorHandlingGrafics.h"
 
 CInputLayout::CInputLayout()
 {}
@@ -63,6 +62,8 @@ bool CInputLayout::ReadShaderDataDX(CVertexShader& ShaderData, int ShaderInputDa
 	D3D11_SHADER_DESC ShaderDesc;
 	// to know how long to make the for loop
 	ReflectorShader->GetDesc(&ShaderDesc);
+	// helps to get the proper alignment 
+
 
 	for (uint32_t i = 0; i < ShaderDesc.InputParameters; ++i)
 	{
@@ -76,14 +77,6 @@ bool CInputLayout::ReadShaderDataDX(CVertexShader& ShaderData, int ShaderInputDa
 		InputLayout.DataArrangement = 0;
 		InputLayout.Slots = 0;
 
-		if (i != 0)
-		{
-			InputLayout.Alignment = ShaderDesc.FloatInstructionCount;
-		}
-		else
-		{
-			InputLayout.Alignment = 0;
-		}
 		InputLayout.InputDataType = ShaderInputData;
 
 		// determine DXGI format 
@@ -92,23 +85,51 @@ bool CInputLayout::ReadShaderDataDX(CVertexShader& ShaderData, int ShaderInputDa
 		if (paramDesc.Mask == 1)
 		{
 			// 1 component values
-			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) { InputLayout.Format = DXGI_FORMAT_R32_UINT; }
-			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) { InputLayout.Format = DXGI_FORMAT_R32_SINT; }
-			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) { InputLayout.Format = DXGI_FORMAT_R32_FLOAT; }
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32_UINT;
+				InputLayout.Alignment  = sizeof(uint32_t);
+			}
+			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32_SINT;
+				InputLayout.Alignment  = sizeof(int32_t);
+			}
+			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32_FLOAT;
+				InputLayout.Alignment  = sizeof(float);
+			}
 		}
 		// 2 component values 
 		else if (paramDesc.Mask <= 3)
 		{
 			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) { InputLayout.Format = DXGI_FORMAT_R32G32_UINT; }
 			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) { InputLayout.Format = DXGI_FORMAT_R32G32_SINT; }
-			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) { InputLayout.Format = DXGI_FORMAT_R32G32_FLOAT; }
+			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32G32_FLOAT;
+				InputLayout.Alignment  = sizeof(float) * 2;
+			}
 		}
 		// 3 component values 
 		else if (paramDesc.Mask <= 7)
 		{
-			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) { InputLayout.Format = DXGI_FORMAT_R32G32B32_UINT; }
-			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) { InputLayout.Format = DXGI_FORMAT_R32G32B32_SINT; }
-			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) { InputLayout.Format = DXGI_FORMAT_R32G32B32_FLOAT; }
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32G32B32_UINT;
+				InputLayout.Alignment  = sizeof(uint32_t) * 3;
+			}
+			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32G32B32_SINT;
+				InputLayout.Alignment  = sizeof(int32_t) * 3;
+			}
+			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
+			{
+				InputLayout.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				InputLayout.Alignment  = sizeof(float) * 3;
+			}
 		}
 		// 4 component values 
 		else if (paramDesc.Mask <= 15)
@@ -122,14 +143,23 @@ bool CInputLayout::ReadShaderDataDX(CVertexShader& ShaderData, int ShaderInputDa
 				InputLayout.Format = DXGI_FORMAT_R32G32B32A32_SINT;
 			}
 			else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32)
-			{// this is just a temporary fix
-				InputLayout.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			{
+				InputLayout.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputLayout.Alignment = sizeof(float) * 4;
 			}
 		}
 		else// when non of the others are recognized
 		{
 			// should work on everything
 			InputLayout.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+		if (i == 0)
+		{
+			InputLayout.Alignment = 0;
+		}
+		else
+		{
+			InputLayout.Alignment = D3D11_APPEND_ALIGNED_ELEMENT;
 		}
 
 		m_InputLayouts.emplace_back(InputLayout);

@@ -52,7 +52,7 @@ bool CPixelShader::InitPixelShader(const char * ShaderFile)
 {
 #if USING_OPEN_GL
 	GlRemoveAllErrors();
-	m_Shader = FileHelper::ReadFileGl(ShaderFile, 2);
+	m_Shader = FileHelper::ReadFileGl(ShaderFile);
 	m_PixelShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 	if (!GlCheckForError())
 	{

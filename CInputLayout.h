@@ -1,7 +1,8 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include  "GraphicsLIbsHeader.h"
 #include <vector>
+
 #include <string_view>
 class CVertexShader;
 

@@ -29,6 +29,10 @@ void CDepthStencilView::InitDepthStencil2D(uint32_t Height, uint32_t Width, int 
 #elif USING_OPEN_GL
 	GlRemoveAllErrors();
 	glEnable(Format);
+
+	mptr_DepthStencil->SetHeight(Height);
+	mptr_DepthStencil->SetWidth(Width);
+	
 	if (!GlCheckForError())
 	{
 		return;

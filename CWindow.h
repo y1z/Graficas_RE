@@ -1,6 +1,6 @@
 #pragma once
-#include "Usable_Windows.h"
-#include "GLFW/glfw3.h"
+#include  "Usable_Windows.h"
+#include  "GraphicsLIbsHeader.h"
 
 /*! typedef meant for management of the  wndProc function */
 using ptr_WindProc =  LRESULT(__stdcall*)(HWND, UINT, WPARAM, LPARAM);

@@ -14,12 +14,9 @@ class CPixelShader;
 class CVertexShader;
 class CSampler;
 
+#include "GraphicsLIbsHeader.h"
 
-#if USING_DIRECTX
-#include "DirectXHeader.h"  
-#elif	 USING_OPEN_GL
-//#include "OpenglHeader.h"
-#endif // USING_DIRECTX
+#include "Utility/ErrorHandlingGrafics.h"
 #include <cinttypes>
 #include"Usable_Windows.h"
 //TODO_Gl add include guard

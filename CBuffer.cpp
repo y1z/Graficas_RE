@@ -1,13 +1,10 @@
-#if USING_OPEN_GL
-#include "OpenglHeader.h"
-#include "Utility/ErrorHandlingGrafics.h"
-#include "Custom_Structs.h"
-#include "glm.hpp"
-#endif // USING_OPEN_GL
-
 #include "CBuffer.h"
+#include "Custom_Structs.h"
+#include "Utility/ErrorHandlingGrafics.h"
+
 CBuffer::CBuffer()
 {
+	m_Type = BufferType::UNKNOWN;
 #if USING_DIRECTX
 	memset(&m_Data, 0, sizeof(m_Data));
 	memset(&m_Discriptor, 0, sizeof(m_Discriptor));
@@ -32,10 +29,12 @@ void CBuffer::InitVertexBuffer(const void * DataStruct, uint64_t TotalElements, 
 	m_Stride = SizeSingleElement;
 	m_Offset = OffSet;
 	m_CountElemets = TotalElements;
+	m_Type = BufferType::Vertex;
 
 #if defined(USING_DIRECTX)
 	m_Discriptor.Usage = D3D11_USAGE_DEFAULT;
 	m_Discriptor.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	m_Type = static_cast<BufferType>(D3D11_BIND_VERTEX_BUFFER);
 
 	m_Discriptor.ByteWidth = SizeSingleElement * TotalElements;
 	m_Discriptor.CPUAccessFlags = 0;
@@ -45,32 +44,24 @@ void CBuffer::InitVertexBuffer(const void * DataStruct, uint64_t TotalElements, 
 
 	glGenBuffers(1, &m_BufferID);
 	// start using the buffer
-	glEnableVertexAttribArray(0);// pos 
-	glEnableVertexAttribArray(1);// texcoord 
-	glBindBuffer(GL_ARRAY_BUFFER, m_BufferID);
-	glBufferData(GL_ARRAY_BUFFER, SizeSingleElement, DataStruct, GL_DYNAMIC_DRAW);
-
-	/// THIS is temporary 
-	unsigned int OffSetFirstMember = offsetof(VertexWithTexture, Pos);
-	unsigned int OffSetSecondMember = offsetof(VertexWithTexture, TexCoord);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetFirstMember));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetSecondMember));
-	// end using the buffer
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	mptr_DataStruct = DataStruct;
 
 	if (GlCheckForError())
 	{
 		assert(true == false);
+		return;
 	}
-
-	return;
 
 #endif
 }
 
 void CBuffer::InitIndexBuffer(const void * DataStruct, uint64_t TotalElements, uint32_t OffSet, uint32_t SizeSingleElement)
 {
+	m_Stride = SizeSingleElement;
+	m_CountElemets = TotalElements;
+	m_Offset = OffSet;
+	m_Type = BufferType::Index;
+	
 #if defined(USING_DIRECTX)
 	m_Discriptor.Usage = D3D11_USAGE_DEFAULT;
 	m_Discriptor.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -85,12 +76,11 @@ void CBuffer::InitIndexBuffer(const void * DataStruct, uint64_t TotalElements, u
 
 	m_Data.pSysMem = DataStruct;
 #elif USING_OPEN_GL
+	mptr_DataStruct = DataStruct;
+
 	GlRemoveAllErrors();
 	glGenBuffers(1, &m_BufferID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, SizeSingleElement * TotalElements, DataStruct, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	if (GlCheckForError())
 	{
 		assert(true == false);
@@ -100,6 +90,9 @@ void CBuffer::InitIndexBuffer(const void * DataStruct, uint64_t TotalElements, u
 
 void CBuffer::InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t SizeOfBuffer, unsigned int &Program, uint32_t Index)
 {
+	m_Stride = SizeOfBuffer;
+	m_Type = BufferType::ConstBuffer;
+
 #if defined(USING_DIRECTX)
 	m_Discriptor.Usage = D3D11_USAGE_DEFAULT;
 	m_Discriptor.ByteWidth = SizeOfBuffer;
@@ -113,13 +106,14 @@ void CBuffer::InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t 
 	m_Data.pSysMem = DataStruct;
 
 #	elif USING_OPEN_GL
+	mptr_DataStruct = DataStruct;
 	GlRemoveAllErrors();
+
 	GLint Location = 0;
 	if (Index == 0)
 	{
 		Location = glGetUniformLocation(Program, "u_NeverChanges");
 		glUniformMatrix4fv(Location, 1, GL_FALSE, (GLfloat*) DataStruct);
-
 	}
 	else if (Index == 1)
 	{
@@ -138,7 +132,7 @@ void CBuffer::InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t 
 	}
 
 #endif
-}
+	}
 
 UINT CBuffer::GetStride()
 {
@@ -148,6 +142,11 @@ UINT CBuffer::GetStride()
 UINT CBuffer::GetOffset()
 {
 	return m_Offset;
+}
+
+BufferType CBuffer::GetBufferType() const
+{
+	return this->m_Type;
 }
 
 #if USING_DIRECTX
@@ -181,12 +180,16 @@ D3D11_SUBRESOURCE_DATA * CBuffer::GetDataRef()
 {
 	return &m_Data;
 }
+
 #elif USING_OPEN_GL
 
-
+uint32_t CBuffer::GetBufferID() const
+{
+	return m_BufferID;
+}
 #endif // USING_DIRECTX
 
-uint64_t CBuffer::GetElementCount()
+uint64_t CBuffer::GetElementCount() const
 {
 	return m_CountElemets;
 }

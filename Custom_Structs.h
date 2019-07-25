@@ -1,9 +1,12 @@
 #pragma once
 #include "glm.hpp"
 
+using uint = unsigned int;
+
 struct VertexWithTexture
 {
-	glm::vec3 Pos;
+	glm::vec4 Pos;
+	glm::vec3 Norm;
 	glm::vec2 TexCoord;
 };
 
@@ -22,3 +25,4 @@ struct GlChangesEveryFrameBuf
 	glm::mat4x4 WorldMatrix;
 	float Color[4];
 };
+

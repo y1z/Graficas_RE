@@ -1,9 +1,7 @@
 #pragma once
-#include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include "GraphicsLibsHeader.h"
 #include "glm.hpp"
 #include <cinttypes>
-#include <cmath>
 
 class CCamera
 {

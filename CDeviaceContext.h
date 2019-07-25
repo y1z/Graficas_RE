@@ -1,6 +1,5 @@
 #pragma once
-#include "OpenglHeader.h"
-#include "DirectXHeader.h"
+#include "GraphicsLIbsHeader.h"
 
 #include <cinttypes>
 class CRenderTragetView;

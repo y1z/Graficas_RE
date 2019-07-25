@@ -1,6 +1,6 @@
 #pragma once
 #include "Usable_Windows.h"
-#include "DirectXHeader.h"
+#include  "GraphicsLIbsHeader.h"
 class CDevice;
 
 class CShaderResourceView

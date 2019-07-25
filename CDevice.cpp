@@ -1,6 +1,5 @@
 //Other
-#include "OpenglHeader.h"
-#include "Utility/ErrorHandlingGrafics.h"
+
 // class inclues 
 #include "CDevice.h"
 #include "CBuffer.h"
@@ -13,6 +12,7 @@
 #include "CPixelShader.h"
 #include "CSampler.h"
 #include <cassert>
+#include "Custom_Structs.h"
 
 /* often used preprocessor statements
 #if defined(USING_DIRECTX)
@@ -23,7 +23,6 @@
 
 CDevice::CDevice()
 {
-
 }
 //Descriptor
 
@@ -133,16 +132,19 @@ bool CDevice::CreateRenderTargetView(CRenderTragetView &RenderTragetView)
 
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (status != GL_FRAMEBUFFER_COMPLETE)
-	{
-		 std::string ErrorCode = std::to_string(status);
-		 assert(true == false && "Frame buffer Errror :");
-	}
+	//if (status != GL_FRAMEBUFFER_COMPLETE)
+	//{
+	//	 std::string ErrorCode = std::to_string(status);
+	//	 assert(true == false && "Frame buffer Errror :");
+	//}
 
 	if (!GlCheckForError())
 	{
+		// un bind the buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return true;
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #endif
 
 	return false;
@@ -212,8 +214,9 @@ bool CDevice::CreateDepthStencilView(CDepthStencilView &DepthStencilView)
 	glEnable(GL_DEPTH_TEST);
 	glGenRenderbuffers(1, &DepthStencilView.GetDepthBufferRef());
 	glBindRenderbuffer(GL_RENDERBUFFER, DepthStencilView.GetDepthBuffer());
-	
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, DepthStencilView.GetTexture2D()->GetWidth(), DepthStencilView.GetTexture2D()->GetHeight());
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+		DepthStencilView.GetTexture2D()->GetWidth(), DepthStencilView.GetTexture2D()->GetHeight());
 
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -253,8 +256,25 @@ bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 	const char * Shader = VertexShader.m_Shader.c_str();
 	// for checking the string 
 	OutputDebugStringA(Shader);
-	glShaderSource(VertexShader.m_VertexShaderID, 1, &Shader, nullptr);
-	glCompileShader(VertexShader.m_VertexShaderID);
+
+
+	glShaderSource(VertexShader.GetShaderID(), 1, &Shader, nullptr);
+	glCompileShader(VertexShader.GetShaderID());
+	int Result;
+	int MessageSize;
+	// is there an error 
+	glGetShaderiv(VertexShader.GetShaderID(), GL_COMPILE_STATUS, &Result);
+	// how long is the error message 
+	glGetShaderiv(VertexShader.GetShaderID(), GL_INFO_LOG_LENGTH, &MessageSize);
+
+	if (Result != GL_TRUE)
+	{
+		char *ptr_message = new char[MessageSize + 1];
+		glGetShaderInfoLog(VertexShader.GetShaderID(), 2048, &MessageSize, ptr_message);
+		OutputDebugStringA(ptr_message);
+		delete[] ptr_message;
+	}
+
 	if (!GlCheckForError())
 	{
 		return true;
@@ -271,7 +291,6 @@ bool CDevice::CreateInputLayout(CInputLayout &Layout, CVertexShader &VertexShade
 	ID3DBlob * ptr_temp = static_cast<ID3DBlob*>(VertexShader.GetVertexShaderData());
 	auto InputLayoutDesc = Layout.ConvertInputLayoutToDx();
 	HRESULT hr = S_OK;
-
 
 	hr = mptr_Device->CreateInputLayout(&InputLayoutDesc[0],
 		InputLayoutDesc.size(),
@@ -348,6 +367,36 @@ bool CDevice::CreateBuffer(CBuffer &Buffer)
 	}
 	return false;
 #elif USING_OPEN_GL
+
+	GlRemoveAllErrors();
+
+	if (Buffer.GetBufferType() == BufferType::Vertex)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, Buffer.GetBufferID());
+		glBufferData(GL_ARRAY_BUFFER, Buffer.GetStride() * Buffer.GetElementCount(), Buffer.mptr_DataStruct, GL_DYNAMIC_DRAW);
+		// THIS is temporary 
+		unsigned int OffSetFirstMember = offsetof(VertexWithTexture, Pos);
+		unsigned int OffSetSecondMember = offsetof(VertexWithTexture, TexCoord);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetFirstMember));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetSecondMember));
+		// end using the buffer
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+	else if(Buffer.GetBufferType() == BufferType::Index)
+	{
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer.GetBufferID());
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Buffer.GetStride() * Buffer.GetElementCount(), Buffer.mptr_DataStruct, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+
+	if (GlCheckForError())
+	{
+		assert(true == false);
+	}
 
 	//TODO_GL
 	return true;

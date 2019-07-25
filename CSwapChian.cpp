@@ -1,4 +1,3 @@
-#include "OpenglHeader.h"
 #include "CSwapChian.h"
 #include "CDevice.h"
 #include "CBuffer.h"
@@ -46,8 +45,6 @@ bool CSwapChian::GetBuffer(int32_t BufferIndex, CRenderTragetView &RenderTraget)
 	this->m_BackBufferID = RenderTraget.GetBackBufferRef();
 
 	return true;
-
-	return false;
 #endif
 
 	return false;
@@ -79,7 +76,7 @@ bool CSwapChian::Present(int32_t Syc, unsigned int PresentOpction)
 	return false;
 }
 
-void CSwapChian::ResizeBuffer(int width, int height, HWND g_hWnd)
+void CSwapChian::ResizeBuffer(int width, int height, HWND hWnd)
 {
 #if USING_DIRECTX
 	mptr_SwapChian->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);

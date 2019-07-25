@@ -1,4 +1,3 @@
-#include "OpenglHeader.h"
 #include "ViewPort.h"
 
 CViewPort::CViewPort()

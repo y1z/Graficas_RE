@@ -1,11 +1,8 @@
 #pragma once
-
-#include "Usable_Windows.h"
+#include  "GraphicsLibsHeader.h"
 #include <string>
 #ifdef USING_DIRECTX
 #include "DirectXHeader.h"
-#elif USING_OPEN_GL
-#include "OpenglHeader.h"
 #endif // USING_DIRECTX
 
 class CPixelShader
