@@ -20,6 +20,8 @@ public:
 	int GetWidth();
 	
 	ptr_WindProc GetWindProcPtr();
+
+	bool CheckIsActive() const ;
 	/*! returns the handler of the window in directX */
 #ifdef USING_DIRECTX
 
@@ -45,6 +47,7 @@ private:
 #endif // USING_DIRECTX
 	int m_Width;
 	int m_Height;
+	bool IsActive = false;
 
 };
 

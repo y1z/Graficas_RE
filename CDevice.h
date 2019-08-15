@@ -19,8 +19,6 @@ class CSampler;
 #include "Utility/ErrorHandlingGrafics.h"
 #include <cinttypes>
 #include"Usable_Windows.h"
-//TODO_Gl add include guard
-#include "CWindow.h"
 
 class CDevice
 {
@@ -67,6 +65,8 @@ public: // functions
 	\param DescriptorSampler [in] Dictates what are sampler does 
 	\param Sampler [out] The Resulting sampler */
 	bool CreateSamplerState(CSampler &Sampler);
+
+	void DestorySelf();
 
 	/*! This is just for testing 
 	\todo when the classes "CSwapChain" and "CDeviceContext" Remove this method*/

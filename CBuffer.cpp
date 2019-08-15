@@ -1,5 +1,5 @@
 #include "CBuffer.h"
-#include "Custom_Structs.h"
+#include <glm/gtc/type_ptr.hpp>
 #include "Utility/ErrorHandlingGrafics.h"
 
 CBuffer::CBuffer()
@@ -11,7 +11,6 @@ CBuffer::CBuffer()
 #elif USING_OPEN_GL
 
 #endif // USING_DIRECTX
-
 }
 
 CBuffer::~CBuffer()
@@ -41,10 +40,11 @@ void CBuffer::InitVertexBuffer(const void * DataStruct, uint64_t TotalElements, 
 
 	m_Data.pSysMem = DataStruct;
 #elif USING_OPEN_GL
-
 	glGenBuffers(1, &m_BufferID);
+
 	// start using the buffer
 	mptr_DataStruct = DataStruct;
+
 
 	if (GlCheckForError())
 	{
@@ -61,7 +61,7 @@ void CBuffer::InitIndexBuffer(const void * DataStruct, uint64_t TotalElements, u
 	m_CountElemets = TotalElements;
 	m_Offset = OffSet;
 	m_Type = BufferType::Index;
-	
+
 #if defined(USING_DIRECTX)
 	m_Discriptor.Usage = D3D11_USAGE_DEFAULT;
 	m_Discriptor.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -110,30 +110,77 @@ void CBuffer::InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t 
 	GlRemoveAllErrors();
 
 	GLint Location = 0;
+	int ActiveUniformCount;
+	glGetProgramiv(Program, GL_ACTIVE_UNIFORMS, &ActiveUniformCount);
+	glUseProgram(Program);
+
 	if (Index == 0)
 	{
-		Location = glGetUniformLocation(Program, "u_NeverChanges");
-		glUniformMatrix4fv(Location, 1, GL_FALSE, (GLfloat*) DataStruct);
+		glm::mat4 *Temp = (glm::mat4*) DataStruct;
+
+		m_BufferID = glGetUniformLocation(Program, "u_View");
+		glUniformMatrix4fv(m_BufferID, 1, GL_FALSE, (GLfloat*) DataStruct);
 	}
 	else if (Index == 1)
 	{
-		Location = glGetUniformLocation(Program, "u_ChangeOnRisize");
-		glUniformMatrix4fv(Location, 1, GL_FALSE, (GLfloat*) DataStruct);
+		m_BufferID = glGetUniformLocation(Program, "u_Projection");
+		glUniformMatrix4fv(m_BufferID, 1, GL_FALSE, (GLfloat*) DataStruct);
 	}
+
 	else if (Index == 2)
 	{
-		Location = glGetUniformLocation(Program, "u_ChangeEveryFrame");
-		glUniformMatrix4fv(Location, 2, GL_FALSE, (GLfloat*) DataStruct);
+		GlChangesEveryFrameBuf* Temp = (GlChangesEveryFrameBuf*) DataStruct;
+		m_BufferID = glGetUniformLocation(Program, "u_World.World");
+		glUniformMatrix4fv(m_BufferID, 1, GL_FALSE, &Temp->WorldMatrix[0][0]);
+
+		m_SecondID = glGetUniformLocation(Program, "u_World.LightPos");
+		glUniform4fv(m_SecondID, 1, glm::value_ptr(Temp->Color));
+	}
+	//
+	if (GlCheckForError())
+	{
+		assert(true == false && "Error with Const buffer ");
+	}
+
+#endif
+}
+
+#ifdef USING_OPEN_GL
+void CBuffer::InitConstBuffer(glm::mat4x4 & Matrice, uint32_t Offset, uint32_t SizeOfBuffer, unsigned int & Program, uint32_t Index)
+{
+	GlRemoveAllErrors();
+	m_Stride = SizeOfBuffer;
+	m_Type = BufferType::ConstBuffer;
+	mptr_DataStruct = static_cast<void*>(&Matrice);
+
+	int ActiveUniformCount;
+	glGetProgramiv(Program, GL_ACTIVE_UNIFORMS, &ActiveUniformCount);
+	glUseProgram(Program);
+	std::string ActiveUniformCountStr = "\nACTIVE UNIFORM COUNT : ";
+	ActiveUniformCountStr += std::to_string(ActiveUniformCount);
+
+	OutputDebugStringA(ActiveUniformCountStr.c_str());
+
+
+	if (Index == 0)
+	{
+		m_BufferID = glGetUniformLocation(Program, "u_View");
+		glUniformMatrix4fv(m_BufferID, 1, GL_FALSE, &Matrice[0][0]);
+	}
+	else if (Index == 1)
+	{
+		m_BufferID = glGetUniformLocation(Program, "u_Projection");
+		glUniformMatrix4fv(m_BufferID, 1, GL_FALSE, &Matrice[0][0]);
 	}
 
 	if (GlCheckForError())
 	{
-		assert(true == false);
+		assert(true == false && "Error with Const buffer ");
 	}
+}
+
 
 #endif
-	}
-
 UINT CBuffer::GetStride()
 {
 	return this->m_Stride;

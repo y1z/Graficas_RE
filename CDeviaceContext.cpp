@@ -8,6 +8,9 @@
 #include "CPixelShader.h"
 #include "CShaderResourceView.h"
 #include "CSampler.h"
+#include "Utility/ErrorHandlingGrafics.h"
+#include "Custom_Structs.h"
+#include <cassert>
 
 CDeviceContext::CDeviceContext()
 {}
@@ -49,7 +52,7 @@ void CDeviceContext::IASetInputLayout(CInputLayout &InputLayout)
 #if defined(USING_DIRECTX)
 	mptr_DeviceContext->IASetInputLayout(static_cast<ID3D11InputLayout*>(InputLayout.GetInputLayout()));
 #elif USING_OPEN_GL
-	
+
 #endif
 
 }
@@ -82,7 +85,9 @@ void CDeviceContext::IASetPrimitiveTopology(int Topology)
 {
 #if defined(USING_DIRECTX)
 	mptr_DeviceContext->IASetPrimitiveTopology(static_cast<D3D_PRIMITIVE_TOPOLOGY>(Topology));
+
 #elif USING_OPEN_GL
+
 #endif
 }
 
@@ -127,6 +132,8 @@ void CDeviceContext::ClearRenderTargetView(CRenderTragetView &RenderTraget, floa
 		mptr_DeviceContext->ClearRenderTargetView(static_cast<ID3D11RenderTargetView*>(RenderTraget.GetRenderTraget()), Color);
 	}
 #elif USING_OPEN_GL
+	glClearColor(0.5f, 0, 0.5f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
 
 }
@@ -159,7 +166,75 @@ void CDeviceContext::VSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffer
 
 	}
 #elif USING_OPEN_GL
+	GlRemoveAllErrors();
+	if (StartSlot == 0)
+	{
+		glUniformMatrix4fv(Buffer[0].m_BufferID, 1, GL_FALSE, (GLfloat*) Buffer->mptr_DataStruct);
+	}
+	else if (StartSlot == 1)
+	{
+		glUniformMatrix4fv(Buffer[0].m_BufferID, 1, GL_FALSE, (GLfloat*) Buffer->mptr_DataStruct);
+	}
+
+	else if (StartSlot == 2)
+	{
+		GlChangesEveryFrameBuf* Temp = (GlChangesEveryFrameBuf*) Buffer->mptr_DataStruct;
+		glUniformMatrix4fv(Buffer[0].m_BufferID, 1, GL_FALSE, &Temp->WorldMatrix[0][0]);
+
+		glUniform4fv(Buffer[0].m_SecondID, 1, glm::value_ptr(Temp->Color));
+	}
+	if (GlCheckForError())
+	{
+		assert(true == false, "Error with setting the unifomrs ");
+	}
+
 #endif
+}
+
+//! OVERLOAD for openGL 
+void CDeviceContext::VSSetConstantBuffers(uint8_t Index, CBuffer &Buffer, glm::mat4x4 &Matrix)
+{
+#ifdef USING_OPEN_GL
+	GlRemoveAllErrors();
+
+	if (Index == 0 || Index == 1)
+	{
+		glUniformMatrix4fv(Buffer.GetBufferID(), 1, GL_FALSE, &Matrix[0][0]);
+	}
+
+	//else if (StartSlot == 2)
+	//{
+	//	GlChangesEveryFrameBuf* Temp = (GlChangesEveryFrameBuf*) Buffer->mptr_DataStruct;
+	//	glUniformMatrix4fv(Buffer[0].m_BufferID, 1, GL_FALSE, &Temp->WorldMatrix[0][0]);
+	//
+	//	glUniform4fv(Buffer[0].m_SecondID, 1, Temp->Color);
+	//}
+	if (GlCheckForError())
+	{
+		assert(true == false, "Error with setting the unifomrs ");
+	}
+
+#endif // USING_OPEN_GL
+
+
+}
+//! OVERLOAD  for openGLS
+void CDeviceContext::VSSetConstantBuffers(uint8_t Index, CBuffer &Buffer, GlChangesEveryFrameBuf &WorldAndColor)
+{
+#ifdef USING_OPEN_GL
+	GlRemoveAllErrors();
+
+	glUniformMatrix4fv(Buffer.GetBufferID(), 1, GL_FALSE, &WorldAndColor.WorldMatrix[0][0]);
+
+	glUniform4fv(Buffer.m_SecondID, 1, glm::value_ptr(WorldAndColor.Color));
+
+	if (GlCheckForError())
+	{
+		assert(true == false, "Error with setting the unifomrs ");
+	}
+
+#endif // USING_OPEN_GLs
+
 }
 
 void CDeviceContext::PSSetShader(CPixelShader &PixelShader)
@@ -186,7 +261,32 @@ void CDeviceContext::PSSetShaderResources(int32_t StratSlot, int32_t TotalViews,
 #if defined(USING_DIRECTX)
 	mptr_DeviceContext->PSSetShaderResources(StratSlot, TotalViews, static_cast<ID3D11ShaderResourceView**>(ShaderResourceView.GetResourceViewRef()));
 #elif USING_OPEN_GL
+
+
 #endif
+}
+
+void CDeviceContext::PSSetShaderResources(uint32_t & Program, CShaderResourceView & ShaderResourceView)
+{
+#ifdef USING_OPEN_GL
+	GlRemoveAllErrors();
+	// should be the index for shader program 
+	glUseProgram(Program);
+
+	int Location = glGetUniformLocation(Program, "myTextureSampler");
+
+	glActiveTexture(GL_TEXTURE0 + ShaderResourceView.GetResuorce());
+
+	glBindTexture(GL_TEXTURE_2D, ShaderResourceView.GetResuorce());
+	// NEEDS TO BE ONE OR EVERYTHING GOES TO SHIT 
+	glUniform1i(Location,1);
+
+	if (GlCheckForError())
+	{
+		assert(true == false, "Error with Texture Sample");
+	}
+#endif
+
 }
 
 void CDeviceContext::PSSetSamplers(int32_t StartSlot, int32_t TotalSamplers, CSampler &Sampler)
@@ -207,19 +307,28 @@ void CDeviceContext::DrawIndexed(int32_t TotalIndexs, int32_t StartIndex, int32_
 
 void CDeviceContext::DrawIndexed(CBuffer & IndexBuffer)
 {
-	
+
 #if defined(USING_DIRECTX)
 	mptr_DeviceContext->DrawIndexed(IndexBuffer.GetElementCount(), 0, 0);
 #elif USING_OPEN_GL
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer.m_BufferID);
-	glDrawBuffers(1,&IndexBuffer.m_BufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer.GetBufferID());
+
+	glDrawElements(GL_TRIANGLES, IndexBuffer.GetElementCount(), GL_UNSIGNED_SHORT, reinterpret_cast<const void*>(0));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 #endif
 }
 
 
 #if defined(USING_DIRECTX)
+
+void CDeviceContext::DestroySelf()
+{
+	mptr_DeviceContext->Release();
+	mptr_DeviceContext = nullptr;
+}
+
 ID3D11DeviceContext **CDeviceContext::GetDeviceContextRef()
 {
 	return &mptr_DeviceContext;

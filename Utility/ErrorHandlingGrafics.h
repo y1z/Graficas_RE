@@ -3,6 +3,8 @@
 #include "..//OpenglHeader.h"
 #include "..//Usable_Windows.h"
 #include <string>
+#include <sstream>
+using namespace  std::string_literals;
 
 #ifdef USING_DIRECTX
 /*! tell's if there is an error */
@@ -36,15 +38,22 @@ static void GlRemoveAllErrors()
 
 static bool GlCheckForError()
 {
-
+	bool IsErrorResult = false;
 	while (GLenum Error = glGetError())
 	{
+		IsErrorResult = true;
+		std::stringstream ConvertToHex;
 
-		std::string Result = std::to_string(Error).c_str();
+		ConvertToHex << std::hex << (unsigned int)Error;
 
-		OutputDebugStringA(Result.c_str());
+		std::string Message = "\n ---- ERROR HAS OCURRED :< ";
+
+		Message += ConvertToHex.str();
+		Message += "> \n";
+		
+		OutputDebugStringA( Message.c_str());
 	}
-	return false;
+	return IsErrorResult;
 }
 
 

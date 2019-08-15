@@ -439,6 +439,8 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="IntermidiateMath.cpp" />
@@ -449,6 +451,8 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
   <ItemGroup>
     <None Include="FragShader.glsl" />
     <None Include="Graficas_re.fx" />
+    <None Include="shaders\Test.frag" />
+    <None Include="shaders\Test.vert" />
     <None Include="Test.vert" />
     <None Include="VertexShader.glsl" />
   </ItemGroup>
@@ -474,12 +478,15 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui_impl_win32.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="IntermidiateMath.h" />
+    <ClInclude Include="MathHelper.h" />
     <ClInclude Include="OpenglHeader.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Structs.h" />
@@ -490,8 +497,6 @@ xcopy /y /d "$(SolutionDir)GLFW\bin\glfw3.dll" "$(SolutionDir)$(Platform)\$(Conf
     <ClInclude Include="Utility\Timer.h" />
     <ClInclude Include="ViewPort.h" />
     <ResourceCompile Include="Graficas_re.rc" />
-  </ItemGroup>
-  <ItemGroup>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

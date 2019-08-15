@@ -1,6 +1,6 @@
 #pragma once
-#include "GraphicsLibsHeader.h"
-#include "glm.hpp"
+#include "GraphicsLIbsHeader.h"
+#include <glm/glm.hpp>
 #include <cinttypes>
 
 class CCamera
@@ -27,14 +27,26 @@ public:// functions
 	void ResetTrasformMatrice();
 
 	void CoordinateUpdate();
+	//! returns the member m_At
+	glm::vec4 GetAt() const;
+
+	glm::vec3 GetFront() const;
+
+	glm::vec4 GetEye() const;
 
 #if defined(USING_DIRECTX)
 	XMMATRIX GetViewMatrice();
 	XMMATRIX GetTrasformMatrice();
 	XMMATRIX GetProyectionMatrice();
+
 	void MoveCamera(XMVECTOR Vec);
 #else
 
+	glm::mat4x4 GetViewMatrice();
+	glm::mat4 GetTrasformMatrice();
+	glm::mat4 GetProyectionMatrice();
+	
+	void MoveCamera(glm::vec4 arg);
 #endif
 
 private:
@@ -57,10 +69,9 @@ public:// REMOVE public
 	XMVECTOR m_RightVector;
 	XMVECTOR m_UpVector;
 	XMVECTOR m_FrontVector;
-
-	XMVECTOR m_Up;
-
+	//! used to know where the camera is located 
 	XMVECTOR m_Eye;
+	//! used to know where the camera is looking at 
 	XMVECTOR m_At;
 
 #else
@@ -72,10 +83,9 @@ public:// REMOVE public
 	glm::vec4 m_RightVector;
 	glm::vec4 m_UpVector;
 	glm::vec4 m_FrontVector;
-
-	glm::vec4 m_Up;
-
+	//! used to know where the camera is located 
 	glm::vec4 m_Eye;
+	//! used to know where the camera is looking at 
 	glm::vec4 m_At;
 #endif
 };

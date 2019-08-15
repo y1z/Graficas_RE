@@ -1,6 +1,6 @@
 #pragma once
-
 #include "GraphicsLIbsHeader.h"
+#include "Custom_Structs.h"
 #include <cinttypes>
 
 
@@ -16,7 +16,8 @@ enum class BufferType
 #elif USING_OPEN_GL
 	Vertex = 1,//<! where the geometry is 
 	Index = 2,//<! which order to draw the vertices 
-	ConstBuffer = 3//<! buffer that does not change during the render call 
+	UV = 3,
+	ConstBuffer = 6//<! buffer that does not change during the render call 
 #endif // USING_DIRECTX
 
 };
@@ -37,13 +38,19 @@ public:// functions
 
 	/*! This function set up the buffer to later become a constant buffer.*/
 	void InitConstBuffer(const void *DataStruct, uint32_t Offset, uint32_t SizeOfBuffer, unsigned int &Program, uint32_t Index = 0);
+#ifdef USING_OPEN_GL
+
+	void InitConstBuffer(glm::mat4x4 &Matrice, uint32_t Offset, uint32_t SizeOfBuffer, unsigned int &Program, uint32_t Index = 0);
+	//GlChangeOnResizeBuf
+	void InitConstBuffer(GlChangeOnResizeBuf &Matrice, uint32_t Offset, uint32_t SizeOfBuffer, unsigned int &Program, uint32_t Index = 0);
+#endif // USING_OPEN_GL
 
 	UINT GetStride();
 	UINT GetOffset();
 
 	[[nodiscard]]
 	BufferType GetBufferType() const;
-
+	[[nodiscard]]
 	uint64_t GetElementCount() const;
 
 #ifdef USING_DIRECTX
@@ -65,6 +72,7 @@ private://variables
 
 #elif	USING_OPEN_GL	
 	uint32_t m_BufferID = 0;
+	uint32_t m_SecondID = 0;
 
 	const void * mptr_DataStruct = nullptr;
 #endif // USING_DIRECTX
@@ -74,6 +82,8 @@ private://variables
 	uint32_t m_Offset = 0;
 	//! how many element the buffer contains
 	uint64_t m_CountElemets = 0;
+
+
 	//! what type of buffer this buffer is 
 	BufferType m_Type;
 };

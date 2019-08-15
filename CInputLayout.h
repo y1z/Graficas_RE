@@ -25,7 +25,7 @@ struct SInputDesc
 	uint32_t Index;
 	int Slots;
 	int Format;
-	int32_t Alignment;
+	uint32_t Alignment;
 	int DataArrangement;
 	int InputDataType;
 };

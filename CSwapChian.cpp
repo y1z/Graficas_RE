@@ -2,7 +2,7 @@
 #include "CDevice.h"
 #include "CBuffer.h"
 #include "CRenderTragetView.h"
-
+#include <cassert>
 
 CSwapChian::CSwapChian()
 {
@@ -54,6 +54,7 @@ bool CSwapChian::Present(int32_t Syc, unsigned int PresentOpction)
 {
 #if defined(USING_DIRECTX)
 	HRESULT hr = S_OK;
+
 	hr = mptr_SwapChian->Present(Syc, PresentOpction);
 
 	if (!CheckForError(hr))
@@ -65,12 +66,16 @@ bool CSwapChian::Present(int32_t Syc, unsigned int PresentOpction)
 #elif USING_OPEN_GL
 	//glEnableVertexAttribArray(0);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1, 0, 0, 1);
+	glfwPollEvents();
 
 	glfwSwapBuffers(this->ptr_Window);
-	glfwPollEvents();
-	
+
+	if (! GlCheckForError())
+	{
+		return true;
+	}
+
+
 #endif
 
 	return false;
@@ -79,7 +84,9 @@ bool CSwapChian::Present(int32_t Syc, unsigned int PresentOpction)
 void CSwapChian::ResizeBuffer(int width, int height, HWND hWnd)
 {
 #if USING_DIRECTX
-	mptr_SwapChian->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+
+	HRESULT hr =	mptr_SwapChian->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	assert( CheckForError(hr) == false && "Erro with Resizing buffers ");
 #endif // USING_DIRECTX
 
 }
@@ -96,11 +103,20 @@ void CSwapChian::ResizeTarget(int width, int height)
 	Description.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
 	Description.Scaling = DXGI_MODE_SCALING_STRETCHED;
 
-	DXGI_SWAP_CHAIN_DESC temp;
+	mptr_SwapChian->ResizeTarget(&Description);
 
-	mptr_SwapChian->GetDesc(&temp);
 #endif // USING_DIRECTX
 
+
+}
+
+void CSwapChian::DestroySelf()
+{
+#ifdef USING_DIRECTX
+	mptr_SwapChian->Release();
+	mptr_SwapChian = nullptr;
+
+#endif // USING_DIRECTX
 
 }
 

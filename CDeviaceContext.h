@@ -1,6 +1,7 @@
 #pragma once
 #include "GraphicsLIbsHeader.h"
-
+#include "glm/glm.hpp"
+#include <glm/gtc/type_ptr.hpp>
 #include <cinttypes>
 class CRenderTragetView;
 class CDepthStencilView;
@@ -11,6 +12,7 @@ class CVertexShader;
 class CPixelShader;
 class CShaderResourceView;
 class CSampler;
+struct GlChangesEveryFrameBuf;
 
 class CDeviceContext
 {
@@ -80,9 +82,13 @@ public:// functions
 	/*! Sets the constant Buffer
 \param StartSlot[in] where will the buffer be placed
 \param TotalBuffers [in] for knowing how many buffer there are
-\param Buffer [in] the buffer that going te be set 
+\param Buffer [in] the buffers that going to be set 
 .*/
 	void VSSetConstantBuffers(int32_t StartSlot, int32_t TotalBuffers, CBuffer *Buffer);
+
+	void VSSetConstantBuffers(uint8_t Index ,CBuffer &Buffer , glm::mat4x4 &Matrix);
+
+	void VSSetConstantBuffers( uint8_t Index, CBuffer &Buffer, GlChangesEveryFrameBuf &WorldAndColor);
 
 	/*! Set the Pixel Shader
 	\param PixelShader[out] The Resulting Shader*/
@@ -95,6 +101,11 @@ public:// functions
 \param ShaderResourceView [in] allows you to see data from the shader.
 */
 	void PSSetShaderResources(int32_t StratSlot, int32_t TotalViews, CShaderResourceView &ShaderResourceView);
+	/*!
+	 * \param Program This is openGL shader program
+	 * \param ShaderResourceView The resource view that contains the texutre
+	 */
+	void PSSetShaderResources(uint32_t &Program, CShaderResourceView &ShaderResourceView);
 	/*!
 \param StratSlot [in] dictates where you are in compaction to others
 \param TotalSamplers [in] dictates how many Samplers there are .
@@ -109,6 +120,8 @@ public:// functions
 	void DrawIndexed(CBuffer& IndexBuffer);
 
 #ifdef USING_DIRECTX
+	void DestroySelf();
+
 	ID3D11DeviceContext ** GetDeviceContextRef();
 	ID3D11DeviceContext * GetDeviceContext();
 #else

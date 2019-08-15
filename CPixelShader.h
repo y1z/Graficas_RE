@@ -14,6 +14,8 @@ public:
 	bool InitPixelShader(wchar_t *ShaderFile, char * ShaderEntry, char* ShaderVersion);
 	bool InitPixelShader(const char *ShaderFile);
 
+	unsigned int GetShaderID();
+
 #ifdef USING_DIRECTX
 	ID3D11PixelShader * GetPixelShader();
 	ID3D11PixelShader **GetPixelShaderRef();

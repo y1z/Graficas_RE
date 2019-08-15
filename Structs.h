@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXHeader.h"
+#include "GraphicsLIbsHeader.h"
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -12,17 +12,19 @@ struct SimpleVertex
 	XMFLOAT2 Tex;
 };
 
-struct CBNeverChanges
+struct CBNeverChanges_View
 {
 	XMMATRIX mView;
+	// where the camera is looking at 
+	glm::vec3 AtVector;
 };
 
-struct CBChangeOnResize
+struct CBChangeOnResize_Projection
 {
 	XMMATRIX mProjection;
 };
 
-struct CBChangesEveryFrame
+struct CBChangesEveryFrame_World
 {
 	XMMATRIX mWorld;
 	XMFLOAT4 vMeshColor;

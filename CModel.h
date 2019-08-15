@@ -22,7 +22,7 @@ public:
 	~CModel();
 	//! check if we can load a model from a file 
 	bool LoadModelFromFile(const char * FilePath, CDevice &Device);
-	void DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *, 3>&BufferArray, CCamera &camera);
+	void DrawAllMeshes(CDeviceContext &DeviceContext, std::vector<CBuffer *>&BufferArray, CCamera &camera);
 	
 //	D3D11_BUFFER_DESC GetDescVertex(int Index);
 //	D3D11_BUFFER_DESC GetDescIndex(int Index);

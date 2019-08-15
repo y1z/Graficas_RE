@@ -64,6 +64,16 @@ bool CPixelShader::InitPixelShader(const char * ShaderFile)
 	return false;
 }
 
+#ifdef USING_OPEN_GL
+
+unsigned int CPixelShader::GetShaderID()
+{
+	return m_PixelShaderID;
+}
+
+#endif // USING_OPEN_GL
+
+
 #if USING_DIRECTX
 ID3D11PixelShader * CPixelShader::GetPixelShader()
 {

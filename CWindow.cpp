@@ -17,6 +17,7 @@ CWindow::~CWindow()
 
 bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int Height, int CommandShow)
 {
+	IsActive = true;
 	mptr_windProc = Proc;
 	m_Height = Height;
 	m_Width = Width;
@@ -62,6 +63,10 @@ bool CWindow::InitWindow(HINSTANCE Instance, ptr_WindProc Proc, int Width, int H
 
 	glfwMakeContextCurrent(mptr_Window);
 
+	glfwSetInputMode(mptr_Window, GLFW_STICKY_KEYS, GL_TRUE);
+	// Hide the mouse and enable unlimited mouvement
+	glfwSetInputMode(mptr_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	if (!mptr_Window)
 	{
 		glfwTerminate();
@@ -80,6 +85,7 @@ void CWindow::DestoryWindow()
 	UnregisterClass(m_Name, m_Instance);
 
 #else
+	IsActive = false;
 	glfwDestroyWindow(mptr_Window);
 #endif // USING_DIRECTX
 
@@ -116,5 +122,10 @@ GLFWwindow *  CWindow::GetHandler()
 ptr_WindProc CWindow::GetWindProcPtr()
 {
 	return mptr_windProc;
+}
+
+bool CWindow::CheckIsActive() const
+{
+	return IsActive;
 }
 

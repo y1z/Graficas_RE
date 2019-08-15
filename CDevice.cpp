@@ -11,6 +11,7 @@
 #include "CInputLayout.h"
 #include "CPixelShader.h"
 #include "CSampler.h"
+#include "CWindow.h"
 #include <cassert>
 #include "Custom_Structs.h"
 
@@ -22,8 +23,7 @@
 
 
 CDevice::CDevice()
-{
-}
+{}
 //Descriptor
 
 CDevice::~CDevice()
@@ -166,8 +166,7 @@ bool CDevice::CreateTexture2D(CTexture2D &Texture)
 	}
 
 	return false;
-
-#elif USING_OPEN_GL//! TODO add opengl Functionality
+#elif USING_OPEN_GL 
 
 	GlRemoveAllErrors();
 
@@ -177,7 +176,6 @@ bool CDevice::CreateTexture2D(CTexture2D &Texture)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture.GetWidth(), Texture.GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -257,7 +255,6 @@ bool CDevice::CreateVertexShader(CVertexShader &VertexShader)
 	// for checking the string 
 	OutputDebugStringA(Shader);
 
-
 	glShaderSource(VertexShader.GetShaderID(), 1, &Shader, nullptr);
 	glCompileShader(VertexShader.GetShaderID());
 	int Result;
@@ -336,6 +333,21 @@ bool CDevice::CreatePixelShader(CPixelShader &PixelShader)
 	OutputDebugStringA(Shader);
 	glShaderSource(PixelShader.m_PixelShaderID, 1, &Shader, nullptr);
 	glCompileShader(PixelShader.m_PixelShaderID);
+
+	int Result;
+	glGetShaderiv(PixelShader.GetShaderID(), GL_COMPILE_STATUS, &Result);
+	// how long is the error message 
+	int MessageSize;
+	glGetShaderiv(PixelShader.GetShaderID(), GL_INFO_LOG_LENGTH, &MessageSize);
+	if (Result != GL_TRUE)
+	{
+		char *ptr_message = new char[MessageSize + 1];
+		glGetShaderInfoLog(PixelShader.GetShaderID(), 2048, &MessageSize, ptr_message);
+		OutputDebugStringA(ptr_message);
+		delete[] ptr_message;
+	}
+
+
 	if (!GlCheckForError())
 	{
 		return true;
@@ -367,27 +379,20 @@ bool CDevice::CreateBuffer(CBuffer &Buffer)
 	}
 	return false;
 #elif USING_OPEN_GL
-
+	// todo : change back to VertexPosNormTex
 	GlRemoveAllErrors();
 
 	if (Buffer.GetBufferType() == BufferType::Vertex)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, Buffer.GetBufferID());
 		glBufferData(GL_ARRAY_BUFFER, Buffer.GetStride() * Buffer.GetElementCount(), Buffer.mptr_DataStruct, GL_DYNAMIC_DRAW);
-		// THIS is temporary 
-		unsigned int OffSetFirstMember = offsetof(VertexWithTexture, Pos);
-		unsigned int OffSetSecondMember = offsetof(VertexWithTexture, TexCoord);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetFirstMember));
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexWithTexture), reinterpret_cast<const void*>(OffSetSecondMember));
-		// end using the buffer
+		// unBind the buffer 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	else if(Buffer.GetBufferType() == BufferType::Index)
+	else if (Buffer.GetBufferType() == BufferType::Index)
 	{
-		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer.GetBufferID());
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Buffer.GetStride() * Buffer.GetElementCount(), Buffer.mptr_DataStruct, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Buffer.GetElementCount() * sizeof(WORD), Buffer.mptr_DataStruct, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
@@ -421,10 +426,35 @@ bool CDevice::CreateSamplerState(CSampler &Sampler)
 
 	return false;
 #elif USING_OPEN_GL
+	//TODO : add sampler function 
+
+	GlRemoveAllErrors();
+
+	if (GlCheckForError())
+	{
+		assert(true == false);
+	}
+	else
+	{
+		return true;
+	}
+
 #endif
 
 	return false;
 }
+
+#ifdef USING_DIRECTX
+
+void CDevice::DestorySelf()
+{
+	mptr_Device->Release();
+	mptr_Device = nullptr;
+}
+
+#endif // USING_DIRECTX
+
+
 
 #if defined(USING_DIRECTX)
 ID3D11Device * CDevice::GetDevice()

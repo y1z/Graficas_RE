@@ -2,17 +2,19 @@
 //float4x4 matWorld;
 Texture2D txDiffuse : register(t0);
 SamplerState samLinear : register(s0);
-
+// view
 cbuffer cbNeverChanges : register(b0)
 {
     matrix View;
+   // where the camera is looking at 
+    float3 AtVector;
 };
-
+// Projection 
 cbuffer cbChangeOnResize : register(b1)
 {
     matrix Projection;
 };
-
+// world 
 cbuffer cbChangesEveryFrame : register(b2)
 {
     matrix World;
@@ -46,6 +48,8 @@ PS_INPUT vs_main(VS_OUTPUT input)
     // transform 
     //converting a value that float3 to float4 
     Out.Norm = normalize(mul(float4(input.Norm, 1.0f), World));
+    // make sure i can see the textures 
+    Out.Tex = input.Tex;
     return Out;
 }
 
@@ -53,7 +57,7 @@ PS_INPUT vs_main(VS_OUTPUT input)
 float4 ps_main(PS_INPUT input) : SV_Target
 {
     float3 m_light = { vMeshColor.xyz };
-    //float4 color = txDiffuse.Sample(samLinear, input.Tex) * vMeshColor;
-    float4 diffuse = { 1.0f, 0.5f, 0.3f, 1.0f };
+    //float4 color = txDiffuse.Sample(samLinear, input.Tex);
+    float4 diffuse = txDiffuse.Sample(samLinear, input.Tex);
     return diffuse + saturate(dot(m_light, input.Norm));
 }

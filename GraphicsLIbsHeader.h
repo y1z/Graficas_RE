@@ -1,6 +1,12 @@
 #pragma once
 //! Controls if your using Open_GL or DirectX 
+
+//-------------------------------------
 //#define USING_OPEN_GL 1
+//-------------------------------------
+
+//! constrols if a model is loaded or not 
+#define MODEL_LOAD 1
 
 // use open_Gl
 #ifdef USING_OPEN_GL 1

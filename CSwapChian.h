@@ -1,11 +1,10 @@
 #pragma once
 #include "Usable_Windows.h"
 #include "GraphicsLibsHeader.h"
-#include "CDevice.h"
 #include <cinttypes>
-
 #include "Utility/ErrorHandlingGrafics.h"
 class CBuffer;
+class CRenderTragetView;
 
 class CSwapChian
 {
@@ -19,10 +18,12 @@ public:// functions
 
 	void ResizeBuffer(int width, int height, HWND hWnd);
 	void ResizeTarget(int width, int height);
+	/*! releases the current swap chain and make it nullptr*/
+	void DestroySelf();
 #if USING_DIRECTX
 	/*! This is just for creating the SwapChian*/
 	IDXGISwapChain** GetSwapChianRef();
-public:// variable
+private:// variable
 	IDXGISwapChain* mptr_SwapChian = nullptr;
 #elif USING_OPEN_GL
 	//! used in openGL need to be able to manipulate the render-target back-buffer 
@@ -30,8 +31,4 @@ public:// variable
 	//! this is used to present an image an screen 
 	GLFWwindow *ptr_Window;
 #endif // USING_DIRECTX
-
-
-
 };
-

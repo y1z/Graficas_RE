@@ -4,9 +4,10 @@
 #include "CCamera.h"
 #include "CSwapChian.h"
 #include "DirectXHeader.h"
-#include "Custom_Structs.h"
-#include "Structs.h"
+#include "Structs.h" // is used when directX is active
+#include "Custom_Structs.h"// is used when opengl is active 
 #include <array>
+
 CModel::CModel()
 {}
 
@@ -30,18 +31,20 @@ bool CModel::LoadModelFromFile(const char * FilePath, CDevice &Device)
 	{
 		return false;
 	}
+	
 
 	this->GetTreeInfo(TheScene, TheScene->mRootNode, Device);
 
 	return true;
 }
 
-void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *,3> &BufferArray, CCamera &camera)
+void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::vector<CBuffer *> &BufferArray, CCamera &camera)
 {
 #ifdef USING_DIRECTX
-	CBNeverChanges cbNeverChanges;
-	CBChangesEveryFrame cb;
-	CBChangeOnResize cbChangesOnResize;
+	CBNeverChanges_View cbNeverChanges;
+	CBChangesEveryFrame_World cb;
+	CBChangeOnResize_Projection cbChangesOnResize;
+	Light light;
 
 	for (CMesh* mesh : m_Meshs)
 	{
@@ -51,6 +54,7 @@ void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *,3
 	}
 
 	cbNeverChanges.mView = XMMatrixTranspose(camera.GetViewMatrice());
+	cbNeverChanges.AtVector = camera.GetFront();
 	DeviceContext.UpdateSubresource(*BufferArray[0], static_cast<void*> (&cbNeverChanges), 0);
 
 	float MyCubeColor[4] = { 0.7f,0.7f,0.05f,1.0f };
@@ -62,8 +66,21 @@ void CModel::DrawAllMeshes(CDeviceContext &DeviceContext, std::array<CBuffer *,3
 	cbChangesOnResize.mProjection = XMMatrixTranspose(camera.GetProyectionMatrice());
 	DeviceContext.UpdateSubresource(*BufferArray[2], static_cast<void*>(&cbChangesOnResize), 0);
 
+	light.Pos = camera.GetEye() + glm::vec4(100.0f, 0.0f, 10.0f, 1.0f);
+	light.Color;// = glm::vec4{ 1.0f,.5f,1.0f,1.0f };
+	light.Direction = camera.GetFront();// glm::vec3(-10.0f, 0.0f, 0.0f);
+	light.Intensity = 1.0f;
+
+
+	DeviceContext.UpdateSubresource(*BufferArray[3], static_cast<void*>(&light), 0);
+
 #else
 
+	for (CMesh* mesh : m_Meshs)
+	{
+		mesh->PrepareForDarwCall(DeviceContext);
+		DeviceContext.DrawIndexed(mesh->GetIndexBuffer());
+	}
 
 #endif
 }
@@ -96,22 +113,23 @@ void CModel::GetTreeInfo(const aiScene * Scene, aiNode * node, CDevice & Device)
 
 void CModel::ExtracMesh(aiMesh * meshInfo, CDevice & Device)
 {
+	// indeces are constant 
 	std::vector<WORD> Indeces;
-	std::vector<VertexWithTexture> Vertexes;
-#ifdef USING_DIRECTX
+	std::vector<VertexPosNormTex> Vertexes;
 
 	// getting the vertexes  
 	for (int i = 0; i < meshInfo->mNumVertices; ++i)
 	{
-		VertexWithTexture ResultVertex;
+		VertexPosNormTex ResultVertex;
 
 		ResultVertex.Pos.x = meshInfo->mVertices[i].x;
 		ResultVertex.Pos.y = meshInfo->mVertices[i].y;
 		ResultVertex.Pos.z = meshInfo->mVertices[i].z;
 		ResultVertex.Pos.w = 1.0f;
 
+	
 		//	 check for texture 
-		if (meshInfo->HasTextureCoords(i))
+		if (meshInfo->HasTextureCoords(0))
 		{
 			ResultVertex.TexCoord.y = (float) meshInfo->mTextureCoords[0][i].y;
 			ResultVertex.TexCoord.x = (float) meshInfo->mTextureCoords[0][i].x;
@@ -122,7 +140,7 @@ void CModel::ExtracMesh(aiMesh * meshInfo, CDevice & Device)
 			ResultVertex.TexCoord.y = 0.0f;
 		}
 
-		if(meshInfo->HasNormals())
+		if (meshInfo->HasNormals())
 		{
 			ResultVertex.Norm.x = meshInfo->mNormals[i].x;
 			ResultVertex.Norm.y = meshInfo->mNormals[i].y;
@@ -149,5 +167,4 @@ void CModel::ExtracMesh(aiMesh * meshInfo, CDevice & Device)
 	m_Meshs.emplace_back(new CMesh(Indeces, Vertexes, Device));
 
 	return;
-#endif // USING_DIRECTX
 }

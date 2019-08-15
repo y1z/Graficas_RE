@@ -1,4 +1,7 @@
 #pragma once
+
+using uint = unsigned int;
+
 /**
 \brief contains all headers needed for using open_gl
 */
@@ -10,7 +13,7 @@
 #include "glew-2.1.0/include/GL/glew.h"  
 #endif // __gl_h_
 
-using uint = unsigned int;
+
 
 #include "freeglut/include/GL/freeglut.h"
 #include <GLFW/glfw3.h>
